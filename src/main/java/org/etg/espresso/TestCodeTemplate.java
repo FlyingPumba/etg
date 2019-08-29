@@ -23,6 +23,9 @@ public class TestCodeTemplate {
                 "#if (${AddContribImport})\n" +
                 "import static ${EspressoPackageName}.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;\n" +
                 "#end\n" +
+                "#if (${AddNoMatchingViewExceptionImport})\n" +
+                "import android.support.test.espresso.NoMatchingViewException;\n" +
+                "#end\n" +
                 "import static ${EspressoPackageName}.espresso.action.ViewActions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.assertion.ViewAssertions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.matcher.ViewMatchers.*;\n" +
@@ -74,7 +77,7 @@ public class TestCodeTemplate {
                 "        };\n" +
                 "    }\n" +
                 "    #end\n" +
-                "    #if (${AddclassOrSuperClassesNameMethod})\n" +
+                "    #if (${AddClassOrSuperClassesNameMethod})\n" +
                 "private static Matcher<View> classOrSuperClassesName(final Matcher<String> classNameMatcher) {\n" +
                 "\n" +
                 "        return new TypeSafeMatcher<View>() {\n" +

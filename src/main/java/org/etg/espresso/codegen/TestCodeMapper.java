@@ -46,6 +46,7 @@ public class TestCodeMapper {
   private boolean mIsclassOrSuperClassesNameAdded = false;
   private boolean mIsKotlinTestClass = false;
   private boolean mUseTextForElementMatching = true;
+  private boolean mSurroundPerformsWithTryCatch = true;
 
   /**
    * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
@@ -60,12 +61,20 @@ public class TestCodeMapper {
 
     if (action.getActionType() == ActionType.BACK) {
       //testCodeLines.add("pressBackUnconditionally()" + getStatementTerminator());
-      testCodeLines.add("onView(isRoot()).perform(pressBackUnconditionally())" + getStatementTerminator());
+      String statement = "onView(isRoot()).perform(pressBackUnconditionally())" + getStatementTerminator();
+      if (mSurroundPerformsWithTryCatch) {
+        statement = surroundPerformWithTryCatch(statement);
+      }
+      testCodeLines.add(statement);
       return testCodeLines;
     }
     else if (action.getActionType() == ActionType.MENU) {
       //testCodeLines.add("openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext())" + getStatementTerminator());
-      testCodeLines.add("onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU))"  + getStatementTerminator());
+      String statement = "onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU))" + getStatementTerminator();
+      if (mSurroundPerformsWithTryCatch) {
+        statement = surroundPerformWithTryCatch(statement);
+      }
+      testCodeLines.add(statement);
       return testCodeLines;
     }
 
@@ -358,7 +367,28 @@ public class TestCodeMapper {
             ? completeAction
             : getActionOnItemAtPositionMethodCallPrefix() + recyclerViewChildPosition + ", " + completeAction + ")";
 
-    return variableName + ".perform(" + completeAction + ")" + getStatementTerminator();
+    String performStatement = variableName + ".perform(" + completeAction + ")" + getStatementTerminator();
+
+    if (mSurroundPerformsWithTryCatch) {
+      performStatement = surroundPerformWithTryCatch(performStatement);
+    }
+
+    return performStatement;
+  }
+
+  private String surroundPerformWithTryCatch(String performStatement) {
+    performStatement = "\ntry {\n" +
+            performStatement + "\n" +
+            "} catch (NoMatchingViewException e) {\n" +
+            "System.out.println(\"No matching view for perform in line: \")" + getStatementTerminator() + "\n" +
+            "} catch (Exception e1) {\n" +
+            "System.out.println(\"Trying to perform an action when app is closed. " +
+            "Finishing test execution.\")" + getStatementTerminator() + "\n" +
+            "return" + getStatementTerminator() + "\n" +
+            "}\n";
+
+
+    return performStatement;
   }
 
   private String getActionOnItemAtPositionMethodCallPrefix() {
@@ -399,5 +429,9 @@ public class TestCodeMapper {
 
   public boolean isClassOrSuperClassesNameAdded() {
     return mIsclassOrSuperClassesNameAdded;
+  }
+
+  public boolean isNoMatchingViewExceptionAdded () {
+    return mSurroundPerformsWithTryCatch;
   }
 }
