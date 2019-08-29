@@ -15,11 +15,11 @@
  */
 package org.etg.espresso.codegen;
 
-import org.etg.espresso.util.Pair;
 import org.etg.mate.Action;
 import org.etg.mate.ActionType;
 import org.etg.mate.Widget;
 import org.etg.utils.Randomness;
+import org.etg.utils.Tuple;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -328,19 +328,19 @@ public class TestCodeMapper {
   }
 
   private boolean isAndroidFrameworkPrivateId(String resourceId) {
-    Pair<String, String> parsedId = parseId(resourceId);
-    return parsedId != null && "android".equals(parsedId.getFirst());
+    Tuple<String, String> parsedId = parseId(resourceId);
+    return parsedId != null && "android".equals(parsedId.getX());
   }
 
   private String convertIdToTestCodeFormat(String resourceId) {
-    Pair<String, String> parsedId = parseId(resourceId);
+    Tuple<String, String> parsedId = parseId(resourceId);
 
     if (parsedId == null) {
       // Parsing failed, return the raw id.
       return resourceId;
     }
 
-    String testCodeId = "R.id." + parsedId.getSecond();
+    String testCodeId = "R.id." + parsedId.getY();
 //    if (!parsedId.getFirst().equals(mApplicationId)) {
 //      // Only the app's resource package will be explicitly imported, so use a fully qualified id for other packages.
 //      testCodeId = parsedId.getFirst() + "." + testCodeId;

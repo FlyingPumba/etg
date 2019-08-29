@@ -15,6 +15,8 @@
  */
 package org.etg.espresso.util;
 
+import org.etg.utils.Tuple;
+
 public class StringHelper {
 
   /**
@@ -55,7 +57,7 @@ public class StringHelper {
   /**
    * Returns a pair of (package_name, element_id).
    */
-  public static Pair parseId(String resourceId) {
+  public static Tuple parseId(String resourceId) {
     final String idMarker = ":id/";
     final int idMarkerIndex = resourceId.indexOf(idMarker);
 
@@ -64,7 +66,7 @@ public class StringHelper {
       return null;
     }
 
-    return new Pair(resourceId.substring(0, idMarkerIndex), resourceId.substring(idMarkerIndex + idMarker.length()));
+    return new Tuple(resourceId.substring(0, idMarkerIndex), resourceId.substring(idMarkerIndex + idMarker.length()));
   }
 
   public static void escapeStringCharacters(int length, String str, StringBuilder buffer) {
