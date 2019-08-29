@@ -1,4 +1,4 @@
-package org.etg.mate;
+package org.etg.mate.models;
 
 public class ActionType {
 

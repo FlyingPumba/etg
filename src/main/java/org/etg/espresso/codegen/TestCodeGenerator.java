@@ -19,8 +19,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.etg.espresso.TestCodeTemplate;
-import org.etg.mate.TestCase;
-import org.etg.mate.Action;
+import org.etg.mate.models.TestCase;
+import org.etg.mate.models.Action;
 
 import java.io.StringWriter;
 import java.io.Writer;

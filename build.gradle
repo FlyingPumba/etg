@@ -18,4 +18,8 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.9.8'
 }
 
+run {
+    args = ["/home/ivan/src/etg-mate-server/mate-test-cases.json", "de.danoeh.antennapod"]
+}
+
 mainClassName = 'org.etg.ETG'

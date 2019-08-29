@@ -1,4 +1,4 @@
-package org.etg.mate;
+package org.etg.mate.models;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -15,9 +15,9 @@
  */
 package org.etg.espresso.codegen;
 
-import org.etg.mate.Action;
-import org.etg.mate.ActionType;
-import org.etg.mate.Widget;
+import org.etg.mate.models.Action;
+import org.etg.mate.models.ActionType;
+import org.etg.mate.models.Widget;
 import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 

@@ -1,4 +1,4 @@
-package org.etg.mate;
+package org.etg.mate.models;
 
 import org.etg.utils.Randomness;
 
@@ -6,9 +6,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-/**
- * Created by marceloe on 08/12/16.
- */
 public class Widget {
 
     private Widget parent;
