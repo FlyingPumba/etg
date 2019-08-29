@@ -150,7 +150,7 @@ public class TestCodeMapper {
     Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
     Widget childrenWithRId = target.getChildrenWithRId();
 
-    System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
+    // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
 
     if (childrenWithSomeText != null &&
             !statement.contains("withContentDescription") &&
@@ -181,7 +181,7 @@ public class TestCodeMapper {
       statement = addViewPickingStatement(new Action(target, actionType), testCodeLines);
     }
 
-    System.out.println("Statement post rewrite: " + testCodeLines.get(0));
+    // System.out.println("Statement post rewrite: " + testCodeLines.get(0));
 
     return statement;
   }

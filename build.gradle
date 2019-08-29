@@ -19,7 +19,12 @@ dependencies {
 }
 
 run {
-    args = ["/home/ivan/src/etg-mate-server/mate-test-cases.json", "de.danoeh.antennapod"]
+    args = [
+            "/home/ivan/src/etg-mate-server/mate-test-cases.json", // MATE test cases dump
+            "de.danoeh.antennapod",  // app package name
+            "de.test.antennapod", // testing package name
+            "/home/ivan/src/android-open-source-apps/AntennaPod/app/src/androidTest/java/de/test/antennapod/" // output folder
+    ]
 }
 
 mainClassName = 'org.etg.ETG'

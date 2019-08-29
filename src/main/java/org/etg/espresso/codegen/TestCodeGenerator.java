@@ -35,9 +35,11 @@ public class TestCodeGenerator {
   private final String ESPRESSO_STANDARD_PACKAGE = "android.support.test";
 
   private String packageName;
+  private String testPackageName;
 
-  public TestCodeGenerator(String packageName) {
+  public TestCodeGenerator(String packageName, String testPackageName) {
     this.packageName = packageName;
+    this.testPackageName = testPackageName;
   }
 
   public List<String> getEspressoTestCases(List<TestCase> widgetTestCases) {
@@ -86,7 +88,7 @@ public class TestCodeGenerator {
     String[] activityName = visitedActivities[0].toString().split("/");
     velocityContext.put("TestActivityName", packageName + activityName[1]);
 
-    velocityContext.put("PackageName", packageName);
+    velocityContext.put("PackageName", testPackageName);
     velocityContext.put("ResourcePackageName", packageName);
 
     // TODO: improve test name based on TestCase's visitedActivities
