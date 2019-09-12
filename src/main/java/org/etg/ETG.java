@@ -102,7 +102,7 @@ public class ETG {
     }
 
     private static List<TestCase> parseTestCases(String filePath) throws IOException {
-        String content = readFile(filePath, StandardCharsets.US_ASCII);
+        String content = readFile(filePath, StandardCharsets.UTF_8);
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(content);
