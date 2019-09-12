@@ -40,8 +40,7 @@ public class TestCodeTemplate {
                 "import org.junit.Test;\n" +
                 "import org.junit.runner.RunWith;\n" +
                 "\n" +
-                "import static org.hamcrest.Matchers.allOf;\n" +
-                "import static org.hamcrest.Matchers.is;\n" +
+                "import static org.hamcrest.Matchers.*;\n" +
                 "\n" +
                 "@LargeTest\n" +
                 "@RunWith(AndroidJUnit4.class)\n" +

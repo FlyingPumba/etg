@@ -37,7 +37,7 @@ public class ETG {
 
             writeTestCases(outputFolderPath, espressoTestCases);
 
-            runTestCases(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases);
+            // runTestCases(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases);
         } catch (Exception e) {
             e.printStackTrace();
         }

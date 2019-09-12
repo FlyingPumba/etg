@@ -44,9 +44,12 @@ public class MatcherBuilder {
         } else {
           matchers.append("classOrSuperClassesName(is(" + boxString(matchedString) + "))");
         }
-      } else {
+      } else if (kind == Kind.Id) {
         matchers.append("with").append(kind.name()).append("(")
                 .append(shouldBox ? boxString(matchedString) : matchedString).append(")");
+      } else {
+        matchers.append("with").append(kind.name()).append("(equalToIgnoringCase(")
+                .append(shouldBox ? boxString(matchedString) : matchedString).append("))");
       }
 
       matcherCount++;
