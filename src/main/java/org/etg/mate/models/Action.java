@@ -22,10 +22,10 @@ public class Action {
         return adjActions;
     }
 
-    public Action(int actionType){
+    public Action(int actionType) {
         this.actionType = actionType;
-        fitness=0;
-        widget = new Widget("","","");
+        fitness = 0;
+        widget = new Widget("", "", "");
     }
 
     public Action(Widget widget, int actionType) {
@@ -55,6 +55,7 @@ public class Action {
     public void setActionType(int actionType) {
         this.actionType = actionType;
     }
+
     public String getExtraInfo() {
         return extraInfo;
     }
@@ -63,7 +64,7 @@ public class Action {
         this.extraInfo = extraInfo;
     }
 
-    public void addAdjAction(Action eventAction){
+    public void addAdjAction(Action eventAction) {
         adjActions.add(eventAction);
     }
 
@@ -78,6 +79,7 @@ public class Action {
     public void setTimeToWait(long timeToWait) {
         this.timeToWait = timeToWait;
     }
+
     public float getPheromone() {
         return pheromone;
     }
@@ -85,6 +87,7 @@ public class Action {
     public void setPheromone(float pheromone) {
         this.pheromone = pheromone;
     }
+
     public float getProportionalPheromone() {
         return proportionalPheromone;
     }

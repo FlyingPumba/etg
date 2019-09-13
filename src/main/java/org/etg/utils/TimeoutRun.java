@@ -1,12 +1,6 @@
 package org.etg.utils;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 public class TimeoutRun {
     public static boolean timeoutRun(Callable<Void> c, long milliseconds) {
@@ -28,6 +22,6 @@ public class TimeoutRun {
         }
 
         executor.shutdownNow();
-        return  finishedWithoutTimeout;
+        return finishedWithoutTimeout;
     }
 }

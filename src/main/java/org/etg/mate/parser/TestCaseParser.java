@@ -36,13 +36,13 @@ public class TestCaseParser {
         JavaType listOfStringType = mapper.getTypeFactory().constructCollectionType(List.class, String.class);
         List<String> visitedActivities = mapper.convertValue(node.get("visitedActivities"), listOfStringType);
 
-        for (String activity: visitedActivities) {
+        for (String activity : visitedActivities) {
             testCase.updateVisitedActivities(activity);
         }
 
         List<Action> eventSequence = ActionParser.parseList(mapper, node.get("eventSequence"));
 
-        for (Action event: eventSequence) {
+        for (Action event : eventSequence) {
             testCase.addEvent(event);
         }
 

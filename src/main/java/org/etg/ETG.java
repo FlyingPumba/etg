@@ -79,7 +79,7 @@ public class ETG {
             ProcessRunner.runCommand(clearCmd);
 
             String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                    "%s.%s %s/android.support.test.runner.AndroidJUnitRunner",
+                            "%s.%s %s/android.support.test.runner.AndroidJUnitRunner",
                     testPackageName, testCaseName, testPackageName);
             String testResult = ProcessRunner.runCommand(instrumentCmd);
 

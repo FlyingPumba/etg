@@ -11,7 +11,7 @@ public class Randomness {
         // if (Properties.RANDOM_SEED != null) {
         //     rnd = new MersenneTwister(Properties.RANDOM_SEED);
         // } else {
-            rnd = new MersenneTwister();
+        rnd = new MersenneTwister();
         // }
     }
 
@@ -32,7 +32,7 @@ public class Randomness {
     }
 
     public static int getInRangeStd(int range) {
-        return getInRangeStd(range, 2.0/15.0 * range);
+        return getInRangeStd(range, 2.0 / 15.0 * range);
     }
 
     public static int getInRangeStd(int range, double std) {

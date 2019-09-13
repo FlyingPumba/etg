@@ -31,7 +31,7 @@ public class Optional<T> {
         return hasValue;
     }
 
-    public static<T> Optional<T> none() {
+    public static <T> Optional<T> none() {
         @SuppressWarnings("unchecked")
         Optional<T> t = (Optional<T>) NONE;
         return t;

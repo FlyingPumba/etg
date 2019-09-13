@@ -19,8 +19,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.etg.espresso.TestCodeTemplate;
-import org.etg.mate.models.TestCase;
 import org.etg.mate.models.Action;
+import org.etg.mate.models.TestCase;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -29,88 +29,87 @@ import java.util.List;
 import java.util.Vector;
 
 public class TestCodeGenerator {
-  private final String TEST_CODE_TEMPLATE_FILE_NAME = "TestCodeTemplate.vm";
+    private final String TEST_CODE_TEMPLATE_FILE_NAME = "TestCodeTemplate.vm";
 
-  private final String ESPRESSO_CUSTOM_PACKAGE = "com.google.android.apps.common.testing.ui";
-  private final String ESPRESSO_STANDARD_PACKAGE = "android.support.test";
+    private final String ESPRESSO_CUSTOM_PACKAGE = "com.google.android.apps.common.testing.ui";
+    private final String ESPRESSO_STANDARD_PACKAGE = "android.support.test";
 
-  private String packageName;
-  private String testPackageName;
+    private String packageName;
+    private String testPackageName;
 
-  public TestCodeGenerator(String packageName, String testPackageName) {
-    this.packageName = packageName;
-    this.testPackageName = testPackageName;
-  }
-
-  public List<String> getEspressoTestCases(List<TestCase> widgetTestCases) {
-    List<String> espressoTestCases = new ArrayList<>();
-    for (int i = 0; i < widgetTestCases.size(); i++) {
-      TestCase widgetTestCase = widgetTestCases.get(i);
-      espressoTestCases.add(generateEspressoTestCase(widgetTestCase, i));
+    public TestCodeGenerator(String packageName, String testPackageName) {
+        this.packageName = packageName;
+        this.testPackageName = testPackageName;
     }
 
-    return espressoTestCases;
-  }
+    public List<String> getEspressoTestCases(List<TestCase> widgetTestCases) {
+        List<String> espressoTestCases = new ArrayList<>();
+        for (int i = 0; i < widgetTestCases.size(); i++) {
+            TestCase widgetTestCase = widgetTestCases.get(i);
+            espressoTestCases.add(generateEspressoTestCase(widgetTestCase, i));
+        }
 
-  private String generateEspressoTestCase(TestCase widgetTestCase, int testCaseIndex) {
-    Writer writer = null;
-    try {
-      writer = new StringWriter();
+        return espressoTestCases;
+    }
 
-      VelocityEngine velocityEngine = new VelocityEngine();
-      // Suppress creation of velocity.log file.
-      velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
-      velocityEngine.init();
-      VelocityContext velocityContext = createVelocityContext(widgetTestCase, testCaseIndex);
-      velocityEngine.evaluate(velocityContext, writer, "mystring", TestCodeTemplate.getTemplate());
-      writer.flush();
-
-      return writer.toString();
-
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to generate test class file: ", e);
-    } finally {
-      if (writer != null) {
+    private String generateEspressoTestCase(TestCase widgetTestCase, int testCaseIndex) {
+        Writer writer = null;
         try {
-          writer.close();
+            writer = new StringWriter();
+
+            VelocityEngine velocityEngine = new VelocityEngine();
+            // Suppress creation of velocity.log file.
+            velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
+            velocityEngine.init();
+            VelocityContext velocityContext = createVelocityContext(widgetTestCase, testCaseIndex);
+            velocityEngine.evaluate(velocityContext, writer, "mystring", TestCodeTemplate.getTemplate());
+            writer.flush();
+
+            return writer.toString();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to generate test class file: ", e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
         }
-        catch (Exception e) {
-          // ignore
-        }
-      }
-    }
-  }
-
-  private VelocityContext createVelocityContext(TestCase widgetTestCase, int testCaseIndex) {
-    VelocityContext velocityContext = new VelocityContext();
-
-    Object[] visitedActivities = widgetTestCase.getVisitedActivities().toArray();
-    String[] activityName = visitedActivities[0].toString().split("/");
-    velocityContext.put("TestActivityName", packageName + activityName[1]);
-
-    velocityContext.put("PackageName", testPackageName);
-    velocityContext.put("ResourcePackageName", packageName);
-
-    // TODO: improve test name based on TestCase's visitedActivities
-    velocityContext.put("ClassName", String.format("TestCase%d", testCaseIndex));
-    velocityContext.put("TestMethodName", "myTestCase");
-
-    velocityContext.put("EspressoPackageName", false ? ESPRESSO_CUSTOM_PACKAGE : ESPRESSO_STANDARD_PACKAGE);
-
-    TestCodeMapper codeMapper = new TestCodeMapper();
-    List<String> testCodeLines = new ArrayList<>();
-    Vector<Action> actions = widgetTestCase.getEventSequence();
-    for (Action action : actions) {
-      codeMapper.addTestCodeLinesForAction(action, testCodeLines);
     }
 
-    velocityContext.put("AddContribImport", codeMapper.isRecyclerViewActionAdded());
-    velocityContext.put("AddChildAtPositionMethod", codeMapper.isChildAtPositionAdded());
-    velocityContext.put("AddClassOrSuperClassesNameMethod", codeMapper.isClassOrSuperClassesNameAdded());
-    velocityContext.put("AddNoMatchingViewExceptionImport", codeMapper.isNoMatchingViewExceptionAdded());
+    private VelocityContext createVelocityContext(TestCase widgetTestCase, int testCaseIndex) {
+        VelocityContext velocityContext = new VelocityContext();
 
-    velocityContext.put("TestCode", testCodeLines);
+        Object[] visitedActivities = widgetTestCase.getVisitedActivities().toArray();
+        String[] activityName = visitedActivities[0].toString().split("/");
+        velocityContext.put("TestActivityName", packageName + activityName[1]);
 
-    return velocityContext;
-  }
+        velocityContext.put("PackageName", testPackageName);
+        velocityContext.put("ResourcePackageName", packageName);
+
+        // TODO: improve test name based on TestCase's visitedActivities
+        velocityContext.put("ClassName", String.format("TestCase%d", testCaseIndex));
+        velocityContext.put("TestMethodName", "myTestCase");
+
+        velocityContext.put("EspressoPackageName", false ? ESPRESSO_CUSTOM_PACKAGE : ESPRESSO_STANDARD_PACKAGE);
+
+        TestCodeMapper codeMapper = new TestCodeMapper();
+        List<String> testCodeLines = new ArrayList<>();
+        Vector<Action> actions = widgetTestCase.getEventSequence();
+        for (Action action : actions) {
+            codeMapper.addTestCodeLinesForAction(action, testCodeLines);
+        }
+
+        velocityContext.put("AddContribImport", codeMapper.isRecyclerViewActionAdded());
+        velocityContext.put("AddChildAtPositionMethod", codeMapper.isChildAtPositionAdded());
+        velocityContext.put("AddClassOrSuperClassesNameMethod", codeMapper.isClassOrSuperClassesNameAdded());
+        velocityContext.put("AddNoMatchingViewExceptionImport", codeMapper.isNoMatchingViewExceptionAdded());
+
+        velocityContext.put("TestCode", testCodeLines);
+
+        return velocityContext;
+    }
 }

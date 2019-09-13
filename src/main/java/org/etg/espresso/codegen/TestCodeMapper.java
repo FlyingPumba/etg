@@ -21,18 +21,12 @@ import org.etg.mate.models.Widget;
 import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.etg.espresso.codegen.MatcherBuilder.Kind.ClassName;
-import static org.etg.espresso.codegen.MatcherBuilder.Kind.ContentDescription;
-import static org.etg.espresso.codegen.MatcherBuilder.Kind.Id;
-import static org.etg.espresso.codegen.MatcherBuilder.Kind.Text;
-import static org.etg.espresso.util.StringHelper.boxString;
-import static org.etg.espresso.util.StringHelper.isNullOrEmpty;
-import static org.etg.espresso.util.StringHelper.parseId;
+import static org.etg.espresso.codegen.MatcherBuilder.Kind.*;
+import static org.etg.espresso.util.StringHelper.*;
 
 public class TestCodeMapper {
 

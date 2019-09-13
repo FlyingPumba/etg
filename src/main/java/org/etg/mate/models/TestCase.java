@@ -14,7 +14,7 @@ public class TestCase {
     private double sparseness;
 
 
-    public TestCase(String id){
+    public TestCase(String id) {
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();
@@ -32,9 +32,17 @@ public class TestCase {
         this.id = id;
     }
 
-    public void addEvent(Action event){this.eventSequence.add(event);};
+    public void addEvent(Action event) {
+        this.eventSequence.add(event);
+    }
 
-    public void updateVisitedActivities(String activity){this.visitedActivities.add(activity);};
+    ;
+
+    public void updateVisitedActivities(String activity) {
+        this.visitedActivities.add(activity);
+    }
+
+    ;
 
     public Set<String> getVisitedActivities() {
         return visitedActivities;
@@ -44,11 +52,23 @@ public class TestCase {
         return visitedStates;
     }
 
-    public Vector<Action> getEventSequence(){return this.eventSequence;};
+    public Vector<Action> getEventSequence() {
+        return this.eventSequence;
+    }
 
-    public boolean getCrashDetected(){return this.crashDetected;};
+    ;
 
-    public void setCrashDetected(){this.crashDetected=true;};
+    public boolean getCrashDetected() {
+        return this.crashDetected;
+    }
+
+    ;
+
+    public void setCrashDetected() {
+        this.crashDetected = true;
+    }
+
+    ;
 
     public void setNovelty(float novelty) {
         this.novelty = novelty;

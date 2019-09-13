@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ProcessRunner {
-    private static final String[] WIN_RUNTIME = { "cmd.exe", "/C" };
-    private static final String[] OS_LINUX_RUNTIME = { "/bin/bash", "-c" };
+    private static final String[] WIN_RUNTIME = {"cmd.exe", "/C"};
+    private static final String[] OS_LINUX_RUNTIME = {"/bin/bash", "-c"};
 
     private ProcessRunner() {
     }
@@ -48,11 +48,11 @@ public class ProcessRunner {
         }
     }
 
-    public static String runCommand(String command){
+    public static String runCommand(String command) {
         boolean win = false;
         String os = System.getProperty("os.name");
-        if (os!=null && !os.contains("Linux"))
-            win=true;
-        return ProcessRunner.runProcess(win,command);
+        if (os != null && !os.contains("Linux"))
+            win = true;
+        return ProcessRunner.runProcess(win, command);
     }
 }
