@@ -8,6 +8,7 @@ public class TestCodeTemplate {
                 "\n" +
                 "#end\n" +
                 "\n" +
+                "import ${EspressoPackageName}.espresso.Espresso;\n" +
                 "import ${EspressoPackageName}.espresso.ViewInteraction;\n" +
                 "import android.support.test.rule.ActivityTestRule;\n" +
                 "import android.support.test.runner.AndroidJUnit4;\n" +

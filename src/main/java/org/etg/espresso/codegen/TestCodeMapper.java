@@ -60,9 +60,7 @@ public class TestCodeMapper {
     List<String> testCodeLines = new ArrayList<>();
 
     if (action.getActionType() == ActionType.BACK) {
-      // testCodeLines.add("pressBackUnconditionally()" + getStatementTerminator());
-      // String statement = "onView(isRoot()).perform(pressBackUnconditionally())" + getStatementTerminator();
-      String statement = "pressBackUnconditionally()" + getStatementTerminator();
+      String statement = "Espresso.pressBackUnconditionally()" + getStatementTerminator();
       if (mSurroundPerformsWithTryCatch) {
         statement = surroundPerformWithTryCatch(statement);
       }
@@ -70,8 +68,6 @@ public class TestCodeMapper {
       return testCodeLines;
     }
     else if (action.getActionType() == ActionType.MENU) {
-      // String statement = "openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext())" + getStatementTerminator();
-      //String statement = "onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU))" + getStatementTerminator();
       String statement = "pressMenuKey()" + getStatementTerminator();
       if (mSurroundPerformsWithTryCatch) {
         statement = surroundPerformWithTryCatch(statement);
