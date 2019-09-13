@@ -10,6 +10,7 @@ public class TestCodeTemplate {
                 "\n" +
                 "import ${EspressoPackageName}.espresso.Espresso;\n" +
                 "import ${EspressoPackageName}.espresso.ViewInteraction;\n" +
+                "import ${EspressoPackageName}.espresso.action.ViewActions;\n" +
                 "import android.support.test.rule.ActivityTestRule;\n" +
                 "import android.support.test.runner.AndroidJUnit4;\n" +
                 "import android.support.test.filters.LargeTest;\n" +

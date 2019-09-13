@@ -101,7 +101,7 @@ public class TestCodeGenerator {
     List<String> testCodeLines = new ArrayList<>();
     Vector<Action> actions = widgetTestCase.getEventSequence();
     for (Action action : actions) {
-      testCodeLines.addAll(codeMapper.getTestCodeLinesForAction(action));
+      codeMapper.addTestCodeLinesForAction(action, testCodeLines);
     }
 
     velocityContext.put("AddContribImport", codeMapper.isRecyclerViewActionAdded());
