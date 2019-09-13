@@ -387,12 +387,12 @@ public class Widget {
     }
 
     public boolean isSonOfScrollable(){
-        Widget wparent = this.parent;
-        while (wparent!=null){
-            if (wparent.isScrollable())
+        Widget parent = this.parent;
+        while (parent != null){
+            if (parent.isScrollable())
                 return true;
             else
-                wparent = wparent.getParent();
+                parent = parent.getParent();
         }
         return false;
     }

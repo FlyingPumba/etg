@@ -60,8 +60,9 @@ public class TestCodeMapper {
     List<String> testCodeLines = new ArrayList<>();
 
     if (action.getActionType() == ActionType.BACK) {
-      //testCodeLines.add("pressBackUnconditionally()" + getStatementTerminator());
-      String statement = "onView(isRoot()).perform(pressBackUnconditionally())" + getStatementTerminator();
+      // testCodeLines.add("pressBackUnconditionally()" + getStatementTerminator());
+      // String statement = "onView(isRoot()).perform(pressBackUnconditionally())" + getStatementTerminator();
+      String statement = "pressBackUnconditionally()" + getStatementTerminator();
       if (mSurroundPerformsWithTryCatch) {
         statement = surroundPerformWithTryCatch(statement);
       }
@@ -69,8 +70,9 @@ public class TestCodeMapper {
       return testCodeLines;
     }
     else if (action.getActionType() == ActionType.MENU) {
-      //testCodeLines.add("openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext())" + getStatementTerminator());
-      String statement = "onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU))" + getStatementTerminator();
+      // String statement = "openActionBarOverflowOrOptionsMenu(getInstrumentation().getTargetContext())" + getStatementTerminator();
+      //String statement = "onView(isRoot()).perform(pressKey(KeyEvent.KEYCODE_MENU))" + getStatementTerminator();
+      String statement = "pressMenuKey()" + getStatementTerminator();
       if (mSurroundPerformsWithTryCatch) {
         statement = surroundPerformWithTryCatch(statement);
       }
@@ -87,16 +89,16 @@ public class TestCodeMapper {
     int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
     if (action.getActionType() == ActionType.SWIPE_DOWN) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeDown()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeDown()", action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.SWIPE_UP) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeUp()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeUp()", action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.SWIPE_RIGHT) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeRight()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeRight()", action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.SWIPE_LEFT) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isSonOfScrollable()));
     }
 
 //        else if (event.isPressEditorAction()) {
@@ -105,15 +107,15 @@ public class TestCodeMapper {
 //        } else
 
     else if (action.getActionType() == ActionType.CLICK) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "click()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "click()", action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.LONG_CLICK) {
-      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "longClick()", action.getWidget().isScrollable()));
+      testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "longClick()", action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.TYPE_TEXT) {
       String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(action) ? "" : ", closeSoftKeyboard()";
       testCodeLines.add(createActionStatement(
-              variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction, action.getWidget().isScrollable()));
+              variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction, action.getWidget().isSonOfScrollable()));
     }
     else if (action.getActionType() == ActionType.ENTER) {
       // do nothing, since this is handled solely by the Espresso "replaceText" command.
@@ -273,7 +275,7 @@ public class TestCodeMapper {
         return "UNKNOWN";
       }
     }
-    return generateElementHierarchyConditionsRecursively(widget, !widget.isScrollable(), startIndex);
+    return generateElementHierarchyConditionsRecursively(widget, !widget.isSonOfScrollable(), startIndex);
   }
 
   private String generateElementHierarchyConditionsRecursively(Widget widget, boolean checkIsDisplayed, int index) {
@@ -384,7 +386,7 @@ public class TestCodeMapper {
             "} catch (Exception e1) {\n" +
             "System.out.println(\"Trying to perform an action when app is closed. " +
             "Finishing test execution.\")" + getStatementTerminator() + "\n" +
-            "return" + getStatementTerminator() + "\n" +
+            //"return" + getStatementTerminator() + "\n" +
             "}\n";
 
 
