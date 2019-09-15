@@ -376,12 +376,8 @@ public class TestCodeMapper {
     private String surroundPerformWithTryCatch(String performStatement) {
         performStatement = "\ntry {\n" +
                 performStatement + "\n" +
-                "} catch (NoMatchingViewException e) {\n" +
-                "System.out.println(\"No matching view for perform in line: \")" + getStatementTerminator() + "\n" +
-                "} catch (Exception e1) {\n" +
-                "System.out.println(\"Trying to perform an action when app is closed. " +
-                "Finishing test execution.\")" + getStatementTerminator() + "\n" +
-                //"return" + getStatementTerminator() + "\n" +
+                "} catch (Exception e) {\n" +
+                "System.out.println(buildPerformExceptionMessage(e))" + getStatementTerminator() + "\n" +
                 "}\n";
 
 
@@ -428,7 +424,7 @@ public class TestCodeMapper {
         return mIsclassOrSuperClassesNameAdded;
     }
 
-    public boolean isNoMatchingViewExceptionAdded() {
+    public boolean isTryCatchAdded() {
         return mSurroundPerformsWithTryCatch;
     }
 }

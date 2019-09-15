@@ -25,9 +25,6 @@ public class TestCodeTemplate {
                 "#if (${AddContribImport})\n" +
                 "import static ${EspressoPackageName}.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;\n" +
                 "#end\n" +
-                "#if (${AddNoMatchingViewExceptionImport})\n" +
-                "import android.support.test.espresso.NoMatchingViewException;\n" +
-                "#end\n" +
                 "import static ${EspressoPackageName}.espresso.action.ViewActions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.assertion.ViewAssertions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.matcher.ViewMatchers.*;\n" +
@@ -112,6 +109,18 @@ public class TestCodeTemplate {
                 "                return false;\n" +
                 "            }\n" +
                 "        };\n" +
+                "    }\n" +
+                "    #end\n" +
+                "    #if (${AddTryCatchImport})\n" +
+                "private String buildPerformExceptionMessage(Exception e) {\n" +
+                "        String testPackageName = \"${PackageName}\";\n" +
+                "        for (StackTraceElement stackTraceElement : e.getStackTrace()) {\n" +
+                "            if (stackTraceElement.getClassName().startsWith(testPackageName)) {\n" +
+                "                return \"ERROR: when executing perform on line: \" + stackTraceElement.getLineNumber();\n" +
+                "            }\n" +
+                "        }\n" +
+                "\n" +
+                "        return e.getMessage();\n" +
                 "    }\n" +
                 "    #end\n" +
                 "}";
