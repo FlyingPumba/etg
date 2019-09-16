@@ -53,6 +53,7 @@ public class ProcessRunner {
         String os = System.getProperty("os.name");
         if (os != null && !os.contains("Linux"))
             win = true;
+        System.out.println(String.format("Running command: %s", command));
         return ProcessRunner.runProcess(win, command);
     }
 }

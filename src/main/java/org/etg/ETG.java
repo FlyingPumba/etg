@@ -37,7 +37,7 @@ public class ETG {
 
             writeTestCases(outputFolderPath, espressoTestCases);
 
-            // runTestCases(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases);
+            runTestCases(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -75,7 +75,7 @@ public class ETG {
         for (int i = 0; i < espressoTestCases.size(); i++) {
             String testCaseName = "TestCase" + i;
 
-            String clearCmd = String.format("shell pm clear %s", packageName);
+            String clearCmd = String.format("adb shell pm clear %s", packageName);
             ProcessRunner.runCommand(clearCmd);
 
             String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
