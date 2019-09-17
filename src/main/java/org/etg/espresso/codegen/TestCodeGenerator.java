@@ -10,10 +10,12 @@ public class TestCodeGenerator {
 
     private String packageName;
     private String testPackageName;
+    private String espressoPackageName;
 
-    public TestCodeGenerator(String packageName, String testPackageName) {
+    public TestCodeGenerator(String packageName, String testPackageName, String espressoPackageName) {
         this.packageName = packageName;
         this.testPackageName = testPackageName;
+        this.espressoPackageName = espressoPackageName;
     }
 
     public List<EspressoTestCase> getEspressoTestCases(List<WidgetTestCase> widgetTestCases) {
@@ -21,7 +23,7 @@ public class TestCodeGenerator {
         for (int i = 0; i < widgetTestCases.size(); i++) {
             WidgetTestCase widgetTestCase = widgetTestCases.get(i);
 
-            EspressoTestCase testCase = new EspressoTestCase(packageName, testPackageName,
+            EspressoTestCase testCase = new EspressoTestCase(packageName, testPackageName, espressoPackageName,
                     widgetTestCase, String.format("TestCase%d", i));
 
             espressoTestCases.add(testCase);

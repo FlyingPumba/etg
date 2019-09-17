@@ -15,22 +15,21 @@ import java.util.Vector;
 
 public class EspressoTestCase {
 
-    private final String ESPRESSO_CUSTOM_PACKAGE = "com.google.android.apps.common.testing.ui";
-    private final String ESPRESSO_STANDARD_PACKAGE = "android.support.test";
-
     private final String packageName;
     private final String testPackageName;
     private WidgetTestCase widgetTestCase;
     private String testCaseName;
+    private String espressoPackageName;
     private final TestCodeMapper codeMapper;
     private List<String> testCodeLines;
 
-    public EspressoTestCase(String packageName, String testPackageName,
+    public EspressoTestCase(String packageName, String testPackageName, String espressoPackageName,
                             WidgetTestCase widgetTestCase, String testCaseName) {
         this.packageName = packageName;
         this.testPackageName = testPackageName;
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
+        this.espressoPackageName = espressoPackageName;
 
         codeMapper = new TestCodeMapper();
         testCodeLines = new ArrayList<>();
@@ -73,8 +72,12 @@ public class EspressoTestCase {
         VelocityContext velocityContext = new VelocityContext();
 
         Object[] visitedActivities = widgetTestCase.getVisitedActivities().toArray();
-        String[] activityName = visitedActivities[0].toString().split("/");
-        velocityContext.put("TestActivityName", packageName + activityName[1]);
+        String activityName = visitedActivities[0].toString().split("/")[1];
+        if (activityName.startsWith(packageName)) {
+            velocityContext.put("TestActivityName", activityName);
+        } else {
+            velocityContext.put("TestActivityName", packageName + activityName);
+        }
 
         velocityContext.put("PackageName", testPackageName);
         velocityContext.put("ResourcePackageName", packageName);
@@ -83,7 +86,7 @@ public class EspressoTestCase {
         velocityContext.put("ClassName", testCaseName);
         velocityContext.put("TestMethodName", "myTestCase");
 
-        velocityContext.put("EspressoPackageName", false ? ESPRESSO_CUSTOM_PACKAGE : ESPRESSO_STANDARD_PACKAGE);
+        velocityContext.put("EspressoPackageName", espressoPackageName);
 
         velocityContext.put("AddContribImport", codeMapper.isRecyclerViewActionAdded());
         velocityContext.put("AddChildAtPositionMethod", codeMapper.isChildAtPositionAdded());

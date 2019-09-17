@@ -32,9 +32,11 @@ public class ETG {
         System.out.println("Working on file with path: " + filePath + " and package name: " + packageName);
 
         try {
+            String espressoPackageName = getEspressoPackageName(rootProjectFolderPath);
+
             List<WidgetTestCase> widgetTestCases = parseTestCases(filePath);
 
-            TestCodeGenerator codeGenerator = new TestCodeGenerator(packageName, testPackageName);
+            TestCodeGenerator codeGenerator = new TestCodeGenerator(packageName, testPackageName, espressoPackageName);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
             // prune failing lines from each test case
@@ -50,6 +52,24 @@ public class ETG {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getEspressoPackageName(String rootProjectFolderPath) throws Exception {
+        String findSupportTestCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"com.android.support.test.espresso\" {} \\;",
+                rootProjectFolderPath);
+        String findSupportTestResult = ProcessRunner.runCommand(findSupportTestCmd);
+        if (!findSupportTestResult.isEmpty()) {
+            return "android.support.test";
+        }
+
+        String findAndroidXTestCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"androidx.test.espresso\" {} \\;",
+                rootProjectFolderPath);
+        String findAndroidXTestResult = ProcessRunner.runCommand(findAndroidXTestCmd);
+        if (!findAndroidXTestResult.isEmpty()) {
+            return "androidx.test";
+        }
+
+        throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
     }
 
     private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName, String rootProjectFolderPath, String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {

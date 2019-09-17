@@ -19,6 +19,7 @@ dependencies {
 }
 
 run {
+
 //    args = [
 //            "/home/ivan/src/etg-mate-server/mate-test-cases.json", // MATE test cases dump
 //            "de.danoeh.antennapod",  // app package name
@@ -26,12 +27,21 @@ run {
 //            "/home/ivan/src/android-open-source-apps/AntennaPod/", // root project folder
 //            "/home/ivan/src/android-open-source-apps/AntennaPod/app/src/androidTest/java/de/test/antennapod/" // output folder
 //    ]
+
+//    args = [
+//            "/home/ivan/src/etg-mate-server/mate-test-cases.json", // MATE test cases dump
+//            "com.llamacorp.equate",  // app package name
+//            "com.llamacorp.equate.test", // testing package name
+//            "/home/ivan/src/mate-espresso-apps/Equate/", // root project folder
+//            "/home/ivan/src/mate-espresso-apps/Equate/app/src/androidTest/java/com/llamacorp/equate/test/" // output folder
+//    ]
+
     args = [
             "/home/ivan/src/etg-mate-server/mate-test-cases.json", // MATE test cases dump
-            "com.llamacorp.equate",  // app package name
-            "com.llamacorp.equate.test", // testing package name
-            "/home/ivan/src/mate-espresso-apps/Equate/", // root project folder
-            "/home/ivan/src/mate-espresso-apps/Equate/app/src/androidTest/java/com/llamacorp/equate/test/" // output folder
+            "org.totschnig.myexpenses",  // app package name
+            "org.totschnig.myexpenses.test.espresso", // testing package name
+            "/home/ivan/src/mate-espresso-apps/MyExpenses/", // root project folder
+            "/home/ivan/src/mate-espresso-apps/MyExpenses/myExpenses/src/androidTest/java/org/totschnig/myexpenses/test/espresso/" // output folder
     ]
 }
 
