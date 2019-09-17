@@ -50,6 +50,7 @@ public class TestCodeTemplate {
                 "\n" +
                 "    @Test\n" +
                 "    public void ${TestMethodName}() {\n" +
+                "    System.out.println(\"Starting run of ${ClassName}\");\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +
                 "    #end\n" +
@@ -112,11 +113,11 @@ public class TestCodeTemplate {
                 "    }\n" +
                 "    #end\n" +
                 "    #if (${AddTryCatchImport})\n" +
-                "private String buildPerformExceptionMessage(Exception e) {\n" +
+                "private String buildPerformExceptionMessage(Exception e, int performNumber) {\n" +
                 "        String testPackageName = \"${PackageName}\";\n" +
                 "        for (StackTraceElement stackTraceElement : e.getStackTrace()) {\n" +
                 "            if (stackTraceElement.getClassName().startsWith(testPackageName)) {\n" +
-                "                return \"ERROR: when executing perform on line: \" + stackTraceElement.getLineNumber();\n" +
+                "                return \"ERROR: when executing line number: \" + stackTraceElement.getLineNumber() + \", perform number: \" + performNumber;\n" +
                 "            }\n" +
                 "        }\n" +
                 "\n" +

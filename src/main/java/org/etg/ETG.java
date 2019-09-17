@@ -2,8 +2,9 @@ package org.etg;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.etg.espresso.EspressoTestCase;
 import org.etg.espresso.codegen.TestCodeGenerator;
-import org.etg.mate.models.TestCase;
+import org.etg.mate.models.WidgetTestCase;
 import org.etg.mate.parser.TestCaseParser;
 import org.etg.utils.ProcessRunner;
 
@@ -15,6 +16,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ETG {
@@ -30,33 +32,59 @@ public class ETG {
         System.out.println("Working on file with path: " + filePath + " and package name: " + packageName);
 
         try {
-            List<TestCase> testCases = parseTestCases(filePath);
+            List<WidgetTestCase> widgetTestCases = parseTestCases(filePath);
 
             TestCodeGenerator codeGenerator = new TestCodeGenerator(packageName, testPackageName);
-            List<String> espressoTestCases = codeGenerator.getEspressoTestCases(testCases);
+            List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
+            // prune failing lines from each test case
             writeTestCases(outputFolderPath, espressoTestCases);
+            prepareTestRun(rootProjectFolderPath);
 
-            runTestCases(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases);
+            for (int i = 0; i < espressoTestCases.size(); i++) {
+                pruneFailingLines(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases.get(i));
+            }
+
+            // write pruned test cases
+            writeTestCases(outputFolderPath, espressoTestCases);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static void runTestCases(String packageName, String testPackageName, String rootProjectFolderPath,
-                                     String outputFolderPath, List<String> espressoTestCases) throws Exception {
+    private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName, String rootProjectFolderPath, String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
+        // Preform fixed-point removal of failing performs in the test case
+
+        ArrayList<Integer> failingPerformLines;
+        ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
+        do {
+            failingPerformLines = new ArrayList<>(newFailingPerformLines);
+            newFailingPerformLines = runTestCase(packageName, testPackageName,
+                    rootProjectFolderPath, outputFolderPath, espressoTestCase);
+
+            if (newFailingPerformLines.size() > 0) {
+                espressoTestCase.removePerformsByNumber(newFailingPerformLines);
+            }
+
+            writeTestCase(outputFolderPath, espressoTestCase);
+
+        } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
+
+        return espressoTestCase;
+    }
+
+    private static ArrayList<Integer> runTestCase(String packageName, String testPackageName,
+                                                  String rootProjectFolderPath, String outputFolderPath,
+                                                  EspressoTestCase espressoTestCase) throws Exception {
+        ArrayList<Integer> failingPerforms = new ArrayList<>();
+
         // compile tests
         String compileCmd = String.format("%sgradlew -p %s assembleAndroidTest",
                 rootProjectFolderPath, rootProjectFolderPath);
         String compileResult = ProcessRunner.runCommand(compileCmd);
         if (!compileResult.contains("BUILD SUCCESSFUL")) {
-            throw new Exception("Unable to compile Espresso Tests");
+            throw new Exception("Unable to compile Espresso Tests:\n" + compileResult);
         }
-
-        // disable animations on emulator
-        ProcessRunner.runCommand("adb shell settings put global window_animation_scale 0");
-        ProcessRunner.runCommand("adb shell settings put global transition_animation_scale 0");
-        ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
 
         // find where is androidTest apk
         String findApkCmd = String.format("find %sapp/build/outputs/apk/androidTest/ -name *androidTest.apk",
@@ -71,37 +99,60 @@ public class ETG {
         String installCmd = String.format("adb install %s", apkTestPath);
         ProcessRunner.runCommand(installCmd);
 
-        // run each test case
-        for (int i = 0; i < espressoTestCases.size(); i++) {
-            String testCaseName = "TestCase" + i;
+        String clearCmd = String.format("adb shell pm clear %s", packageName);
+        ProcessRunner.runCommand(clearCmd);
 
-            String clearCmd = String.format("adb shell pm clear %s", packageName);
-            ProcessRunner.runCommand(clearCmd);
+        String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
+                        "%s.%s %s/android.support.test.runner.AndroidJUnitRunner",
+                testPackageName, espressoTestCase.getTestName(), testPackageName);
+        String testResult = ProcessRunner.runCommand(instrumentCmd);
 
-            String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                            "%s.%s %s/android.support.test.runner.AndroidJUnitRunner",
-                    testPackageName, testCaseName, testPackageName);
-            String testResult = ProcessRunner.runCommand(instrumentCmd);
+        if (!testResult.contains("OK")) {
+            System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
+            System.out.println(testResult);
+        }
 
-            if (!testResult.contains("OK")) {
-                System.out.println("There was an error running test case: " + testCaseName);
-                System.out.println(testResult);
+        String logcatCmd = "adb logcat -d -s System.out";
+        String[] logcatLines = ProcessRunner.runCommand(logcatCmd).split("\n");
+        for (int i = logcatLines.length - 1; i >= 0; i--) {
+            String logcatLine = logcatLines[i];
+
+            if (logcatLine.contains("Starting run of")) {
+                // we reached the beginning of the test run
+                break;
+            } else if (logcatLine.contains("ERROR: when executing line number")) {
+                String lineNumberStr = logcatLine.split("perform number: ")[1];
+                Integer performNumber = Integer.valueOf(lineNumberStr);
+                failingPerforms.add(performNumber);
             }
         }
+
+        return failingPerforms;
     }
 
-    private static void writeTestCases(String outputFolderPath, List<String> espressoTestCases) throws FileNotFoundException {
-        for (int i = 0; i < espressoTestCases.size(); i++) {
-            String testContent = espressoTestCases.get(i);
-            String outputFilePath = outputFolderPath + "TestCase" + i + ".java";
+    private static void prepareTestRun(String rootProjectFolderPath) throws Exception {
+        // disable animations on emulator
+        ProcessRunner.runCommand("adb shell settings put global window_animation_scale 0");
+        ProcessRunner.runCommand("adb shell settings put global transition_animation_scale 0");
+        ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
+    }
 
-            PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
-            out.print(testContent);
-            out.close();
+    private static void writeTestCases(String outputFolderPath, List<EspressoTestCase> espressoTestCases) throws FileNotFoundException {
+        for (int i = 0; i < espressoTestCases.size(); i++) {
+            writeTestCase(outputFolderPath, espressoTestCases.get(i));
         }
     }
 
-    private static List<TestCase> parseTestCases(String filePath) throws IOException {
+    private static void writeTestCase(String outputFolderPath, EspressoTestCase espressoTestCase) throws FileNotFoundException {
+        String testContent = espressoTestCase.toString();
+        String outputFilePath = outputFolderPath + espressoTestCase.getTestName() + ".java";
+
+        PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
+        out.print(testContent);
+        out.close();
+    }
+
+    private static List<WidgetTestCase> parseTestCases(String filePath) throws IOException {
         String content = readFile(filePath, StandardCharsets.UTF_8);
 
         ObjectMapper mapper = new ObjectMapper();

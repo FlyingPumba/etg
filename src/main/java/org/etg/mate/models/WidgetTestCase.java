@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-public class TestCase {
+public class WidgetTestCase {
     private String id;
     private Set<String> visitedActivities;
     private Set<String> visitedStates;
@@ -14,7 +14,7 @@ public class TestCase {
     private double sparseness;
 
 
-    public TestCase(String id) {
+    public WidgetTestCase(String id) {
         setId(id);
         crashDetected = false;
         visitedActivities = new HashSet<>();

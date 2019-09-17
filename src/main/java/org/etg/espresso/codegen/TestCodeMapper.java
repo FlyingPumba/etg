@@ -46,6 +46,7 @@ public class TestCodeMapper {
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     private final Map<String, Integer> mVariableNameIndexes = new HashMap<>();
+    private int performCount = 0;
 
     public TestCodeMapper() {
     }
@@ -146,7 +147,8 @@ public class TestCodeMapper {
         if (isAdapterViewAction(action)) {
             return addDataPickingStatement(action, testCodeLines);
         }
-        String statement = addViewPickingStatement(action, testCodeLines);
+        String variableName = addViewPickingStatement(action, testCodeLines);
+        String statement = testCodeLines.get(testCodeLines.size() - 1);
 
         int actionType = action.getActionType();
         Widget target = action.getWidget();
@@ -164,14 +166,14 @@ public class TestCodeMapper {
             // there as a child with some text to make the statement more specific
 
             testCodeLines.remove(testCodeLines.size() - 1);
-            statement = addViewPickingStatement(new Action(childrenWithSomeText, actionType), testCodeLines);
+            variableName = addViewPickingStatement(new Action(childrenWithSomeText, actionType), testCodeLines);
 
         } else if (childrenWithRId != null &&
                 !statement.contains("R.id")) {
             // there is a child with R.id to make the statement more specific
 
             testCodeLines.remove(testCodeLines.size() - 1);
-            statement = addViewPickingStatement(new Action(childrenWithRId, actionType), testCodeLines);
+            variableName = addViewPickingStatement(new Action(childrenWithRId, actionType), testCodeLines);
 
         } else if (!target.getChildren().isEmpty() &&
                 !statement.contains("withContentDescription") &&
@@ -184,12 +186,12 @@ public class TestCodeMapper {
             }
 
             testCodeLines.remove(testCodeLines.size() - 1);
-            statement = addViewPickingStatement(new Action(target, actionType), testCodeLines);
+            variableName = addViewPickingStatement(new Action(target, actionType), testCodeLines);
         }
 
         // System.out.println("Statement post rewrite: " + testCodeLines.get(0));
 
-        return statement;
+        return variableName;
     }
 
     private String addDataPickingStatement(Action action, List<String> testCodeLines) {
@@ -228,7 +230,7 @@ public class TestCodeMapper {
             viewMatchers = "isRoot()";
         }
 
-        testCodeLines.add(getVariableTypeDeclaration(true) + " " + variableName + " = onView(\n" +
+        testCodeLines.add(getVariableTypeDeclaration(true) + " " + variableName + " = onView(" +
                 viewMatchers + ")" + getStatementTerminator());
 
         return variableName;
@@ -326,8 +328,8 @@ public class TestCodeMapper {
 
         mIsChildAtPositionAdded = mIsChildAtPositionAdded || groupViewChildPosition != -1;
 
-        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? ",\n" : "")
-                + (groupViewChildPosition != -1 ? "childAtPosition(\n" : "withParent(")
+        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? "," : "")
+                + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
                 + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
                 + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
                 + (addIsDisplayed ? ",\nisDisplayed()" : "") + (addAllOf ? ")" : "");
@@ -377,9 +379,10 @@ public class TestCodeMapper {
         performStatement = "\ntry {\n" +
                 performStatement + "\n" +
                 "} catch (Exception e) {\n" +
-                "System.out.println(buildPerformExceptionMessage(e))" + getStatementTerminator() + "\n" +
+                "System.out.println(buildPerformExceptionMessage(e, " + performCount + "))" + getStatementTerminator() + "\n" +
                 "}\n";
 
+        performCount++;
 
         return performStatement;
     }
