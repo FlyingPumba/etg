@@ -39,9 +39,9 @@ run {
     args = [
             "/home/ivan/src/etg-mate-server/mate-test-cases.json", // MATE test cases dump
             "org.totschnig.myexpenses",  // app package name
-            "org.totschnig.myexpenses.test.espresso", // testing package name
+            "org.totschnig.myexpenses", // testing package name
             "/home/ivan/src/mate-espresso-apps/MyExpenses/", // root project folder
-            "/home/ivan/src/mate-espresso-apps/MyExpenses/myExpenses/src/androidTest/java/org/totschnig/myexpenses/test/espresso/" // output folder
+            "/home/ivan/src/mate-espresso-apps/MyExpenses/myExpenses/src/androidTest/java/org/totschnig/myexpenses/" // output folder
     ]
 }
 

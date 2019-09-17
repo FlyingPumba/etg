@@ -130,6 +130,7 @@ public class ETG {
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
             System.out.println(testResult);
+            return failingPerforms;
         }
 
         String logcatCmd = "adb logcat -d -s System.out";
