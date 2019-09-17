@@ -109,12 +109,31 @@ public class EspressoTestCase {
     public void removePerformsByNumber(ArrayList<Integer> lineNumbers) {
         List<String> newTestCodeLines = new ArrayList<>();
         int performNumber = 0;
-        for (int i = 0; i < testCodeLines.size(); i++) {
+        for (int i = 0; i < testCodeLines.size();) {
             String statement = testCodeLines.get(i);
 
             if (statement.contains("onView")) {
-                // not a perform
-                newTestCodeLines.add(statement);
+                // not a perform, but check if it's related to next one
+                if (i+1 < testCodeLines.size()) {
+
+                    String variableName = statement.split("ViewInteraction ")[1].split(" = ")[0];
+                    String nextStatement = testCodeLines.get(i + 1);
+
+                    if (!nextStatement.contains("onView") && nextStatement.contains(variableName)
+                            && lineNumbers.contains(performNumber)) {
+                        // both this and next statement are related, and the next statement is a perform that should be removed
+                        // skip both and increase perform number
+                        i++;
+                        performNumber++;
+
+                    } else {
+                        newTestCodeLines.add(statement);
+                    }
+
+                } else {
+                    newTestCodeLines.add(statement);
+                }
+
             } else {
                 if (!lineNumbers.contains(performNumber)) {
                     newTestCodeLines.add(statement);
@@ -122,6 +141,8 @@ public class EspressoTestCase {
 
                 performNumber++;
             }
+
+            i++;
         }
         testCodeLines = newTestCodeLines;
     }
