@@ -8,10 +8,7 @@ import org.etg.mate.models.WidgetTestCase;
 import org.etg.mate.parser.TestCaseParser;
 import org.etg.utils.ProcessRunner;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,6 +29,7 @@ public class ETG {
         System.out.println("Working on file with path: " + filePath + " and package name: " + packageName);
 
         try {
+            String applicationFolderPath = getApplicationFolderPath(rootProjectFolderPath);
             String espressoPackageName = getEspressoPackageName(rootProjectFolderPath);
 
             List<WidgetTestCase> widgetTestCases = parseTestCases(filePath);
@@ -44,7 +42,9 @@ public class ETG {
             prepareTestRun(rootProjectFolderPath);
 
             for (int i = 0; i < espressoTestCases.size(); i++) {
-                pruneFailingLines(packageName, testPackageName, rootProjectFolderPath, outputFolderPath, espressoTestCases.get(i));
+                pruneFailingLines(packageName, testPackageName, espressoPackageName,
+                        rootProjectFolderPath, applicationFolderPath, outputFolderPath,
+                        espressoTestCases.get(i));
             }
 
             // write pruned test cases
@@ -52,6 +52,15 @@ public class ETG {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private static String getApplicationFolderPath(String rootProjectFolderPath) throws Exception {
+        String grepCmd = String.format("grep -l -R \"apply plugin: 'com.android.application'\" %s", rootProjectFolderPath);
+        String[] grepResult = ProcessRunner.runCommand(grepCmd).split("\n");
+        if (grepResult.length != 1) {
+            throw new Exception("Unable to find application path inside project.");
+        }
+        return new File(grepResult[0]).getParent() + File.separator;
     }
 
     private static String getEspressoPackageName(String rootProjectFolderPath) throws Exception {
@@ -72,15 +81,18 @@ public class ETG {
         throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
     }
 
-    private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName, String rootProjectFolderPath, String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
+    private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName,
+                                                      String espressoPackageName, String rootProjectFolderPath,
+                                                      String applicationFolderPath, String outputFolderPath,
+                                                      EspressoTestCase espressoTestCase) throws Exception {
         // Preform fixed-point removal of failing performs in the test case
 
         ArrayList<Integer> failingPerformLines;
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            newFailingPerformLines = runTestCase(packageName, testPackageName,
-                    rootProjectFolderPath, outputFolderPath, espressoTestCase);
+            newFailingPerformLines = runTestCase(packageName, testPackageName, espressoPackageName,
+                    rootProjectFolderPath, applicationFolderPath, outputFolderPath, espressoTestCase);
 
             if (newFailingPerformLines.size() > 0) {
                 espressoTestCase.removePerformsByNumber(newFailingPerformLines);
@@ -94,9 +106,14 @@ public class ETG {
     }
 
     private static ArrayList<Integer> runTestCase(String packageName, String testPackageName,
-                                                  String rootProjectFolderPath, String outputFolderPath,
+                                                  String espressoPackageName, String rootProjectFolderPath,
+                                                  String applicationFolderPath, String outputFolderPath,
                                                   EspressoTestCase espressoTestCase) throws Exception {
         ArrayList<Integer> failingPerforms = new ArrayList<>();
+
+        // delete previously built APKs
+        String rmCmd = String.format("find %s -name *.apk -delete", applicationFolderPath);
+        ProcessRunner.runCommand(rmCmd);
 
         // compile tests
         String compileCmd = String.format("%sgradlew -p %s assembleAndroidTest",
@@ -107,10 +124,14 @@ public class ETG {
         }
 
         // find where is androidTest apk
-        String findApkCmd = String.format("find %sapp/build/outputs/apk/androidTest/ -name *androidTest.apk",
-                rootProjectFolderPath);
-        String[] apks = ProcessRunner.runCommand(findApkCmd).split("\n");
-        if (apks.length == 0) {
+        String findApkCmd = String.format("find %s -name *androidTest.apk", applicationFolderPath);
+        String findApkResult = ProcessRunner.runCommand(findApkCmd);
+        if (findApkResult.contains("No such file or directory")) {
+            throw new Exception("Unable to find compiled Espresso Tests");
+        }
+
+        String[] apks = findApkResult.split("\n");
+        if (apks.length != 1) {
             throw new Exception("Unable to find compiled Espresso Tests");
         }
         String apkTestPath = apks[0];
@@ -122,9 +143,16 @@ public class ETG {
         String clearCmd = String.format("adb shell pm clear %s", packageName);
         ProcessRunner.runCommand(clearCmd);
 
+        String junitRunner = "";
+        if (espressoPackageName.contains("androidx")) {
+            junitRunner = "androidx.test.runner.AndroidJUnitRunner";
+        } else {
+            junitRunner = "android.support.test.runner.AndroidJUnitRunner";
+        }
+
         String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s/android.support.test.runner.AndroidJUnitRunner",
-                testPackageName, espressoTestCase.getTestName(), testPackageName);
+                        "%s.%s %s/%s",
+                testPackageName, espressoTestCase.getTestName(), testPackageName, junitRunner);
         String testResult = ProcessRunner.runCommand(instrumentCmd);
 
         if (!testResult.contains("OK")) {
