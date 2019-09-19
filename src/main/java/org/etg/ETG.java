@@ -8,7 +8,10 @@ import org.etg.mate.models.WidgetTestCase;
 import org.etg.mate.parser.TestCaseParser;
 import org.etg.utils.ProcessRunner;
 
-import java.io.*;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -24,12 +27,9 @@ public class ETG {
             ETGProperties properties = ETGProperties.loadProperties(args[0]);
             System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
 
-            String applicationFolderPath = getApplicationFolderPath(properties.getRootProjectPath());
-            String espressoPackageName = getEspressoPackageName(properties.getRootProjectPath());
-
             List<WidgetTestCase> widgetTestCases = parseTestCases(properties.getJsonPath());
 
-            TestCodeGenerator codeGenerator = new TestCodeGenerator(properties.getPackageName(), properties.getTestPackageName(), espressoPackageName);
+            TestCodeGenerator codeGenerator = new TestCodeGenerator(properties.getPackageName(), properties.getTestPackageName(), properties.getEspressoPackageName());
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
             // prune failing lines from each test case
@@ -37,8 +37,8 @@ public class ETG {
             prepareTestRun(properties.getRootProjectPath());
 
             for (int i = 0; i < espressoTestCases.size(); i++) {
-                pruneFailingLines(properties.getPackageName(), properties.getTestPackageName(), espressoPackageName,
-                        properties.getRootProjectPath(), applicationFolderPath, properties.getBuildVariant(), properties.getOutputPath(),
+                pruneFailingLines(properties.getPackageName(), properties.getTestPackageName(), properties.getEspressoPackageName(),
+                        properties.getRootProjectPath(), properties.getApplicationFolderPath(), properties.getBuildVariant(), properties.getOutputPath(),
                         espressoTestCases.get(i));
             }
 
@@ -47,33 +47,6 @@ public class ETG {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static String getApplicationFolderPath(String rootProjectFolderPath) throws Exception {
-        String grepCmd = String.format("grep -l -R \"apply plugin: 'com.android.application'\" %s", rootProjectFolderPath);
-        String[] grepResult = ProcessRunner.runCommand(grepCmd).split("\n");
-        if (grepResult.length != 1) {
-            throw new Exception("Unable to find application path inside project.");
-        }
-        return new File(grepResult[0]).getParent() + File.separator;
-    }
-
-    private static String getEspressoPackageName(String rootProjectFolderPath) throws Exception {
-        String findSupportTestCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"com.android.support.test.espresso\" {} \\;",
-                rootProjectFolderPath);
-        String findSupportTestResult = ProcessRunner.runCommand(findSupportTestCmd);
-        if (!findSupportTestResult.isEmpty()) {
-            return "android.support.test";
-        }
-
-        String findAndroidXTestCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"androidx.test.espresso\" {} \\;",
-                rootProjectFolderPath);
-        String findAndroidXTestResult = ProcessRunner.runCommand(findAndroidXTestCmd);
-        if (!findAndroidXTestResult.isEmpty()) {
-            return "androidx.test";
-        }
-
-        throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
     }
 
     private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName,
