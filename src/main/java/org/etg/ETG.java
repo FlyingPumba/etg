@@ -29,17 +29,15 @@ public class ETG {
 
             List<WidgetTestCase> widgetTestCases = parseTestCases(properties.getJsonPath());
 
-            TestCodeGenerator codeGenerator = new TestCodeGenerator(properties.getPackageName(), properties.getTestPackageName(), properties.getEspressoPackageName());
+            TestCodeGenerator codeGenerator = new TestCodeGenerator(properties);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
             // prune failing lines from each test case
             writeTestCases(properties.getOutputPath(), espressoTestCases);
-            prepareTestRun(properties.getRootProjectPath());
+            prepareTestRun();
 
             for (int i = 0; i < espressoTestCases.size(); i++) {
-                pruneFailingLines(properties.getPackageName(), properties.getTestPackageName(), properties.getEspressoPackageName(),
-                        properties.getRootProjectPath(), properties.getApplicationFolderPath(), properties.getBuildVariant(), properties.getOutputPath(),
-                        espressoTestCases.get(i));
+                pruneFailingLines(properties, espressoTestCases.get(i));
             }
 
             // write pruned test cases
@@ -49,50 +47,43 @@ public class ETG {
         }
     }
 
-    private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName,
-                                                      String espressoPackageName, String rootProjectFolderPath,
-                                                      String applicationFolderPath, String buildVariant,
-                                                      String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
+    private static EspressoTestCase pruneFailingLines(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
         // Preform fixed-point removal of failing performs in the test case
 
         ArrayList<Integer> failingPerformLines;
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            newFailingPerformLines = runTestCase(packageName, testPackageName, espressoPackageName,
-                    rootProjectFolderPath, applicationFolderPath, buildVariant, outputFolderPath, espressoTestCase);
+            newFailingPerformLines = runTestCase(properties, espressoTestCase);
 
             if (newFailingPerformLines.size() > 0) {
                 espressoTestCase.removePerformsByNumber(newFailingPerformLines);
             }
 
-            writeTestCase(outputFolderPath, espressoTestCase);
+            writeTestCase(properties.getOutputPath(), espressoTestCase);
 
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
 
         return espressoTestCase;
     }
 
-    private static ArrayList<Integer> runTestCase(String packageName, String testPackageName,
-                                                  String espressoPackageName, String rootProjectFolderPath,
-                                                  String applicationFolderPath, String buildVariant,
-                                                  String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
+    private static ArrayList<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
         ArrayList<Integer> failingPerforms = new ArrayList<>();
 
         // delete previously built APKs
-        String rmCmd = String.format("find %s -name *.apk -delete", applicationFolderPath);
+        String rmCmd = String.format("find %s -name *.apk -delete", properties.getApplicationFolderPath());
         ProcessRunner.runCommand(rmCmd);
 
         // compile tests
         String compileCmd = String.format("%sgradlew -p %s assembleAndroidTest",
-                rootProjectFolderPath, rootProjectFolderPath);
+                properties.getRootProjectPath(), properties.getRootProjectPath());
         String compileResult = ProcessRunner.runCommand(compileCmd);
         if (!compileResult.contains("BUILD SUCCESSFUL")) {
             throw new Exception("Unable to compile Espresso Tests:\n" + compileResult);
         }
 
         // find where is androidTest apk
-        String findApkCmd = String.format("find %s -name *androidTest.apk", applicationFolderPath);
+        String findApkCmd = String.format("find %s -name *androidTest.apk", properties.getApplicationFolderPath());
         String findApkResult = ProcessRunner.runCommand(findApkCmd);
         if (findApkResult.contains("No such file or directory")) {
             throw new Exception("Unable to find compiled Espresso Tests");
@@ -101,7 +92,7 @@ public class ETG {
         String[] apks = findApkResult.split("\n");
         List<String> filteredApks = new ArrayList<>();
         for (String apk : apks) {
-            if (apk.contains(buildVariant)) {
+            if (apk.contains(properties.getBuildVariant())) {
                 filteredApks.add(apk);
             }
         }
@@ -115,11 +106,11 @@ public class ETG {
         String installCmd = String.format("adb install %s", apkTestPath);
         ProcessRunner.runCommand(installCmd);
 
-        String clearCmd = String.format("adb shell pm clear %s", packageName);
+        String clearCmd = String.format("adb shell pm clear %s", properties.getPackageName());
         ProcessRunner.runCommand(clearCmd);
 
         String junitRunner = "";
-        if (espressoPackageName.contains("androidx")) {
+        if (properties.getEspressoPackageName().contains("androidx")) {
             junitRunner = "androidx.test.runner.AndroidJUnitRunner";
         } else {
             junitRunner = "android.support.test.runner.AndroidJUnitRunner";
@@ -127,7 +118,7 @@ public class ETG {
 
         String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
                         "%s.%s %s.test/%s",
-                testPackageName, espressoTestCase.getTestName(), packageName, junitRunner);
+                properties.getTestPackageName(), espressoTestCase.getTestName(), properties.getPackageName(), junitRunner);
         String testResult = ProcessRunner.runCommand(instrumentCmd);
 
         if (!testResult.contains("OK")) {
@@ -154,7 +145,7 @@ public class ETG {
         return failingPerforms;
     }
 
-    private static void prepareTestRun(String rootProjectFolderPath) throws Exception {
+    private static void prepareTestRun() {
         // disable animations on emulator
         ProcessRunner.runCommand("adb shell settings put global window_animation_scale 0");
         ProcessRunner.runCommand("adb shell settings put global transition_animation_scale 0");

@@ -36,6 +36,9 @@ public class ETGProperties {
     }
 
     public String getBuildVariant() {
+        if (!properties.containsKey("buildVariant")) {
+            properties.setProperty("buildVariant", "");
+        }
         return properties.getProperty("buildVariant");
     }
 
