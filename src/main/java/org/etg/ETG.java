@@ -20,36 +20,30 @@ public class ETG {
     public static void main(String[] args) {
         System.out.println("ETG");
 
-        String filePath = args[0];
-        String packageName = args[1];
-        String testPackageName = args[2];
-        String buildVariant = args[3];
-        String rootProjectFolderPath = args[4];
-        String outputFolderPath = args[5];
-
-        System.out.println("Working on file with path: " + filePath + " and package name: " + packageName);
-
         try {
-            String applicationFolderPath = getApplicationFolderPath(rootProjectFolderPath);
-            String espressoPackageName = getEspressoPackageName(rootProjectFolderPath);
+            ETGProperties properties = ETGProperties.loadProperties(args[0]);
+            System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
 
-            List<WidgetTestCase> widgetTestCases = parseTestCases(filePath);
+            String applicationFolderPath = getApplicationFolderPath(properties.getRootProjectPath());
+            String espressoPackageName = getEspressoPackageName(properties.getRootProjectPath());
 
-            TestCodeGenerator codeGenerator = new TestCodeGenerator(packageName, testPackageName, espressoPackageName);
+            List<WidgetTestCase> widgetTestCases = parseTestCases(properties.getJsonPath());
+
+            TestCodeGenerator codeGenerator = new TestCodeGenerator(properties.getPackageName(), properties.getTestPackageName(), espressoPackageName);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
             // prune failing lines from each test case
-            writeTestCases(outputFolderPath, espressoTestCases);
-            prepareTestRun(rootProjectFolderPath);
+            writeTestCases(properties.getOutputPath(), espressoTestCases);
+            prepareTestRun(properties.getRootProjectPath());
 
             for (int i = 0; i < espressoTestCases.size(); i++) {
-                pruneFailingLines(packageName, testPackageName, espressoPackageName,
-                        rootProjectFolderPath, applicationFolderPath, buildVariant, outputFolderPath,
+                pruneFailingLines(properties.getPackageName(), properties.getTestPackageName(), espressoPackageName,
+                        properties.getRootProjectPath(), applicationFolderPath, properties.getBuildVariant(), properties.getOutputPath(),
                         espressoTestCases.get(i));
             }
 
             // write pruned test cases
-            writeTestCases(outputFolderPath, espressoTestCases);
+            writeTestCases(properties.getOutputPath(), espressoTestCases);
         } catch (Exception e) {
             e.printStackTrace();
         }
