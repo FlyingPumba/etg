@@ -3,12 +3,12 @@ package org.etg.espresso;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
+import org.etg.ETGProperties;
 import org.etg.espresso.codegen.TestCodeMapper;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
 
-import java.io.StringWriter;
-import java.io.Writer;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
@@ -37,6 +37,32 @@ public class EspressoTestCase {
         for (Action action : actions) {
             codeMapper.addTestCodeLinesForAction(action, testCodeLines);
         }
+    }
+
+    public void pruneFailingPerforms(ETGProperties properties) throws Exception {
+        // Perform fixed-point removal of failing performs in the test case
+
+        ArrayList<Integer> failingPerformLines;
+        ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
+        do {
+            failingPerformLines = new ArrayList<>(newFailingPerformLines);
+
+            writeToFolder(properties.getOutputPath());
+            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
+
+            if (newFailingPerformLines.size() > 0) {
+                removePerformsByNumber(newFailingPerformLines);
+            }
+        } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
+    }
+
+    private void writeToFolder(String outputFolderPath) throws FileNotFoundException {
+        String testContent = toString();
+        String outputFilePath = outputFolderPath + getTestName() + ".java";
+
+        PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
+        out.print(testContent);
+        out.close();
     }
 
     @Override
