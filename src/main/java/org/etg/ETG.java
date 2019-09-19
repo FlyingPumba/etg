@@ -23,8 +23,9 @@ public class ETG {
         String filePath = args[0];
         String packageName = args[1];
         String testPackageName = args[2];
-        String rootProjectFolderPath = args[3];
-        String outputFolderPath = args[4];
+        String buildVariant = args[3];
+        String rootProjectFolderPath = args[4];
+        String outputFolderPath = args[5];
 
         System.out.println("Working on file with path: " + filePath + " and package name: " + packageName);
 
@@ -43,7 +44,7 @@ public class ETG {
 
             for (int i = 0; i < espressoTestCases.size(); i++) {
                 pruneFailingLines(packageName, testPackageName, espressoPackageName,
-                        rootProjectFolderPath, applicationFolderPath, outputFolderPath,
+                        rootProjectFolderPath, applicationFolderPath, buildVariant, outputFolderPath,
                         espressoTestCases.get(i));
             }
 
@@ -83,8 +84,8 @@ public class ETG {
 
     private static EspressoTestCase pruneFailingLines(String packageName, String testPackageName,
                                                       String espressoPackageName, String rootProjectFolderPath,
-                                                      String applicationFolderPath, String outputFolderPath,
-                                                      EspressoTestCase espressoTestCase) throws Exception {
+                                                      String applicationFolderPath, String buildVariant,
+                                                      String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
         // Preform fixed-point removal of failing performs in the test case
 
         ArrayList<Integer> failingPerformLines;
@@ -92,7 +93,7 @@ public class ETG {
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
             newFailingPerformLines = runTestCase(packageName, testPackageName, espressoPackageName,
-                    rootProjectFolderPath, applicationFolderPath, outputFolderPath, espressoTestCase);
+                    rootProjectFolderPath, applicationFolderPath, buildVariant, outputFolderPath, espressoTestCase);
 
             if (newFailingPerformLines.size() > 0) {
                 espressoTestCase.removePerformsByNumber(newFailingPerformLines);
@@ -107,8 +108,8 @@ public class ETG {
 
     private static ArrayList<Integer> runTestCase(String packageName, String testPackageName,
                                                   String espressoPackageName, String rootProjectFolderPath,
-                                                  String applicationFolderPath, String outputFolderPath,
-                                                  EspressoTestCase espressoTestCase) throws Exception {
+                                                  String applicationFolderPath, String buildVariant,
+                                                  String outputFolderPath, EspressoTestCase espressoTestCase) throws Exception {
         ArrayList<Integer> failingPerforms = new ArrayList<>();
 
         // delete previously built APKs
@@ -131,10 +132,17 @@ public class ETG {
         }
 
         String[] apks = findApkResult.split("\n");
-        if (apks.length != 1) {
+        List<String> filteredApks = new ArrayList<>();
+        for (String apk : apks) {
+            if (apk.contains(buildVariant)) {
+                filteredApks.add(apk);
+            }
+        }
+
+        if (filteredApks.size() != 1) {
             throw new Exception("Unable to find compiled Espresso Tests");
         }
-        String apkTestPath = apks[0];
+        String apkTestPath = filteredApks.get(0);
 
         // install apk test
         String installCmd = String.format("adb install %s", apkTestPath);
@@ -151,8 +159,8 @@ public class ETG {
         }
 
         String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s/%s",
-                testPackageName, espressoTestCase.getTestName(), testPackageName, junitRunner);
+                        "%s.%s %s.test/%s",
+                testPackageName, espressoTestCase.getTestName(), packageName, junitRunner);
         String testResult = ProcessRunner.runCommand(instrumentCmd);
 
         if (!testResult.contains("OK")) {
