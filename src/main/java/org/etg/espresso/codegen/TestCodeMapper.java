@@ -150,7 +150,7 @@ public class TestCodeMapper {
         String variableName = addViewPickingStatement(action, testCodeLines);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
-        int actionType = action.getActionType();
+        ActionType actionType = action.getActionType();
         Widget target = action.getWidget();
 
         // check if this view pick statement is too unspecific.

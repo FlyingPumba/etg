@@ -6,7 +6,7 @@ import java.util.Vector;
 public class Action {
 
     private Widget widget;
-    private int actionType;
+    private ActionType actionType;
     private String extraInfo;
     private boolean executed;
 
@@ -22,13 +22,13 @@ public class Action {
         return adjActions;
     }
 
-    public Action(int actionType) {
+    public Action(ActionType actionType) {
         this.actionType = actionType;
         fitness = 0;
         widget = new Widget("", "", "");
     }
 
-    public Action(Widget widget, int actionType) {
+    public Action(Widget widget, ActionType actionType) {
         setWidget(widget);
         setActionType(actionType);
         setExtraInfo("");
@@ -48,11 +48,11 @@ public class Action {
         this.widget = widget;
     }
 
-    public int getActionType() {
+    public ActionType getActionType() {
         return actionType;
     }
 
-    public void setActionType(int actionType) {
+    public void setActionType(ActionType actionType) {
         this.actionType = actionType;
     }
 
