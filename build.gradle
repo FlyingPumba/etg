@@ -20,7 +20,7 @@ dependencies {
 
 run {
     args = [
-            "/home/christian/tesis/gitProjects/etg/config/pelis.config"
+            "/home/christian/tesis/gitProjects/etg/config/recyclerViewTest.config"
     ]
 }
 
