@@ -20,7 +20,8 @@ dependencies {
 
 run {
     args = [
-            "/home/christian/tesis/gitProjects/etg/config/recyclerViewTest.config"
+//            "/home/christian/tesis/gitProjects/etg/config/recyclerViewTest_noScroll.config"
+            "/home/christian/tesis/gitProjects/etg/config/mateTestCasesRecyclerView_withScroll.config"
     ]
 }
 
