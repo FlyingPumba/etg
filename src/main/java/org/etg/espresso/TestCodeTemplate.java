@@ -41,6 +41,8 @@ public class TestCodeTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "import org.hamcrest.TypeSafeMatcher;\n" +
                 "import org.hamcrest.core.IsInstanceOf;\n" +
+                "import org.junit.After;\n" +
+                "import org.junit.Before;\n"+
                 "import org.junit.Rule;\n" +
                 "import org.junit.Test;\n" +
                 "import org.junit.runner.RunWith;\n" +
@@ -50,6 +52,18 @@ public class TestCodeTemplate {
                 "@LargeTest\n" +
                 "@RunWith(AndroidJUnit4.class)\n" +
                 "public class ${ClassName} {\n" +
+                "\n" +
+                "private int errorCount;\n" +
+                "\n" +
+                "    @Before\n" +
+                "    public void setUp(){\n" +
+                "        errorCount = 0;\n" +
+                "    }" +
+                "\n "+
+                "    @After\n" +
+                "    public void teardown(){\n" +
+                "        System.out.println(\"Error count: \" + errorCount);\n" +
+                "    }" +
                 "\n" +
                 "    @Rule\n" +
                 "    public ActivityTestRule<${TestActivityName}> mActivityTestRule = new ActivityTestRule<>(${TestActivityName}.class);\n" +
@@ -120,6 +134,7 @@ public class TestCodeTemplate {
                 "    #end\n" +
                 "    #if (${AddTryCatchImport})\n" +
                 "private String buildPerformExceptionMessage(Exception e, int performNumber) {\n" +
+                "        errorCount++;\n" +
                 "        String testPackageName = \"${PackageName}\";\n" +
                 "        for (StackTraceElement stackTraceElement : e.getStackTrace()) {\n" +
                 "            if (stackTraceElement.getClassName().startsWith(testPackageName)) {\n" +
