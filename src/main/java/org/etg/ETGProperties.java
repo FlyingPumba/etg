@@ -59,7 +59,7 @@ public class ETGProperties {
     }
 
     private String getApplicationFolderPath(String rootProjectFolderPath) throws Exception {
-        String grepCmd = String.format("grep -l -R \"apply plugin: 'com.android.application'\" %s", rootProjectFolderPath);
+        String grepCmd = String.format("grep -l -R \"apply plugin: 'com.android.application'\" %s | grep build.gradle", rootProjectFolderPath);
         String[] grepResult = ProcessRunner.runCommand(grepCmd).split("\n");
         if (grepResult.length != 1) {
             throw new Exception("Unable to find application path inside project.");
