@@ -15,6 +15,7 @@
  */
 package org.etg.espresso.codegen;
 
+import org.etg.ETGProperties;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
 import org.etg.mate.models.Widget;
@@ -42,13 +43,20 @@ public class TestCodeMapper {
     private boolean mUseTextForElementMatching = true;
     private boolean mSurroundPerformsWithTryCatch = true;
 
+    private String mPressBackCmd = "";
+
     /**
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     private final Map<String, Integer> mVariableNameIndexes = new HashMap<>();
     private int performCount = 0;
 
-    public TestCodeMapper() {
+    public TestCodeMapper(ETGProperties properties) throws Exception {
+        if (properties.getEspressoVersion().startsWith("3")) {
+            mPressBackCmd = "pressBackUnconditionally";
+        } else {
+            mPressBackCmd = "pressBack";
+        }
     }
 
     public void addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
@@ -61,13 +69,13 @@ public class TestCodeMapper {
             // the following statement is identically to
             // onView(isRoot()).perform(ViewActions.pressBackUnconditionally());
             // choosing one or the other is just a matter of taste
-            String statement = "Espresso.pressBackUnconditionally()" + getStatementTerminator();
+            String statement = String.format("Espresso.%s()%s", mPressBackCmd, getStatementTerminator());
 
             if (lastStatement != null && lastStatement.contains("pressMenuKey")) {
                 // add hoc heuristic:
                 // In the cases where pressMenuKey was just fired, it seems to work better if we don't specifiy the root view
                 // as the target of the pressBackUnconditionally action.
-                statement = "ViewActions.pressBackUnconditionally()" + getStatementTerminator();
+                statement = String.format("ViewActions.%s()%s", mPressBackCmd, getStatementTerminator());
             }
 
             if (mSurroundPerformsWithTryCatch) {

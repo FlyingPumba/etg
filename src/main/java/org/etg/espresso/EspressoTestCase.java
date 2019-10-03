@@ -23,15 +23,14 @@ public class EspressoTestCase {
     private final TestCodeMapper codeMapper;
     private List<String> testCodeLines;
 
-    public EspressoTestCase(String packageName, String testPackageName, String espressoPackageName,
-                            WidgetTestCase widgetTestCase, String testCaseName) {
-        this.packageName = packageName;
-        this.testPackageName = testPackageName;
+    public EspressoTestCase(ETGProperties properties, WidgetTestCase widgetTestCase, String testCaseName) throws Exception {
+        this.packageName = properties.getPackageName();
+        this.testPackageName = properties.getTestPackageName();
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
-        this.espressoPackageName = espressoPackageName;
+        this.espressoPackageName = properties.getEspressoPackageName();
 
-        codeMapper = new TestCodeMapper();
+        codeMapper = new TestCodeMapper(properties);
         testCodeLines = new ArrayList<>();
         Vector<Action> actions = widgetTestCase.getEventSequence();
         for (Action action : actions) {

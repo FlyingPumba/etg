@@ -72,6 +72,7 @@ public class ETGProperties {
             String espressoPackageName = getEspressoPackageName(getRootProjectPath());
             properties.setProperty("espressoPackageName", espressoPackageName);
         }
+
         return properties.getProperty("espressoPackageName");
     }
 
@@ -91,5 +92,25 @@ public class ETGProperties {
         }
 
         throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
+    }
+
+    public String getEspressoVersion() throws Exception {
+        if (!properties.containsKey("espressoVersion")) {
+            String espressoVersion = getEspressoVersion(getRootProjectPath());
+            properties.setProperty("espressoVersion", espressoVersion);
+        }
+        return properties.getProperty("espressoVersion");
+    }
+
+    private String getEspressoVersion(String rootProjectFolderPath) throws Exception {
+        String findEspressoCoreCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"espresso-core\" {} \\;",
+                rootProjectFolderPath);
+        String findEspressoCoreResult = ProcessRunner.runCommand(findEspressoCoreCmd);
+        if (findEspressoCoreResult.isEmpty()) {
+            throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
+        }
+
+        String version = findEspressoCoreResult.split("espresso-core:")[1].split("'")[0];
+        return version;
     }
 }
