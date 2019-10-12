@@ -3,6 +3,7 @@ package org.etg.mate.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.mate.models.Action;
+import org.etg.mate.models.ActionType;
 import org.etg.mate.models.Widget;
 
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ public class ActionParser {
 
     public static Action parse(ObjectMapper mapper, JsonNode node) {
         Widget widget = WidgetParser.parse(mapper, node.get("widget"));
-        int actionType = mapper.convertValue(node.get("actionType"), Integer.class);
+        ActionType actionType = mapper.convertValue(node.get("actionType"), ActionType.class);
         return new Action(widget, actionType);
     }
 }
