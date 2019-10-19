@@ -10,7 +10,12 @@ public class TestCodeTemplate {
                 "\n" +
                 "import ${EspressoPackageName}.espresso.Espresso;\n" +
                 "import ${EspressoPackageName}.espresso.ViewInteraction;\n" +
+                "import ${EspressoPackageName}.espresso.action.CoordinatesProvider;\n" +
+                "import ${EspressoPackageName}.espresso.action.GeneralSwipeAction;\n" +
+                "import ${EspressoPackageName}.espresso.action.Press;\n" +
+                "import ${EspressoPackageName}.espresso.action.Swipe;\n" +
                 "import ${EspressoPackageName}.espresso.action.ViewActions;\n" +
+                "import ${EspressoPackageName}.espresso.ViewAction;\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule;\n" +
                 "import androidx.test.ext.junit.runners.AndroidJUnit4;\n" +
@@ -41,6 +46,7 @@ public class TestCodeTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "import org.hamcrest.TypeSafeMatcher;\n" +
                 "import org.hamcrest.core.IsInstanceOf;\n" +
+                "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.junit.After;\n" +
                 "import org.junit.Before;\n"+
                 "import org.junit.Rule;\n" +
@@ -145,6 +151,28 @@ public class TestCodeTemplate {
                 "        return e.getMessage();\n" +
                 "    }\n" +
                 "    #end\n" +
+                //todo: add only if necessary
+                "@NotNull\n" +
+                "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
+                "        return ViewActions.actionWithAssertions(\n" +
+                "                new GeneralSwipeAction(\n" +
+                "                        Swipe.FAST,\n" +
+                "                        new CoordinatesProvider() {\n" +
+                "                            @Override\n" +
+                "                            public float[] calculateCoordinates(View view) {\n" +
+                "                                float[] coordinates = {fromX, fromY};\n" +
+                "                                return coordinates;\n" +
+                "                            }\n" +
+                "                        },\n" +
+                "                        new CoordinatesProvider() {\n" +
+                "                            @Override\n" +
+                "                            public float[] calculateCoordinates(View view) {\n" +
+                "                                float[] coordinates = {toX, toY};\n" +
+                "                                return coordinates;\n" +
+                "                            }\n" +
+                "                        },\n" +
+                "                        Press.FINGER));\n" +
+                "    }"+
                 "}";
     }
 }

@@ -17,6 +17,7 @@ package org.etg.espresso.codegen;
 
 import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
+import org.etg.mate.models.Swipe;
 import org.etg.mate.models.Widget;
 import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
@@ -93,15 +94,35 @@ public class TestCodeMapper {
         String variableName = addPickingStatement(action, testCodeLines);
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
-        if (action.getActionType() == ActionType.SWIPE_DOWN) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeDown()", action.getWidget().isSonOfScrollable()));
-        } else if (action.getActionType() == ActionType.SWIPE_UP) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeUp()", action.getWidget().isSonOfScrollable()));
-        } else if (action.getActionType() == ActionType.SWIPE_RIGHT) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeRight()", action.getWidget().isSonOfScrollable()));
-        } else if (action.getActionType() == ActionType.SWIPE_LEFT) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isSonOfScrollable()));
+//        if (action.getActionType() == ActionType.SWIPE_DOWN) {
+//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeDown()", action.getWidget().isSonOfScrollable()));
+//        } else if (action.getActionType() == ActionType.SWIPE_UP) {
+//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeUp()", action.getWidget().isSonOfScrollable()));
+//        } else if (action.getActionType() == ActionType.SWIPE_RIGHT) {
+//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeRight()", action.getWidget().isSonOfScrollable()));
+//        } else if (action.getActionType() == ActionType.SWIPE_LEFT) {
+//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isSonOfScrollable()));
+//        }
+
+        if (action.getSwipe() != null){//if swipe
+            Swipe swipe = action.getSwipe();
+
+            String methdCall = "getSwipeAction($fromX, $fromY, $toX, $toY)";
+            methdCall =
+                    methdCall
+                        .replace("$fromX", String.valueOf(swipe.getInitialPosition().x))
+                        .replace("$fromY", String.valueOf(swipe.getInitialPosition().y))
+                        .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
+                        .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
+
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, action.getWidget().isSonOfScrollable()));
         }
+
+
+
+
+
+
 
 //        else if (event.isPressEditorAction()) {
 //            // TODO: If this is the same element that was just edited, consider reusing the same view interaction (i.e., variable name).
