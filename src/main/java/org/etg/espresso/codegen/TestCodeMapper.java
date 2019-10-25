@@ -104,7 +104,6 @@ public class TestCodeMapper {
 //            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isSonOfScrollable()));
 //        }
 
-        HACER SWIPE SIEMPRE EN LA VISTA ROOT Y NO EN LA CLICKEADA
         if (action.getSwipe() != null){//if swipe
             Swipe swipe = action.getSwipe();
 
