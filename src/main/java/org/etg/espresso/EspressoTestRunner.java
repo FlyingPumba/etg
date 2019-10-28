@@ -102,7 +102,20 @@ public class EspressoTestRunner {
         String[] apks = findApkResult.split("\n");
         List<String> filteredApks = new ArrayList<>();
         for (String apk : apks) {
-            if (apk.contains(properties.getBuildVariant())) {
+            String lowerCaseAPK = apk.toLowerCase();
+            if (!lowerCaseAPK.contains(properties.getBuildType().toLowerCase())) {
+                continue;
+            }
+
+            boolean discard = false;
+            for (String productFlavor : properties.getProductFlavors()) {
+                if (!lowerCaseAPK.contains(productFlavor.toLowerCase())) {
+                    discard = true;
+                    break;
+                }
+            }
+
+            if (!discard) {
                 filteredApks.add(apk);
             }
         }

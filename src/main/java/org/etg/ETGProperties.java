@@ -32,14 +32,34 @@ public class ETGProperties {
     }
 
     public String getTestPackageName() {
+        if (!properties.containsKey("testPackageName")) {
+            properties.setProperty("testPackageName", properties.getProperty("packageName"));
+        }
         return properties.getProperty("testPackageName");
     }
 
-    public String getBuildVariant() {
-        if (!properties.containsKey("buildVariant")) {
-            properties.setProperty("buildVariant", "");
+    public String getCompiledPackageName() {
+        if (!properties.containsKey("compiledPackageName")) {
+            properties.setProperty("compiledPackageName", properties.getProperty("packageName"));
         }
-        return properties.getProperty("buildVariant");
+        return properties.getProperty("compiledPackageName");
+    }
+
+    public String getBuildType() {
+        if (!properties.containsKey("buildType")) {
+            properties.setProperty("buildType", "debug");
+        }
+        return properties.getProperty("buildType");
+    }
+
+    public String[] getProductFlavors() {
+        if (!properties.containsKey("productFlavors")) {
+            properties.setProperty("productFlavors", "");
+        }
+
+
+        String productFlavors = properties.getProperty("productFlavors");
+        return productFlavors.split(",");
     }
 
     public String getRootProjectPath() {
