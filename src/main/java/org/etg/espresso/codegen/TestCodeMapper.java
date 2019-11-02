@@ -94,15 +94,6 @@ public class TestCodeMapper {
         String variableName = addPickingStatement(action, testCodeLines);
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
-//        if (action.getActionType() == ActionType.SWIPE_DOWN) {
-//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeDown()", action.getWidget().isSonOfScrollable()));
-//        } else if (action.getActionType() == ActionType.SWIPE_UP) {
-//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeUp()", action.getWidget().isSonOfScrollable()));
-//        } else if (action.getActionType() == ActionType.SWIPE_RIGHT) {
-//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeRight()", action.getWidget().isSonOfScrollable()));
-//        } else if (action.getActionType() == ActionType.SWIPE_LEFT) {
-//            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "swipeLeft()", action.getWidget().isSonOfScrollable()));
-//        }
 
         if (action.getSwipe() != null){//if swipe
             Swipe swipe = action.getSwipe();
@@ -116,6 +107,7 @@ public class TestCodeMapper {
                         .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
 
             testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, action.getWidget().isSonOfScrollable()));
+            testCodeLines.add("waitToScrollEnd()" + getStatementTerminator() + "\n");
         }
 
 
@@ -164,10 +156,24 @@ public class TestCodeMapper {
                 && (!isNullOrEmpty(action.getExtraInfo()) || action.getWidget().getRecyclerViewChildPosition() != -1);
     }
 
+    private boolean isSwipeAction(Action action){
+        return action.getSwipe()!=null;
+    }
+
+    private String getRootPickingStatement(Action action, List<String> testCodeLines){
+        String variableName = generateVariableNameFromElementClassName("root", VIEW_VARIABLE_CLASS_NAME);
+        testCodeLines.add("ViewInteraction " + variableName +  " = onView(isRoot())" + getStatementTerminator());
+        return variableName;
+    }
+
     private String addPickingStatement(Action action, List<String> testCodeLines) {
-        if (isAdapterViewAction(action)) {
+        if (isSwipeAction(action)){
+            return getRootPickingStatement(action, testCodeLines);
+        }
+        else if (isAdapterViewAction(action)) {
             return addDataPickingStatement(action, testCodeLines);
         }
+
         String variableName = addViewPickingStatement(action, testCodeLines);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
@@ -179,7 +185,7 @@ public class TestCodeMapper {
         Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
         Widget childrenWithRId = target.getChildrenWithRId();
 
-        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
+        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));/
 
         if (childrenWithSomeText != null &&
                 !statement.contains("withContentDescription") &&
@@ -243,7 +249,6 @@ public class TestCodeMapper {
 
         String variableClassName = startIndex == 0 ? action.getWidget().getClazz() : action.getWidget().getParent().getClazz();
         String variableName = generateVariableNameFromElementClassName(variableClassName, VIEW_VARIABLE_CLASS_NAME);
-
         String viewMatchers = generateElementHierarchyConditions(action, startIndex);
 
         if ("isDisplayed()".equals(viewMatchers)) {

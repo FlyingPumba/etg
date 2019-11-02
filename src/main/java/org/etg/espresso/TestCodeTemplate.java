@@ -25,6 +25,7 @@ public class TestCodeTemplate {
                 "import android.support.test.runner.AndroidJUnit4;\n" +
                 "import android.support.test.filters.LargeTest;\n" +
                 "#end\n" +
+                "import android.os.SystemClock;\n" +
                 "import android.view.KeyEvent;\n" +
                 "import android.view.View;\n" +
                 "import android.view.ViewGroup;\n" +
@@ -156,7 +157,7 @@ public class TestCodeTemplate {
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
                 "                new GeneralSwipeAction(\n" +
-                "                        Swipe.FAST,\n" +
+                "                        Swipe.SLOW,\n" +
                 "                        new CoordinatesProvider() {\n" +
                 "                            @Override\n" +
                 "                            public float[] calculateCoordinates(View view) {\n" +
@@ -172,7 +173,11 @@ public class TestCodeTemplate {
                 "                            }\n" +
                 "                        },\n" +
                 "                        Press.FINGER));\n" +
-                "    }"+
-                "}";
+                "    }\n" +
+                "   private void waitToScrollEnd() {\n" +
+                "        SystemClock.sleep(1000);\n" +
+                "    } \n"+
+                "}"
+                ;
     }
 }
