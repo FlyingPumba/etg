@@ -2,7 +2,7 @@ package org.etg.espresso.templates;
 
 
 /**
- * Velocity's template trait
+ * Velocity's template interface
  * **/
 public interface VelocityTemplate {
 
