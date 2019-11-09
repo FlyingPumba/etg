@@ -1,10 +1,10 @@
 package org.etg.espresso;
 
 import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.runtime.RuntimeConstants;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.templates.VelocityTemplate;
+import org.etg.espresso.templates.VelocityTemplateConverter;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
 
@@ -22,17 +22,19 @@ public class EspressoTestCase {
     private String espressoPackageName;
     private final TestCodeMapper codeMapper;
     private List<String> testCodeLines;
+    private VelocityTemplate testCaseTemplate;
+
 
     public EspressoTestCase(String packageName, String testPackageName, String espressoPackageName,
-                            WidgetTestCase widgetTestCase, String testCaseName) {
+                            WidgetTestCase widgetTestCase, String testCaseName, VelocityTemplate testCaseTemplate) {
         this.packageName = packageName;
         this.testPackageName = testPackageName;
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
         this.espressoPackageName = espressoPackageName;
-
-        codeMapper = new TestCodeMapper();
-        testCodeLines = new ArrayList<>();
+        this.testCaseTemplate = testCaseTemplate;
+        this.codeMapper = new TestCodeMapper();
+        this.testCodeLines = new ArrayList<>();
         Vector<Action> actions = widgetTestCase.getEventSequence();
         for (Action action : actions) {
             codeMapper.addTestCodeLinesForAction(action, testCodeLines);
@@ -46,8 +48,9 @@ public class EspressoTestCase {
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-
-            writeToFolder(properties.getOutputPath());
+            VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
+            writeToFolder(properties.getOutputPath(), templateConverter);
+            writeCustomUsedClasses(properties.getOutputPath(), templateConverter);
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
 
             if (newFailingPerformLines.size() > 0) {
@@ -56,8 +59,8 @@ public class EspressoTestCase {
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
 
-    private void writeToFolder(String outputFolderPath) throws FileNotFoundException {
-        String testContent = toString();
+    private void writeToFolder(String outputFolderPath, VelocityTemplateConverter templateConverter) throws FileNotFoundException {
+        String testContent = templateConverter.applyContextToTemplate(testCaseTemplate);
         String outputFilePath = outputFolderPath + getTestName() + ".java";
 
         PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
@@ -65,34 +68,17 @@ public class EspressoTestCase {
         out.close();
     }
 
-    @Override
-    public String toString() {
-        Writer writer = null;
-        try {
-            writer = new StringWriter();
+    private void writeCustomUsedClasses(String outputFolderPath, VelocityTemplateConverter templateConverter) throws FileNotFoundException {
+        for (VelocityTemplate vTemplate : codeMapper.getNeededTemplates()) {
+            String classContent = templateConverter.applyContextToTemplate(vTemplate);
+            String outputFilePath = outputFolderPath + vTemplate.getName();
 
-            VelocityEngine velocityEngine = new VelocityEngine();
-            // Suppress creation of velocity.log file.
-            velocityEngine.setProperty(RuntimeConstants.RUNTIME_LOG_LOGSYSTEM_CLASS, "org.apache.velocity.runtime.log.NullLogChute");
-            velocityEngine.init();
-            VelocityContext velocityContext = createVelocityContext();
-            velocityEngine.evaluate(velocityContext, writer, "mystring", TestCodeTemplate.getTemplate());
-            writer.flush();
-
-            return writer.toString();
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to generate test class file: ", e);
-        } finally {
-            if (writer != null) {
-                try {
-                    writer.close();
-                } catch (Exception e) {
-                    // ignore
-                }
-            }
+            PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
+            out.print(classContent);
+            out.close();
         }
     }
+
 
     private VelocityContext createVelocityContext() {
         VelocityContext velocityContext = new VelocityContext();

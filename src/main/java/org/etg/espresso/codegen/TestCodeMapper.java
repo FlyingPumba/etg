@@ -15,6 +15,8 @@
  */
 package org.etg.espresso.codegen;
 
+import org.etg.espresso.templates.VelocityTemplate;
+import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
 import org.etg.mate.models.Swipe;
@@ -23,8 +25,10 @@ import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static org.etg.espresso.codegen.MatcherBuilder.Kind.*;
 import static org.etg.espresso.util.StringHelper.*;
@@ -44,12 +48,26 @@ public class TestCodeMapper {
     private boolean mSurroundPerformsWithTryCatch = true;
 
     /**
+     * Needed templates, every extra templata that we need must be listed here
+     * **/
+    private Set<VelocityTemplate> neededTemplates = new HashSet<>();
+    private TemplatesFactory templatesFactory = new TemplatesFactory();
+
+    /**
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     private final Map<String, Integer> mVariableNameIndexes = new HashMap<>();
     private int performCount = 0;
 
     public TestCodeMapper() {
+    }
+
+    private void addTemplateFor(TemplatesFactory.Template action) {
+        neededTemplates.add(templatesFactory.createFor(action));
+    }
+
+    public Set<VelocityTemplate> getNeededTemplates() {
+        return neededTemplates;
     }
 
     public void addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
@@ -62,13 +80,13 @@ public class TestCodeMapper {
             // the following statement is identically to
             // onView(isRoot()).perform(ViewActions.pressBackUnconditionally());
             // choosing one or the other is just a matter of taste
-            String statement = "Espresso.pressBackUnconditionally()" + getStatementTerminator();
+            String statement = getEspressoPressBackUnconditionallyAction() + getStatementTerminator();
 
             if (lastStatement != null && lastStatement.contains("pressMenuKey")) {
                 // add hoc heuristic:
                 // In the cases where pressMenuKey was just fired, it seems to work better if we don't specifiy the root view
                 // as the target of the pressBackUnconditionally action.
-                statement = "ViewActions.pressBackUnconditionally()" + getStatementTerminator();
+                statement = getViewActionsPressBackUnconditionallyAction() + getStatementTerminator();
             }
 
             if (mSurroundPerformsWithTryCatch) {
@@ -78,7 +96,7 @@ public class TestCodeMapper {
             return;
 
         } else if (action.getActionType() == ActionType.MENU) {
-            String statement = "pressMenuKey()" + getStatementTerminator();
+            String statement = getPressMenuKeyAction() + getStatementTerminator();
             if (mSurroundPerformsWithTryCatch) {
                 statement = surroundPerformWithTryCatch(statement);
             }
@@ -98,16 +116,10 @@ public class TestCodeMapper {
         if (action.getSwipe() != null){//if swipe
             Swipe swipe = action.getSwipe();
 
-            String methdCall = "getSwipeAction($fromX, $fromY, $toX, $toY)";
-            methdCall =
-                    methdCall
-                        .replace("$fromX", String.valueOf(swipe.getInitialPosition().x))
-                        .replace("$fromY", String.valueOf(swipe.getInitialPosition().y))
-                        .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
-                        .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
+            String methdCall = getSwipeAction(swipe);
 
             testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, action.getWidget().isSonOfScrollable()));
-            testCodeLines.add("waitToScrollEnd()" + getStatementTerminator() + "\n");
+            testCodeLines.add(getWaitToScrollEndStatement() + getStatementTerminator() + "\n");
         }
 
 
@@ -122,11 +134,12 @@ public class TestCodeMapper {
 //        } else
 
         else if (action.getActionType() == ActionType.CLICK) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "click()", action.getWidget().isSonOfScrollable()));
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), action.getWidget().isSonOfScrollable()));
+            addTemplateFor(TemplatesFactory.Template.CLICK_ACTION);
         } else if (action.getActionType() == ActionType.LONG_CLICK) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "longClick()", action.getWidget().isSonOfScrollable()));
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getLongClickAction(), action.getWidget().isSonOfScrollable()));
         } else if (action.getActionType() == ActionType.TYPE_TEXT) {
-            String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(action) ? "" : ", closeSoftKeyboard()";
+            String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(action) ? "" : (", " + getCloseSoftKeyboard());
             testCodeLines.add(createActionStatement(
                     variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction, action.getWidget().isSonOfScrollable()));
         } else if (action.getActionType() == ActionType.ENTER) {
@@ -140,13 +153,14 @@ public class TestCodeMapper {
         }
     }
 
+
     private void addStandaloneCloseSoftKeyboardAction(Action action, List<String> testCodeLines) {
         // Simulate an artificial close soft keyboard event.
         Action closeSoftKeyboardAction = new Action(action.getWidget(), action.getActionType());
 
         testCodeLines.add("");
         String variableName = addPickingStatement(closeSoftKeyboardAction, testCodeLines);
-        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), "closeSoftKeyboard()", false));
+        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), getCloseSoftKeyboard(), false));
     }
 
     private boolean doesNeedStandaloneCloseSoftKeyboardAction(Action action) {
@@ -162,7 +176,7 @@ public class TestCodeMapper {
 
     private String getRootPickingStatement(Action action, List<String> testCodeLines){
         String variableName = generateVariableNameFromElementClassName("root", VIEW_VARIABLE_CLASS_NAME);
-        testCodeLines.add("ViewInteraction " + variableName +  " = onView(isRoot())" + getStatementTerminator());
+        testCodeLines.add("ViewInteraction " + variableName +  " = onView("+ getIsRootMatcher() +")" + getStatementTerminator());
         return variableName;
     }
 
@@ -251,9 +265,9 @@ public class TestCodeMapper {
         String variableName = generateVariableNameFromElementClassName(variableClassName, VIEW_VARIABLE_CLASS_NAME);
         String viewMatchers = generateElementHierarchyConditions(action, startIndex);
 
-        if ("isDisplayed()".equals(viewMatchers)) {
+        if (getIsDisplayedMatcher().equals(viewMatchers)) {
             // this means that the action has an empty widget as a target
-            viewMatchers = "isRoot()";
+            viewMatchers = getIsRootMatcher();
         }
 
         testCodeLines.add(getVariableTypeDeclaration(true) + " " + variableName + " = onView(" +
@@ -336,9 +350,9 @@ public class TestCodeMapper {
             if (matcherBuilder.getMatcherCount() > 1 || addIsDisplayed) {
                 String matchers = matcherBuilder.getMatchers();
                 if (!matchers.isEmpty()) {
-                    return "allOf(" + matchers + (addIsDisplayed ? ", isDisplayed()" : "") + ")";
+                    return "allOf(" + matchers + (addIsDisplayed ? ", " + getIsDisplayedMatcher() : "") + ")";
                 } else {
-                    return addIsDisplayed ? "isDisplayed()" : "";
+                    return addIsDisplayed ? getIsDisplayedMatcher() : "";
                 }
             }
             return matcherBuilder.getMatchers();
@@ -358,8 +372,9 @@ public class TestCodeMapper {
                 + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
                 + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
                 + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
-                + (addIsDisplayed ? ",\nisDisplayed()" : "") + (addAllOf ? ")" : "");
+                + (addIsDisplayed ? ",\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
     }
+
 
     private boolean isAndroidFrameworkPrivateId(String resourceId) {
         Tuple<String, String> parsedId = parseId(resourceId);
@@ -387,7 +402,7 @@ public class TestCodeMapper {
         mIsRecyclerViewActionAdded = mIsRecyclerViewActionAdded || recyclerViewChildPosition != -1;
 
         // No need to explicitly scroll to perform an action on a RecyclerView child.
-        String completeAction = (addScrollTo && recyclerViewChildPosition == -1 ? "scrollTo(), " : "") + action;
+        String completeAction = (addScrollTo && recyclerViewChildPosition == -1 ? getScrollToAction() + ", " : "") + action;
         completeAction = recyclerViewChildPosition == -1
                 ? completeAction
                 : getActionOnItemAtPositionMethodCallPrefix() + recyclerViewChildPosition + ", " + completeAction + ")";
@@ -400,6 +415,8 @@ public class TestCodeMapper {
 
         return performStatement;
     }
+
+
 
     private String surroundPerformWithTryCatch(String performStatement) {
         performStatement = "\ntry {\n" +
@@ -456,4 +473,63 @@ public class TestCodeMapper {
     public boolean isTryCatchAdded() {
         return mSurroundPerformsWithTryCatch;
     }
+
+
+
+
+    /**
+     * actions and matchers. eventually move to another class
+     * **/
+
+    private String getLongClickAction() {
+        return "longClick()";
+    }
+
+    private String getClickViewAction() {
+        return "getClickAction()";
+    }
+
+    private String getSwipeAction(Swipe swipe) {
+        String methdCall = "getSwipeAction($fromX, $fromY, $toX, $toY)";
+        methdCall =
+                methdCall
+                        .replace("$fromX", String.valueOf(swipe.getInitialPosition().x))
+                        .replace("$fromY", String.valueOf(swipe.getInitialPosition().y))
+                        .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
+                        .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
+        return methdCall;
+    }
+
+    private String getPressMenuKeyAction() {
+        return "pressMenuKey()";
+    }
+
+    private String getScrollToAction() {
+        return "scrollTo()";
+    }
+
+    private String getViewActionsPressBackUnconditionallyAction() {
+        return "ViewActions.pressBackUnconditionally()";
+    }
+
+    private String getEspressoPressBackUnconditionallyAction() {
+        return "Espresso.pressBackUnconditionally()";
+    }
+
+    private String getCloseSoftKeyboard() {
+        return "closeSoftKeyboard()";
+    }
+
+    private String getWaitToScrollEndStatement() {
+        return "waitToScrollEnd()";
+    }
+
+    private String getIsDisplayedMatcher() {
+        return "isDisplayed()";
+    }
+
+    private String getIsRootMatcher() {
+        return "isRoot()";
+    }
+
 }

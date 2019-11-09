@@ -2,6 +2,7 @@ package org.etg.espresso.codegen;
 
 import org.etg.ETGProperties;
 import org.etg.espresso.EspressoTestCase;
+import org.etg.espresso.templates.TestCodeTemplate;
 import org.etg.mate.models.WidgetTestCase;
 
 import java.util.ArrayList;
@@ -29,7 +30,7 @@ public class TestCodeGenerator {
             WidgetTestCase widgetTestCase = widgetTestCases.get(i);
 
             EspressoTestCase testCase = new EspressoTestCase(packageName, testPackageName, espressoPackageName,
-                    widgetTestCase, String.format("TestCase%d", i));
+                    widgetTestCase, String.format("TestCase%d", i), new TestCodeTemplate());
 
             espressoTestCases.add(testCase);
         }

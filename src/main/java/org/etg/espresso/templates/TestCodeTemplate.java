@@ -1,8 +1,14 @@
-package org.etg.espresso;
+package org.etg.espresso.templates;
 
-public class TestCodeTemplate {
 
-    public static String getTemplate() {
+public class TestCodeTemplate implements VelocityTemplate {
+
+    @Override
+    public String getName() {
+        return "TestCase.java";
+    }
+
+    public String getAsRawString() {
         return "#if (${PackageName} && ${PackageName} != \"\")\n" +
                 "package ${PackageName};\n" +
                 "\n" +
@@ -15,6 +21,9 @@ public class TestCodeTemplate {
                 "import ${EspressoPackageName}.espresso.action.Press;\n" +
                 "import ${EspressoPackageName}.espresso.action.Swipe;\n" +
                 "import ${EspressoPackageName}.espresso.action.ViewActions;\n" +
+                "import ${EspressoPackageName}.espresso.action.Tap;\n" +
+                "import ${EspressoPackageName}.espresso.action.GeneralLocation;\n" +
+                "import ${EspressoPackageName}.espresso.action.Press;\n" +
                 "import ${EspressoPackageName}.espresso.ViewAction;\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule;\n" +
@@ -30,6 +39,8 @@ public class TestCodeTemplate {
                 "import android.view.View;\n" +
                 "import android.view.ViewGroup;\n" +
                 "import android.view.ViewParent;\n" +
+                "import android.view.InputDevice;\n" +
+                "import android.view.MotionEvent;\n" +
                 "\n" +
                 "import static ${EspressoPackageName}.InstrumentationRegistry.getInstrumentation;\n" +
                 "import static ${EspressoPackageName}.espresso.Espresso.onView;\n" +
@@ -49,7 +60,7 @@ public class TestCodeTemplate {
                 "import org.hamcrest.core.IsInstanceOf;\n" +
                 "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.junit.After;\n" +
-                "import org.junit.Before;\n"+
+                "import org.junit.Before;\n" +
                 "import org.junit.Rule;\n" +
                 "import org.junit.Test;\n" +
                 "import org.junit.runner.RunWith;\n" +
@@ -66,7 +77,7 @@ public class TestCodeTemplate {
                 "    public void setUp(){\n" +
                 "        errorCount = 0;\n" +
                 "    }" +
-                "\n "+
+                "\n " +
                 "    @After\n" +
                 "    public void teardown(){\n" +
                 "        System.out.println(\"Error count: \" + errorCount);\n" +
@@ -152,7 +163,6 @@ public class TestCodeTemplate {
                 "        return e.getMessage();\n" +
                 "    }\n" +
                 "    #end\n" +
-                //todo: add only if necessary
                 "@NotNull\n" +
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
@@ -175,9 +185,29 @@ public class TestCodeTemplate {
                 "                        Press.FINGER));\n" +
                 "    }\n" +
                 "   private void waitToScrollEnd() {\n" +
-                "        SystemClock.sleep(1000);\n" +
+                "        SystemClock.sleep(500);\n" +
                 "    } \n"+
+                "@NotNull\n" +
+                "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
+                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "                Tap.SINGLE,\n" +
+                "                GeneralLocation.VISIBLE_CENTER,\n" +
+                "                Press.FINGER,\n" +
+                "                InputDevice.SOURCE_UNKNOWN,\n" +
+                "                MotionEvent.BUTTON_PRIMARY);\n" +
+                "    }" +
                 "}"
                 ;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TestCodeTemplate;
+    }
+
+    @Override
+    public int hashCode() {
+        return getAsRawString().hashCode();
     }
 }
