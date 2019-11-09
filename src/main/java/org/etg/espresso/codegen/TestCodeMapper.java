@@ -15,6 +15,7 @@
  */
 package org.etg.espresso.codegen;
 
+import org.etg.ETGProperties;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.mate.models.Action;
@@ -58,13 +59,20 @@ public class TestCodeMapper {
     private Set<VelocityTemplate> neededTemplates = new HashSet<>();
     private TemplatesFactory templatesFactory = new TemplatesFactory();
 
+    private String mPressBackCmd = "";
+
     /**
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     private final Map<String, Integer> mVariableNameIndexes = new HashMap<>();
     private int performCount = 0;
 
-    public TestCodeMapper() {
+    public TestCodeMapper(ETGProperties properties) throws Exception {
+        if (properties.getEspressoVersion().startsWith("3")) {
+            mPressBackCmd = "pressBackUnconditionally";
+        } else {
+            mPressBackCmd = "pressBack";
+        }
     }
 
     private void addTemplateFor(TemplatesFactory.Template action) {
@@ -85,13 +93,13 @@ public class TestCodeMapper {
             // the following statement is identically to
             // onView(isRoot()).perform(ViewActions.pressBackUnconditionally());
             // choosing one or the other is just a matter of taste
-            String statement = getEspressoPressBackUnconditionallyAction() + getStatementTerminator();
+            String statement = String.format("Espresso.%s()%s", mPressBackCmd, getStatementTerminator());
 
             if (lastStatement != null && lastStatement.contains("pressMenuKey")) {
                 // add hoc heuristic:
                 // In the cases where pressMenuKey was just fired, it seems to work better if we don't specifiy the root view
                 // as the target of the pressBackUnconditionally action.
-                statement = getViewActionsPressBackUnconditionallyAction() + getStatementTerminator();
+                statement = String.format("ViewActions.%s()%s", mPressBackCmd, getStatementTerminator());
             }
 
             if (mSurroundPerformsWithTryCatch) {
@@ -128,12 +136,6 @@ public class TestCodeMapper {
             swipeActionAdded = true;
         }
 
-
-
-
-
-
-
 //        else if (event.isPressEditorAction()) {
 //            // TODO: If this is the same element that was just edited, consider reusing the same view interaction (i.e., variable name).
 //            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, "pressImeActionButton()", false));
@@ -161,7 +163,6 @@ public class TestCodeMapper {
             addStandaloneCloseSoftKeyboardAction(action, testCodeLines);
         }
     }
-
 
     private void addStandaloneCloseSoftKeyboardAction(Action action, List<String> testCodeLines) {
         // Simulate an artificial close soft keyboard event.
@@ -196,7 +197,6 @@ public class TestCodeMapper {
         else if (isAdapterViewAction(action)) {
             return addDataPickingStatement(action, testCodeLines);
         }
-
         String variableName = addViewPickingStatement(action, testCodeLines);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
@@ -208,7 +208,7 @@ public class TestCodeMapper {
         Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
         Widget childrenWithRId = target.getChildrenWithRId();
 
-        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));/
+        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
 
         if (childrenWithSomeText != null &&
                 !statement.contains("withContentDescription") &&
@@ -524,14 +524,6 @@ public class TestCodeMapper {
 
     private String getScrollToAction() {
         return "scrollTo()";
-    }
-
-    private String getViewActionsPressBackUnconditionallyAction() {
-        return "ViewActions.pressBackUnconditionally()";
-    }
-
-    private String getEspressoPressBackUnconditionallyAction() {
-        return "Espresso.pressBackUnconditionally()";
     }
 
     private String getCloseSoftKeyboard() {

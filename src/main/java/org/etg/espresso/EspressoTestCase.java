@@ -25,16 +25,15 @@ public class EspressoTestCase {
     private VelocityTemplate testCaseTemplate;
 
 
-    public EspressoTestCase(String packageName, String testPackageName, String espressoPackageName,
-                            WidgetTestCase widgetTestCase, String testCaseName, VelocityTemplate testCaseTemplate) {
-        this.packageName = packageName;
-        this.testPackageName = testPackageName;
+    public EspressoTestCase(ETGProperties properties, WidgetTestCase widgetTestCase, String testCaseName, VelocityTemplate testCaseTemplate) throws Exception {
+        this.packageName = properties.getPackageName();
+        this.testPackageName = properties.getTestPackageName();
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
-        this.espressoPackageName = espressoPackageName;
+        this.espressoPackageName = properties.getEspressoPackageName();
         this.testCaseTemplate = testCaseTemplate;
-        this.codeMapper = new TestCodeMapper();
-        this.testCodeLines = new ArrayList<>();
+        codeMapper = new TestCodeMapper(properties);
+        testCodeLines = new ArrayList<>();
         Vector<Action> actions = widgetTestCase.getEventSequence();
         for (Action action : actions) {
             codeMapper.addTestCodeLinesForAction(action, testCodeLines);
@@ -79,11 +78,17 @@ public class EspressoTestCase {
         }
     }
 
-
-    private VelocityContext createVelocityContext() {
+    private VelocityContext createVelocityContext() throws Exception {
         VelocityContext velocityContext = new VelocityContext();
 
         Object[] visitedActivities = widgetTestCase.getVisitedActivities().toArray();
+        if (visitedActivities.length == 0) {
+            throw new Exception("No valid activities found in widget test case");
+        }
+        if ("unknown".equals(visitedActivities[0].toString())|| !visitedActivities[0].toString().contains("/")) {
+            throw new Exception(String.format("No valid activity found in widget test case: %s", visitedActivities[0].toString()));
+        }
+
         String activityName = visitedActivities[0].toString().split("/")[1];
         if (activityName.startsWith(packageName)) {
             velocityContext.put("TestActivityName", activityName);
