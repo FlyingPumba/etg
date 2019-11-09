@@ -107,6 +107,11 @@ public class EspressoTestCase {
 
         velocityContext.put("TestCode", testCodeLines);
 
+        velocityContext.put("longClickActionAdded", codeMapper.isLongClickActionAdded());
+        velocityContext.put("clickActionAdded", codeMapper.isClickActionAdded());
+        velocityContext.put("swipeActionAdded", codeMapper.isSwipeActionAdded());
+
+
         return velocityContext;
     }
 

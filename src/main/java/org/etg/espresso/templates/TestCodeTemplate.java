@@ -163,6 +163,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "        return e.getMessage();\n" +
                 "    }\n" +
                 "    #end\n" +
+                "#if (${swipeActionAdded})\n" +
                 "@NotNull\n" +
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
@@ -187,6 +188,8 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "   private void waitToScrollEnd() {\n" +
                 "        SystemClock.sleep(500);\n" +
                 "    } \n"+
+                "#end\n" +
+                "#if (${clickActionAdded})\n" +
                 "@NotNull\n" +
                 "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
                 "        return new ClickWithoutVisibilityConstraint(\n" +
@@ -195,7 +198,19 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "                Press.FINGER,\n" +
                 "                InputDevice.SOURCE_UNKNOWN,\n" +
                 "                MotionEvent.BUTTON_PRIMARY);\n" +
-                "    }" +
+                "    }\n" +
+                "#end\n" +
+                "#if (${longClickActionAdded})\n" +
+                "@NotNull\n" +
+                "    private ClickWithoutVisibilityConstraint getLongClickAction() {\n" +
+                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "                Tap.LONG,\n" +
+                "                GeneralLocation.CENTER,\n" +
+                "                Press.FINGER,\n" +
+                "                InputDevice.SOURCE_UNKNOWN,\n" +
+                "                MotionEvent.BUTTON_PRIMARY);\n" +
+                "    }\n"+
+                "#end\n" +
                 "}"
                 ;
     }

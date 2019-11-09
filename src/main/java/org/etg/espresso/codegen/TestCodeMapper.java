@@ -46,6 +46,11 @@ public class TestCodeMapper {
     private boolean mIsKotlinTestClass = false;
     private boolean mUseTextForElementMatching = true;
     private boolean mSurroundPerformsWithTryCatch = true;
+    private boolean swipeActionAdded = false;
+    private boolean longClickActionAdded = false;
+    private boolean clickActionAdded = false;
+
+
 
     /**
      * Needed templates, every extra templata that we need must be listed here
@@ -120,6 +125,7 @@ public class TestCodeMapper {
 
             testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, action.getWidget().isSonOfScrollable()));
             testCodeLines.add(getWaitToScrollEndStatement() + getStatementTerminator() + "\n");
+            swipeActionAdded = true;
         }
 
 
@@ -136,8 +142,11 @@ public class TestCodeMapper {
         else if (action.getActionType() == ActionType.CLICK) {
             testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), action.getWidget().isSonOfScrollable()));
             addTemplateFor(TemplatesFactory.Template.CLICK_ACTION);
+            clickActionAdded = true;
         } else if (action.getActionType() == ActionType.LONG_CLICK) {
             testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getLongClickAction(), action.getWidget().isSonOfScrollable()));
+            addTemplateFor(TemplatesFactory.Template.LONG_CLICK_ACTION);
+            longClickActionAdded = true;
         } else if (action.getActionType() == ActionType.TYPE_TEXT) {
             String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(action) ? "" : (", " + getCloseSoftKeyboard());
             testCodeLines.add(createActionStatement(
@@ -474,15 +483,24 @@ public class TestCodeMapper {
         return mSurroundPerformsWithTryCatch;
     }
 
+    public boolean isClickActionAdded() {
+        return clickActionAdded;
+    }
 
+    public boolean isLongClickActionAdded() {
+        return longClickActionAdded;
+    }
 
+    public boolean isSwipeActionAdded() {
+        return swipeActionAdded;
+    }
 
     /**
      * actions and matchers. eventually move to another class
      * **/
 
     private String getLongClickAction() {
-        return "longClick()";
+        return "getLongClickAction()";
     }
 
     private String getClickViewAction() {

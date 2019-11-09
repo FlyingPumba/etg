@@ -7,15 +7,16 @@ package org.etg.espresso.templates;
 public class TemplatesFactory {
 
     public enum Template {
-        CLICK_ACTION
+        CLICK_ACTION,
+        LONG_CLICK_ACTION
     }
 
     public VelocityTemplate createFor(Template neededTemplate){
         switch (neededTemplate){
             case CLICK_ACTION:
-            default:
+            case LONG_CLICK_ACTION:
                 return new ClickWithoutConstraintTemplate();
-
+            default: throw new IllegalArgumentException("Invalid template");
         }
     }
 
