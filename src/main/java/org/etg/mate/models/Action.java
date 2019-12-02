@@ -14,7 +14,7 @@ public class Action {
     private long timeToWait;
     private float pheromone;
     private float proportionalPheromone;
-
+    private Swipe swipe;
 
     private Vector<Action> adjActions;
 
@@ -34,6 +34,14 @@ public class Action {
         setExtraInfo("");
         adjActions = new Vector<Action>();
         setExecuted(false);
+    }
+
+    public Swipe getSwipe() {
+        return swipe;
+    }
+
+    public void setSwipe(Swipe swipe) {
+        this.swipe = swipe;
     }
 
     public void setExecuted(boolean executed) {

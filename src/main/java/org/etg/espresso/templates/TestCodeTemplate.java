@@ -1,8 +1,14 @@
-package org.etg.espresso;
+package org.etg.espresso.templates;
 
-public class TestCodeTemplate {
 
-    public static String getTemplate() {
+public class TestCodeTemplate implements VelocityTemplate {
+
+    @Override
+    public String getName() {
+        return "TestCase.java";
+    }
+
+    public String getAsRawString() {
         return "#if (${PackageName} && ${PackageName} != \"\")\n" +
                 "package ${PackageName};\n" +
                 "\n" +
@@ -10,7 +16,15 @@ public class TestCodeTemplate {
                 "\n" +
                 "import ${EspressoPackageName}.espresso.Espresso;\n" +
                 "import ${EspressoPackageName}.espresso.ViewInteraction;\n" +
+                "import ${EspressoPackageName}.espresso.action.CoordinatesProvider;\n" +
+                "import ${EspressoPackageName}.espresso.action.GeneralSwipeAction;\n" +
+                "import ${EspressoPackageName}.espresso.action.Press;\n" +
+                "import ${EspressoPackageName}.espresso.action.Swipe;\n" +
                 "import ${EspressoPackageName}.espresso.action.ViewActions;\n" +
+                "import ${EspressoPackageName}.espresso.action.Tap;\n" +
+                "import ${EspressoPackageName}.espresso.action.GeneralLocation;\n" +
+                "import ${EspressoPackageName}.espresso.action.Press;\n" +
+                "import ${EspressoPackageName}.espresso.ViewAction;\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule;\n" +
                 "import androidx.test.ext.junit.runners.AndroidJUnit4;\n" +
@@ -20,10 +34,13 @@ public class TestCodeTemplate {
                 "import android.support.test.runner.AndroidJUnit4;\n" +
                 "import android.support.test.filters.LargeTest;\n" +
                 "#end\n" +
+                "import android.os.SystemClock;\n" +
                 "import android.view.KeyEvent;\n" +
                 "import android.view.View;\n" +
                 "import android.view.ViewGroup;\n" +
                 "import android.view.ViewParent;\n" +
+                "import android.view.InputDevice;\n" +
+                "import android.view.MotionEvent;\n" +
                 "\n" +
                 "import static ${EspressoPackageName}.InstrumentationRegistry.getInstrumentation;\n" +
                 "import static ${EspressoPackageName}.espresso.Espresso.onView;\n" +
@@ -41,8 +58,9 @@ public class TestCodeTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "import org.hamcrest.TypeSafeMatcher;\n" +
                 "import org.hamcrest.core.IsInstanceOf;\n" +
+                "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.junit.After;\n" +
-                "import org.junit.Before;\n"+
+                "import org.junit.Before;\n" +
                 "import org.junit.Rule;\n" +
                 "import org.junit.Test;\n" +
                 "import org.junit.runner.RunWith;\n" +
@@ -59,7 +77,7 @@ public class TestCodeTemplate {
                 "    public void setUp(){\n" +
                 "        errorCount = 0;\n" +
                 "    }" +
-                "\n "+
+                "\n " +
                 "    @After\n" +
                 "    public void teardown(){\n" +
                 "        System.out.println(\"Error count: \" + errorCount);\n" +
@@ -145,6 +163,66 @@ public class TestCodeTemplate {
                 "        return e.getMessage();\n" +
                 "    }\n" +
                 "    #end\n" +
-                "}";
+                "#if (${swipeActionAdded})\n" +
+                "@NotNull\n" +
+                "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
+                "        return ViewActions.actionWithAssertions(\n" +
+                "                new GeneralSwipeAction(\n" +
+                "                        Swipe.SLOW,\n" +
+                "                        new CoordinatesProvider() {\n" +
+                "                            @Override\n" +
+                "                            public float[] calculateCoordinates(View view) {\n" +
+                "                                float[] coordinates = {fromX, fromY};\n" +
+                "                                return coordinates;\n" +
+                "                            }\n" +
+                "                        },\n" +
+                "                        new CoordinatesProvider() {\n" +
+                "                            @Override\n" +
+                "                            public float[] calculateCoordinates(View view) {\n" +
+                "                                float[] coordinates = {toX, toY};\n" +
+                "                                return coordinates;\n" +
+                "                            }\n" +
+                "                        },\n" +
+                "                        Press.FINGER));\n" +
+                "    }\n" +
+                "   private void waitToScrollEnd() {\n" +
+                "        SystemClock.sleep(500);\n" +
+                "    } \n"+
+                "#end\n" +
+                "#if (${clickActionAdded})\n" +
+                "@NotNull\n" +
+                "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
+                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "                Tap.SINGLE,\n" +
+                "                GeneralLocation.VISIBLE_CENTER,\n" +
+                "                Press.FINGER,\n" +
+                "                InputDevice.SOURCE_UNKNOWN,\n" +
+                "                MotionEvent.BUTTON_PRIMARY);\n" +
+                "    }\n" +
+                "#end\n" +
+                "#if (${longClickActionAdded})\n" +
+                "@NotNull\n" +
+                "    private ClickWithoutVisibilityConstraint getLongClickAction() {\n" +
+                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "                Tap.LONG,\n" +
+                "                GeneralLocation.CENTER,\n" +
+                "                Press.FINGER,\n" +
+                "                InputDevice.SOURCE_UNKNOWN,\n" +
+                "                MotionEvent.BUTTON_PRIMARY);\n" +
+                "    }\n"+
+                "#end\n" +
+                "}"
+                ;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof TestCodeTemplate;
+    }
+
+    @Override
+    public int hashCode() {
+        return getAsRawString().hashCode();
     }
 }
