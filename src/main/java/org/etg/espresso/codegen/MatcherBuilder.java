@@ -45,10 +45,10 @@ public class MatcherBuilder {
                     matchers.append("classOrSuperClassesName(is(" + boxString(matchedString) + "))");
                 }
             } else if (kind == Kind.Id) {
-                matchers.append("with").append(kind.name()).append("(")
+                matchers.append("\nwith").append(kind.name()).append("(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append(")");
             } else {
-                matchers.append("with").append(kind.name()).append("(equalToIgnoringCase(")
+                matchers.append("\nwith").append(kind.name()).append("(equalToIgnoringCase(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append("))");
             }
 

@@ -29,6 +29,7 @@ public class ETG {
 
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 espressoTestCase.pruneFailingPerforms(properties);
+                espressoTestCase.addToProject(properties, false);
             }
         } catch (Exception e) {
             e.printStackTrace();

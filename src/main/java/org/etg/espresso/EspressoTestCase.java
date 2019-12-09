@@ -25,7 +25,10 @@ public class EspressoTestCase {
     private VelocityTemplate testCaseTemplate;
 
 
-    public EspressoTestCase(ETGProperties properties, WidgetTestCase widgetTestCase, String testCaseName, VelocityTemplate testCaseTemplate) throws Exception {
+    public EspressoTestCase(ETGProperties properties,
+                            WidgetTestCase widgetTestCase,
+                            String testCaseName,
+                            VelocityTemplate testCaseTemplate) throws Exception {
         this.packageName = properties.getPackageName();
         this.testPackageName = properties.getTestPackageName();
         this.widgetTestCase = widgetTestCase;
@@ -34,10 +37,6 @@ public class EspressoTestCase {
         this.testCaseTemplate = testCaseTemplate;
         codeMapper = new TestCodeMapper(properties);
         testCodeLines = new ArrayList<>();
-        Vector<Action> actions = widgetTestCase.getEventSequence();
-        for (Action action : actions) {
-            codeMapper.addTestCodeLinesForAction(action, testCodeLines);
-        }
     }
 
     public void pruneFailingPerforms(ETGProperties properties) throws Exception {
@@ -47,9 +46,7 @@ public class EspressoTestCase {
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
-            writeToFolder(properties.getOutputPath(), templateConverter);
-            writeCustomUsedClasses(properties.getOutputPath(), templateConverter);
+            addToProject(properties, true);
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
 
             if (newFailingPerformLines.size() > 0) {
@@ -58,7 +55,21 @@ public class EspressoTestCase {
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
 
-    private void writeToFolder(String outputFolderPath, VelocityTemplateConverter templateConverter) throws FileNotFoundException {
+    public void addToProject(ETGProperties properties, boolean addTryCatchs) throws Exception {
+        testCodeLines.clear();
+
+        codeMapper.setSurroundPerformsWithTryCatch(addTryCatchs);
+        Vector<Action> actions = widgetTestCase.getEventSequence();
+        for (Action action : actions) {
+            codeMapper.addTestCodeLinesForAction(action, testCodeLines);
+        }
+
+        writeToFolder(properties.getOutputPath());
+        writeCustomUsedClasses(properties.getOutputPath());
+    }
+
+    private void writeToFolder(String outputFolderPath) throws Exception {
+        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         String testContent = templateConverter.applyContextToTemplate(testCaseTemplate);
         String outputFilePath = outputFolderPath + getTestName() + ".java";
 
@@ -67,7 +78,8 @@ public class EspressoTestCase {
         out.close();
     }
 
-    private void writeCustomUsedClasses(String outputFolderPath, VelocityTemplateConverter templateConverter) throws FileNotFoundException {
+    private void writeCustomUsedClasses(String outputFolderPath) throws Exception {
+        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         for (VelocityTemplate vTemplate : codeMapper.getNeededTemplates()) {
             String classContent = templateConverter.applyContextToTemplate(vTemplate);
             String outputFilePath = outputFolderPath + vTemplate.getName();
@@ -90,14 +102,14 @@ public class EspressoTestCase {
         }
 
         String activityName = visitedActivities[0].toString().split("/")[1];
-        if (activityName.startsWith(packageName)) {
+        if (activityName.startsWith(testPackageName)) {
             velocityContext.put("TestActivityName", activityName);
         } else {
-            velocityContext.put("TestActivityName", packageName + activityName);
+            velocityContext.put("TestActivityName", testPackageName + activityName);
         }
 
         velocityContext.put("PackageName", testPackageName);
-        velocityContext.put("ResourcePackageName", packageName);
+        velocityContext.put("ResourcePackageName", testPackageName);
 
         // TODO: improve test name based on TestCase's visitedActivities
         velocityContext.put("ClassName", testCaseName);

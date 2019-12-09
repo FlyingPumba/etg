@@ -58,7 +58,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "import org.hamcrest.TypeSafeMatcher;\n" +
                 "import org.hamcrest.core.IsInstanceOf;\n" +
-                "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.junit.After;\n" +
                 "import org.junit.Before;\n" +
                 "import org.junit.Rule;\n" +
@@ -190,7 +189,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    } \n"+
                 "#end\n" +
                 "#if (${clickActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
                 "        return new ClickWithoutVisibilityConstraint(\n" +
                 "                Tap.SINGLE,\n" +
@@ -201,7 +199,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    }\n" +
                 "#end\n" +
                 "#if (${longClickActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ClickWithoutVisibilityConstraint getLongClickAction() {\n" +
                 "        return new ClickWithoutVisibilityConstraint(\n" +
                 "                Tap.LONG,\n" +

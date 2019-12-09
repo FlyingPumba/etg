@@ -99,10 +99,12 @@ public class EspressoTestRunner {
             throw new Exception("Unable to find compiled Espresso Tests");
         }
 
-        String[] apks = findApkResult.split("\n");
+        String[] apkPaths = findApkResult.split("\n");
         List<String> filteredApks = new ArrayList<>();
-        for (String apk : apks) {
-            String lowerCaseAPK = apk.toLowerCase();
+        for (String apkPath : apkPaths) {
+            String[] aux = apkPath.split("/");
+            String apkFileName = aux[aux.length-1];
+            String lowerCaseAPK = apkFileName.toLowerCase();
             if (!lowerCaseAPK.contains(properties.getBuildType().toLowerCase())) {
                 continue;
             }
@@ -116,7 +118,7 @@ public class EspressoTestRunner {
             }
 
             if (!discard) {
-                filteredApks.add(apk);
+                filteredApks.add(apkPath);
             }
         }
 
