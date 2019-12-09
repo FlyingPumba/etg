@@ -382,7 +382,7 @@ public class TestCodeMapper {
         mIsChildAtPositionAdded = mIsChildAtPositionAdded || groupViewChildPosition != -1;
 
         return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? "," : "")
-                + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
+                + (groupViewChildPosition != -1 ? "childAtPosition(" : "\nwithParent(")
                 + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
                 + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
                 + (addIsDisplayed ? ",\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
