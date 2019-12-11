@@ -1,5 +1,10 @@
 ## ETG: Espresso Test Generator
 
+This repository contains the source code of ETG, a tool for translating sequences of widget-based actions into an Espresso test suite.
+
+The ETG tool leverages on existing widget-based sequences of Android UI interactions.
+The current ETG prototype relies on an extension of the MATE widget-based testing tool.
+
 ### Setup instructions
 
 These instructions assume Ubuntu 18.04 as Operating System.
