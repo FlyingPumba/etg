@@ -1,0 +1,542 @@
+{
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "http://example.com/root.json",
+  "type": "array",
+  "title": "The Root Schema",
+  "items": {
+    "$id": "#/items",
+    "type": "object",
+    "title": "The Items Schema",
+    "required": [
+      "crashDetected",
+      "eventSequence",
+      "id",
+      "novelty",
+      "sparseness",
+      "visitedActivities"
+    ],
+    "properties": {
+      "crashDetected": {
+        "$id": "#/items/properties/crashDetected",
+        "type": "boolean",
+        "title": "The Crashdetected Schema",
+        "default": false,
+        "examples": [
+          false
+        ]
+      },
+      "eventSequence": {
+        "$id": "#/items/properties/eventSequence",
+        "type": "array",
+        "title": "The Eventsequence Schema",
+        "items": {
+          "$id": "#/items/properties/eventSequence/items",
+          "type": "object",
+          "title": "The Items Schema",
+          "required": [
+            "actionType",
+            "adjActions",
+            "extraInfo",
+            "pheromone",
+            "proportionalPheromone",
+            "swipe",
+            "timeToWait",
+            "widget"
+          ],
+          "properties": {
+            "actionType": {
+              "$id": "#/items/properties/eventSequence/items/properties/actionType",
+              "type": "string",
+              "title": "The Actiontype Schema",
+              "default": "",
+              "examples": [
+                "LONG_CLICK"
+              ],
+              "pattern": "^(.*)$"
+            },
+            "adjActions": {
+              "$id": "#/items/properties/eventSequence/items/properties/adjActions",
+              "type": "array",
+              "title": "The Adjactions Schema"
+            },
+            "extraInfo": {
+              "$id": "#/items/properties/eventSequence/items/properties/extraInfo",
+              "type": "string",
+              "title": "The Extrainfo Schema",
+              "default": "",
+              "examples": [
+                ""
+              ],
+              "pattern": "^(.*)$"
+            },
+            "pheromone": {
+              "$id": "#/items/properties/eventSequence/items/properties/pheromone",
+              "type": "integer",
+              "title": "The Pheromone Schema",
+              "default": 0,
+              "examples": [
+                0
+              ]
+            },
+            "proportionalPheromone": {
+              "$id": "#/items/properties/eventSequence/items/properties/proportionalPheromone",
+              "type": "integer",
+              "title": "The Proportionalpheromone Schema",
+              "default": 0,
+              "examples": [
+                0
+              ]
+            },
+            "swipe": {
+              "$id": "#/items/properties/eventSequence/items/properties/swipe",
+              "type": "null",
+              "title": "The Swipe Schema",
+              "default": null,
+              "examples": [
+                null
+              ]
+            },
+            "timeToWait": {
+              "$id": "#/items/properties/eventSequence/items/properties/timeToWait",
+              "type": "integer",
+              "title": "The Timetowait Schema",
+              "default": 0,
+              "examples": [
+                0
+              ]
+            },
+            "widget": {
+              "$id": "#/items/properties/eventSequence/items/properties/widget",
+              "type": "object",
+              "title": "The Widget Schema",
+              "required": [
+                "bounds",
+                "checkable",
+                "checked",
+                "children",
+                "clazz",
+                "clickable",
+                "contentDesc",
+                "enabled",
+                "focusable",
+                "hasChildren",
+                "hint",
+                "id",
+                "idByActivity",
+                "index",
+                "inputType",
+                "labeledBy",
+                "longClickable",
+                "maxLength",
+                "packageName",
+                "password",
+                "resourceID",
+                "scrollable",
+                "selected",
+                "text",
+                "usedAsStateDiff",
+                "x1",
+                "x2",
+                "y1",
+                "y2",
+                "nextChildsText",
+                "x",
+                "y",
+                "editable",
+                "empty",
+                "executable",
+                "sonOfLongClickable",
+                "sonOfScrollable"
+              ],
+              "properties": {
+                "bounds": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/bounds",
+                  "type": "string",
+                  "title": "The Bounds Schema",
+                  "default": "",
+                  "examples": [
+                    "[238,398][312,472]"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "checkable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/checkable",
+                  "type": "boolean",
+                  "title": "The Checkable Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "checked": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/checked",
+                  "type": "boolean",
+                  "title": "The Checked Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "children": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/children",
+                  "type": "array",
+                  "title": "The Children Schema"
+                },
+                "clazz": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/clazz",
+                  "type": "string",
+                  "title": "The Clazz Schema",
+                  "default": "",
+                  "examples": [
+                    "android.widget.ImageButton"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "clickable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/clickable",
+                  "type": "boolean",
+                  "title": "The Clickable Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "contentDesc": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/contentDesc",
+                  "type": "string",
+                  "title": "The Contentdesc Schema",
+                  "default": "",
+                  "examples": [
+                    ""
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "enabled": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/enabled",
+                  "type": "boolean",
+                  "title": "The Enabled Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "focusable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/focusable",
+                  "type": "boolean",
+                  "title": "The Focusable Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "hasChildren": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/hasChildren",
+                  "type": "boolean",
+                  "title": "The Haschildren Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "hint": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/hint",
+                  "type": "string",
+                  "title": "The Hint Schema",
+                  "default": "",
+                  "examples": [
+                    ""
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "id": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/id",
+                  "type": "string",
+                  "title": "The Id Schema",
+                  "default": "",
+                  "examples": [
+                    "it.feio.android.omninotes.foss:id/fab_expand_menu_button"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "idByActivity": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/idByActivity",
+                  "type": "string",
+                  "title": "The Idbyactivity Schema",
+                  "default": "",
+                  "examples": [
+                    "it.feio.android.omninotes.foss/it.feio.android.omninotes.MainActivity_it.feio.android.omninotes.foss:id/fab_expand_menu_button"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "index": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/index",
+                  "type": "integer",
+                  "title": "The Index Schema",
+                  "default": 0,
+                  "examples": [
+                    0
+                  ]
+                },
+                "inputType": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/inputType",
+                  "type": "integer",
+                  "title": "The Inputtype Schema",
+                  "default": 0,
+                  "examples": [
+                    0
+                  ]
+                },
+                "labeledBy": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/labeledBy",
+                  "type": "null",
+                  "title": "The Labeledby Schema",
+                  "default": null,
+                  "examples": [
+                    null
+                  ]
+                },
+                "longClickable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/longClickable",
+                  "type": "boolean",
+                  "title": "The Longclickable Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "maxLength": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/maxLength",
+                  "type": "integer",
+                  "title": "The Maxlength Schema",
+                  "default": 0,
+                  "examples": [
+                    -1
+                  ]
+                },
+                "packageName": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/packageName",
+                  "type": "string",
+                  "title": "The Packagename Schema",
+                  "default": "",
+                  "examples": [
+                    "it.feio.android.omninotes.foss"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "password": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/password",
+                  "type": "boolean",
+                  "title": "The Password Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "resourceID": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/resourceID",
+                  "type": "string",
+                  "title": "The Resourceid Schema",
+                  "default": "",
+                  "examples": [
+                    "it.feio.android.omninotes.foss:id/fab_expand_menu_button"
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "scrollable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/scrollable",
+                  "type": "boolean",
+                  "title": "The Scrollable Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "selected": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/selected",
+                  "type": "boolean",
+                  "title": "The Selected Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "text": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/text",
+                  "type": "string",
+                  "title": "The Text Schema",
+                  "default": "",
+                  "examples": [
+                    ""
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "usedAsStateDiff": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/usedAsStateDiff",
+                  "type": "boolean",
+                  "title": "The Usedasstatediff Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "x1": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/x1",
+                  "type": "integer",
+                  "title": "The X1 Schema",
+                  "default": 0,
+                  "examples": [
+                    238
+                  ]
+                },
+                "x2": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/x2",
+                  "type": "integer",
+                  "title": "The X2 Schema",
+                  "default": 0,
+                  "examples": [
+                    312
+                  ]
+                },
+                "y1": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/y1",
+                  "type": "integer",
+                  "title": "The Y1 Schema",
+                  "default": 0,
+                  "examples": [
+                    398
+                  ]
+                },
+                "y2": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/y2",
+                  "type": "integer",
+                  "title": "The Y2 Schema",
+                  "default": 0,
+                  "examples": [
+                    472
+                  ]
+                },
+                "nextChildsText": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/nextChildsText",
+                  "type": "string",
+                  "title": "The Nextchildstext Schema",
+                  "default": "",
+                  "examples": [
+                    ""
+                  ],
+                  "pattern": "^(.*)$"
+                },
+                "x": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/x",
+                  "type": "integer",
+                  "title": "The X Schema",
+                  "default": 0,
+                  "examples": [
+                    275
+                  ]
+                },
+                "y": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/y",
+                  "type": "integer",
+                  "title": "The Y Schema",
+                  "default": 0,
+                  "examples": [
+                    435
+                  ]
+                },
+                "editable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/editable",
+                  "type": "boolean",
+                  "title": "The Editable Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "empty": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/empty",
+                  "type": "boolean",
+                  "title": "The Empty Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "executable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/executable",
+                  "type": "boolean",
+                  "title": "The Executable Schema",
+                  "default": false,
+                  "examples": [
+                    true
+                  ]
+                },
+                "sonOfLongClickable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/sonOfLongClickable",
+                  "type": "boolean",
+                  "title": "The Sonoflongclickable Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                },
+                "sonOfScrollable": {
+                  "$id": "#/items/properties/eventSequence/items/properties/widget/properties/sonOfScrollable",
+                  "type": "boolean",
+                  "title": "The Sonofscrollable Schema",
+                  "default": false,
+                  "examples": [
+                    false
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "id": {
+        "$id": "#/items/properties/id",
+        "type": "string",
+        "title": "The Id Schema",
+        "default": "",
+        "examples": [
+          "9e7f2f52-7bd0-4c63-950c-67080bd511e5"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "novelty": {
+        "$id": "#/items/properties/novelty",
+        "type": "integer",
+        "title": "The Novelty Schema",
+        "default": 0,
+        "examples": [
+          0
+        ]
+      },
+      "sparseness": {
+        "$id": "#/items/properties/sparseness",
+        "type": "integer",
+        "title": "The Sparseness Schema",
+        "default": 0,
+        "examples": [
+          0
+        ]
+      },
+      "visitedActivities": {
+        "$id": "#/items/properties/visitedActivities",
+        "type": "array",
+        "title": "The Visitedactivities Schema",
+        "items": {
+          "$id": "#/items/properties/visitedActivities/items",
+          "type": "string",
+          "title": "The Items Schema",
+          "default": "",
+          "examples": [
+            "it.feio.android.omninotes.foss/it.feio.android.omninotes.MainActivity"
+          ],
+          "pattern": "^(.*)$"
+        }
+      }
+    }
+  }
+}
