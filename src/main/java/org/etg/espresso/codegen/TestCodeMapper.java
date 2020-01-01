@@ -197,8 +197,35 @@ public class TestCodeMapper {
         else if (isAdapterViewAction(action)) {
             return addDataPickingStatement(action, testCodeLines);
         }
+
+
+        //1- refine action according receiver of action according to coordenates
+        refineReceiverOfAction(action);
+
         String variableName = addViewPickingStatement(action, testCodeLines);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
+
+        //2- check children to be more specific
+        /**
+         * Search for a childs with any? of the following
+         *  - id
+         *  - text
+         *  - content description
+         *
+         * For every (wich? all? how to tell when to stop and wich is better?) child found, add it to last picking statement
+         * **/
+
+
+        //3- check parent to be more specific
+        /**
+         * Search for parents
+         *  - id
+         *  - text
+         *  - content description
+         *
+         * Use this info, or if any of the parents has specific position on a view use that info
+         * **/
+
 
         ActionType actionType = action.getActionType();
         Widget target = action.getWidget();
@@ -207,8 +234,6 @@ public class TestCodeMapper {
         // If so, try to start the creation of the statement with a more specific children
         Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
         Widget childrenWithRId = target.getChildrenWithRId();
-
-        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
 
         if (childrenWithSomeText != null &&
                 !statement.contains("withContentDescription") &&
@@ -242,6 +267,14 @@ public class TestCodeMapper {
         // System.out.println("Statement post rewrite: " + testCodeLines.get(0));
 
         return variableName;
+    }
+
+    private void refineReceiverOfAction(Action action) {
+        Widget receiverOfAction = action.getWidget().getReceiverOfClickInCoordinates(action.getWidget().getX(), action.getWidget().getY());
+        if (receiverOfAction == null) {
+            throw new RuntimeException("there is no receiver of click action for widget");
+        }
+        action.setWidget(receiverOfAction);
     }
 
     private String addDataPickingStatement(Action action, List<String> testCodeLines) {
@@ -329,6 +362,7 @@ public class TestCodeMapper {
         boolean addIsDisplayed = checkIsDisplayed && index == 0;
         MatcherBuilder matcherBuilder = new MatcherBuilder();
 
+        //que significa que sea vacio un widget?
         if (isEmpty(widget)
                 // Cannot use child position for the last element, since no parent descriptor available.
                 || widget.getParent() == null && isEmptyIgnoringChildPosition(widget)

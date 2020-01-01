@@ -20,7 +20,7 @@ dependencies {
 
 run {
     args = [
-            "path to config file"
+            "/home/christian/tesis/gitProjects/etg/config/pelis.config"
     ]
 }
 

@@ -12,7 +12,6 @@ public class WidgetParser {
                 mapper.convertValue(node.get("clazz"), String.class),
                 mapper.convertValue(node.get("idByActivity"), String.class));
 
-        widget.setParent(null);
 
         // Boolean
         widget.setCheckable(mapper.convertValue(node.get("checkable"), Boolean.class));
@@ -49,12 +48,18 @@ public class WidgetParser {
         for (Iterator<JsonNode> it = childrenNode.elements(); it.hasNext(); ) {
             JsonNode element = it.next();
             widget.setHasChildren(true);
-
             Widget child = WidgetParser.parse(mapper, element);
-            child.setParent(widget);
-
             widget.addChild(child);
         }
+
+
+        //parent
+        JsonNode parentNode = node.get("parent");
+        if (parentNode != null && !parentNode.isNull()) {
+            Widget parent = WidgetParser.parse(mapper, parentNode);
+            widget.setParent(parent);
+        }
+
 
         return widget;
     }
