@@ -12,6 +12,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.rmi.server.ExportException;
 import java.util.List;
 
 public class ETG {
@@ -36,8 +37,12 @@ public class ETG {
         }
     }
 
-    private static List<WidgetTestCase> parseWidgetTestCases(String filePath) throws IOException {
+    private static List<WidgetTestCase> parseWidgetTestCases(String filePath) throws Exception {
         String content = readFile(filePath, StandardCharsets.UTF_8);
+
+        if (content.isEmpty()) {
+            throw new Exception(filePath + " JSON file is empty");
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(content);
