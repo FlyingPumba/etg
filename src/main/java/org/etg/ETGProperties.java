@@ -130,7 +130,13 @@ public class ETGProperties {
             throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
         }
 
-        String version = findEspressoCoreResult.split("espresso-core:")[1].split("'")[0];
+        String[] firstSplit = findEspressoCoreResult.split("espresso-core:");
+        if (firstSplit.length == 0) {
+            throw new Exception("Couldn't find Espresso library in project. Found the following but it doesn't seem right: " + findEspressoCoreResult);
+        }
+
+        String[] secondSplit = firstSplit[1].split("'");
+        String version = secondSplit[0];
         return version;
     }
 }
