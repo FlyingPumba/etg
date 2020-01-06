@@ -131,7 +131,7 @@ public class ETGProperties {
         }
 
         String[] firstSplit = findEspressoCoreResult.split("espresso-core:");
-        if (firstSplit.length == 0) {
+        if (firstSplit.length < 2) {
             throw new Exception("Couldn't find Espresso library in project. Found the following but it doesn't seem right: " + findEspressoCoreResult);
         }
 
