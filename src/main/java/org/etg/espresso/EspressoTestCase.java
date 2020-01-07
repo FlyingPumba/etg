@@ -109,7 +109,7 @@ public class EspressoTestCase {
         }
 
         velocityContext.put("PackageName", testPackageName);
-        velocityContext.put("ResourcePackageName", testPackageName);
+        velocityContext.put("ResourcePackageName", packageName);
 
         // TODO: improve test name based on TestCase's visitedActivities
         velocityContext.put("ClassName", testCaseName);
