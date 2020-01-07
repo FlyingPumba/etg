@@ -163,7 +163,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    }\n" +
                 "    #end\n" +
                 "#if (${swipeActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
                 "                new GeneralSwipeAction(\n" +
