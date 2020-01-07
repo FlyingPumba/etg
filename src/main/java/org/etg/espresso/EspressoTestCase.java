@@ -102,10 +102,10 @@ public class EspressoTestCase {
         }
 
         String activityName = visitedActivities[0].toString().split("/")[1];
-        if (activityName.startsWith(testPackageName)) {
+        if (activityName.startsWith(packageName)) {
             velocityContext.put("TestActivityName", activityName);
         } else {
-            velocityContext.put("TestActivityName", testPackageName + activityName);
+            velocityContext.put("TestActivityName", packageName + activityName);
         }
 
         velocityContext.put("PackageName", testPackageName);
