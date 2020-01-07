@@ -70,6 +70,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "@RunWith(AndroidJUnit4.class)\n" +
                 "public class ${ClassName} {\n" +
                 "\n" +
+                "    #if (${AddTryCatchImport})\n" +
                 "private int errorCount;\n" +
                 "\n" +
                 "    @Before\n" +
@@ -82,6 +83,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "        System.out.println(\"Error count: \" + errorCount);\n" +
                 "    }" +
                 "\n" +
+                "    #end\n" +
                 "    @Rule\n" +
                 "    public ActivityTestRule<${TestActivityName}> mActivityTestRule = new ActivityTestRule<>(${TestActivityName}.class);\n" +
                 "\n" +
