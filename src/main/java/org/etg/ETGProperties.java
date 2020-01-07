@@ -40,7 +40,7 @@ public class ETGProperties {
 
     public String getCompiledPackageName() {
         if (!properties.containsKey("compiledPackageName")) {
-            properties.setProperty("compiledPackageName", properties.getProperty("packageName"));
+            properties.setProperty("compiledPackageName", properties.getProperty("packageName") + ".test");
         }
         return properties.getProperty("compiledPackageName");
     }

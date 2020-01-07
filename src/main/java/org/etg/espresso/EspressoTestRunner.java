@@ -49,8 +49,8 @@ public class EspressoTestRunner {
 
     private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
         String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s.test/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
-                properties.getPackageName(), junitRunner);
+                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
+                properties.getCompiledPackageName(), junitRunner);
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
