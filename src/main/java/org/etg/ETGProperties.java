@@ -87,7 +87,7 @@ public class ETGProperties {
     }
 
     private String getApplicationFolderPath(String rootProjectFolderPath) throws Exception {
-        String rawCmd = "grep -l -R \"apply plugin: 'com.android.application'\" %s ";
+        String rawCmd = "grep -l -R \"'com.android.application'\" %s ";
         rawCmd += "| xargs -I {} grep -L \"com.google.android.support:wearable\" {}";
         rawCmd += "| xargs -I {} grep -L \"com.google.android.wearable:wearable\" {}";
         rawCmd += "| grep build.gradle";
