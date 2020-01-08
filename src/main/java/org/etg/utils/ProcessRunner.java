@@ -49,11 +49,15 @@ public class ProcessRunner {
     }
 
     public static String runCommand(String command) {
+        System.out.println(String.format("Running command: %s", command));
+
         boolean win = false;
         String os = System.getProperty("os.name");
-        if (os != null && !os.contains("Linux"))
+        if (os != null && !os.contains("Linux")) {
             win = true;
-        System.out.println(String.format("Running command: %s", command));
+        } else {
+            command = "source ~/.bashrc; " + command;
+        }
         return ProcessRunner.runProcess(win, command);
     }
 }
