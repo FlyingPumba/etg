@@ -72,13 +72,26 @@ public class EspressoTestRunner {
     }
 
     private static String getJunitRunner(ETGProperties properties) throws Exception {
-        String junitRunner = "";
-        if (properties.getEspressoPackageName().contains("androidx")) {
-            junitRunner = "androidx.test.runner.AndroidJUnitRunner";
+        String buildGradlePath = properties.getBuildGradlePath();
+        String findRunnerCmd = String.format("cat %s | grep testInstrumentationRunner", buildGradlePath);
+        String findRunnerResult = ProcessRunner.runCommand(findRunnerCmd);
+
+        String testRunner = "";
+        if (findRunnerResult.isEmpty()) {
+            // no custom test runner, infer it based on Espresso dependencies
+            if (properties.getEspressoPackageName().contains("androidx")) {
+                testRunner = "androidx.test.runner.AndroidJUnitRunner";
+            } else {
+                testRunner = "android.support.test.runner.AndroidJUnitRunner";
+            }
         } else {
-            junitRunner = "android.support.test.runner.AndroidJUnitRunner";
+            // there is a custom test runner, use that one
+            testRunner = findRunnerResult.split("testInstrumentationRunner ")[1];
+            testRunner = testRunner.replace("\"", "");
+            testRunner = testRunner.replace("'", "");
         }
-        return junitRunner;
+
+        return testRunner;
     }
 
     private static void clearPackage(ETGProperties properties) {

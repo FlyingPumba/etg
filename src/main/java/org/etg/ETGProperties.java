@@ -70,6 +70,14 @@ public class ETGProperties {
         return properties.getProperty("outputPath");
     }
 
+    public String getBuildGradlePath() throws Exception {
+        if (!properties.containsKey("buildGradlePath")) {
+            String applicationFolderPath = getApplicationFolderPath();
+            properties.setProperty("buildGradlePath", applicationFolderPath + "build.gradle");
+        }
+        return properties.getProperty("buildGradlePath");
+    }
+
     public String getApplicationFolderPath() throws Exception {
         if (!properties.containsKey("applicationFolderPath")) {
             String applicationFolderPath = getApplicationFolderPath(getRootProjectPath());
