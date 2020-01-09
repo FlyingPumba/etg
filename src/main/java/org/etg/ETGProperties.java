@@ -152,4 +152,11 @@ public class ETGProperties {
         String version = secondSplit[0];
         return version;
     }
+
+    public String getJsonMD5() {
+        String jsonPath = this.getJsonPath();
+        String md5Cmd = String.format("md5sum %s ", jsonPath);
+        String md5Result = ProcessRunner.runCommand(md5Cmd);
+        return md5Result.split(" ")[0];
+    }
 }

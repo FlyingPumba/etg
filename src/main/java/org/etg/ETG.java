@@ -22,6 +22,7 @@ public class ETG {
         try {
             ETGProperties properties = ETGProperties.loadProperties(args[0]);
             System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
+            System.out.println("JSON file MD5: " + properties.getJsonMD5());
 
             System.out.println("Parsing widget test cases");
             List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPath());
