@@ -45,6 +45,13 @@ public class ETGProperties {
         return properties.getProperty("compiledPackageName");
     }
 
+    public String getCompiledTestPackageName() {
+        if (!properties.containsKey("compiledTestPackageName")) {
+            properties.setProperty("compiledTestPackageName", properties.getProperty("packageName") + ".test");
+        }
+        return properties.getProperty("compiledTestPackageName");
+    }
+
     public String getBuildType() {
         if (!properties.containsKey("buildType")) {
             properties.setProperty("buildType", "debug");
