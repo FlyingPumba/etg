@@ -27,6 +27,10 @@ public class ETG {
             System.out.println("Parsing widget test cases");
             List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPath());
 
+            if (widgetTestCases.isEmpty()) {
+                throw new Exception(properties.getJsonPath() + " JSON file is empty");
+            }
+
             TestCodeGenerator codeGenerator = new TestCodeGenerator(properties);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
@@ -44,10 +48,6 @@ public class ETG {
 
     private static List<WidgetTestCase> parseWidgetTestCases(String filePath) throws Exception {
         String content = readFile(filePath, StandardCharsets.UTF_8);
-
-        if (content.isEmpty()) {
-            throw new Exception(filePath + " JSON file is empty");
-        }
 
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonNode = mapper.readTree(content);
