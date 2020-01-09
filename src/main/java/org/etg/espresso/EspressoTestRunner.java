@@ -77,7 +77,8 @@ public class EspressoTestRunner {
         String[] findRunnerResult = ProcessRunner.runCommand(findRunnerCmd).split("\n");
 
         String validRunnerLine = null;
-        for (String line : findRunnerResult) {
+        for (String rawLine : findRunnerResult) {
+            String line = rawLine.trim();
             if (!line.startsWith("//")) {
                 if (validRunnerLine == null) {
                     validRunnerLine = line;
