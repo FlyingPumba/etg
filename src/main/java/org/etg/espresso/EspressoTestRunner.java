@@ -74,10 +74,21 @@ public class EspressoTestRunner {
     private static String getJunitRunner(ETGProperties properties) throws Exception {
         String buildGradlePath = properties.getBuildGradlePath();
         String findRunnerCmd = String.format("cat %s | grep testInstrumentationRunner", buildGradlePath);
-        String findRunnerResult = ProcessRunner.runCommand(findRunnerCmd);
+        String[] findRunnerResult = ProcessRunner.runCommand(findRunnerCmd).split("\n");
+
+        String validRunnerLine = null;
+        for (String line : findRunnerResult) {
+            if (!line.startsWith("//")) {
+                if (validRunnerLine == null) {
+                    validRunnerLine = line;
+                } else {
+                    throw new Exception("Couldn't decide which Instrumentation Runner was declared: " + String.join("\n", findRunnerResult));
+                }
+            }
+        }
 
         String testRunner = "";
-        if (findRunnerResult.isEmpty()) {
+        if (validRunnerLine == null) {
             // no custom test runner, infer it based on Espresso dependencies
             if (properties.getEspressoPackageName().contains("androidx")) {
                 testRunner = "androidx.test.runner.AndroidJUnitRunner";
@@ -86,7 +97,7 @@ public class EspressoTestRunner {
             }
         } else {
             // there is a custom test runner, use that one
-            testRunner = findRunnerResult.split("testInstrumentationRunner ")[1];
+            testRunner = validRunnerLine.split("testInstrumentationRunner ")[1];
             testRunner = testRunner.replace("\"", "");
             testRunner = testRunner.replace("'", "");
         }
