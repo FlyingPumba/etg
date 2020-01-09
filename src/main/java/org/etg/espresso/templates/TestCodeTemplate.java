@@ -27,7 +27,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.ViewAction;\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule;\n" +
-                "import androidx.test.ext.junit.runners.AndroidJUnit4;\n" +
+                "import androidx.test.runner.AndroidJUnit4;\n" +
                 "import androidx.test.filters.LargeTest;\n" +
                 "#else\n" +
                 "import android.support.test.rule.ActivityTestRule;\n" +
