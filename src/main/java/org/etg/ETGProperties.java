@@ -97,7 +97,7 @@ public class ETGProperties {
         String rawCmd = "grep -l -R \"'com.android.application'\" %s ";
         rawCmd += "| xargs -I {} grep -L \"com.google.android.support:wearable\" {}";
         rawCmd += "| xargs -I {} grep -L \"com.google.android.wearable:wearable\" {}";
-        rawCmd += "| grep build.gradle";
+        rawCmd += "| grep \"build.gradle$\"";
 
         String grepCmd = String.format(rawCmd, rootProjectFolderPath);
         String[] grepResult = ProcessRunner.runCommand(grepCmd).split("\n");
