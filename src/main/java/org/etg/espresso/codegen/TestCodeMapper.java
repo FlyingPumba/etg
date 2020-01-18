@@ -15,6 +15,18 @@
  */
 package org.etg.espresso.codegen;
 
+import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.FieldAccessExpr;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
+import com.github.javaparser.ast.stmt.ExpressionStmt;
+import com.github.javaparser.ast.stmt.Statement;
+import com.google.common.collect.Lists;
+
 import org.etg.ETGProperties;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
@@ -25,11 +37,20 @@ import org.etg.mate.models.Widget;
 import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 import static org.etg.espresso.codegen.MatcherBuilder.Kind.*;
 import static org.etg.espresso.util.StringHelper.*;
@@ -40,6 +61,13 @@ public class TestCodeMapper {
     private static final String VIEW_VARIABLE_CLASS_NAME = "ViewInteraction";
     private static final String DATA_VARIABLE_CLASS_NAME = "DataInteraction";
     private static final String CLASS_VIEW_PAGER = "android.support.v4.view.ViewPager";
+    public static final String ALL_OF = "allOf";
+    public static final String HAS_DESCENDANT = "hasDescendant";
+    public static final String IS_DESCENDANT_OF = "isDescendantOfA";
+    public static final String WITH_TEXT = "withText";
+    public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
+    public static final String WITH_ID = "withId";
+    public static final String EQUAL_TO_IGNORING_CASE = "equalToIgnoringCase";
 
     private boolean mIsChildAtPositionAdded = false;
     private boolean mIsRecyclerViewActionAdded = false;
@@ -131,7 +159,7 @@ public class TestCodeMapper {
 
             String methdCall = getSwipeAction(swipe);
 
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, action.getWidget().isSonOfScrollable()));
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall));
             testCodeLines.add(getWaitToScrollEndStatement() + getStatementTerminator() + "\n");
             swipeActionAdded = true;
         }
@@ -142,17 +170,17 @@ public class TestCodeMapper {
 //        } else
 
         else if (action.getActionType() == ActionType.CLICK) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), action.getWidget().isSonOfScrollable()));
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction()));
             addTemplateFor(TemplatesFactory.Template.CLICK_ACTION);
             clickActionAdded = true;
         } else if (action.getActionType() == ActionType.LONG_CLICK) {
-            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getLongClickAction(), action.getWidget().isSonOfScrollable()));
+            testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getLongClickAction()));
             addTemplateFor(TemplatesFactory.Template.LONG_CLICK_ACTION);
             longClickActionAdded = true;
         } else if (action.getActionType() == ActionType.TYPE_TEXT) {
             String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(action) ? "" : (", " + getCloseSoftKeyboard());
             testCodeLines.add(createActionStatement(
-                    variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction, action.getWidget().isSonOfScrollable()));
+                    variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction));
         } else if (action.getActionType() == ActionType.ENTER) {
             // do nothing, since this is handled solely by the Espresso "replaceText" command.
         } else {
@@ -170,7 +198,7 @@ public class TestCodeMapper {
 
         testCodeLines.add("");
         String variableName = addPickingStatement(closeSoftKeyboardAction, testCodeLines);
-        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), getCloseSoftKeyboard(), false));
+        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), getCloseSoftKeyboard()));
     }
 
     private boolean doesNeedStandaloneCloseSoftKeyboardAction(Action action) {
@@ -201,32 +229,29 @@ public class TestCodeMapper {
 
         //1- refine action according receiver of action according to coordenates
         refineReceiverOfAction(action);
-
         String variableName = addViewPickingStatement(action, testCodeLines);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
-        //2- check children to be more specific
-        /**
-         * Search for a childs with any? of the following
-         *  - id
-         *  - text
-         *  - content description
-         *
-         * For every (wich? all? how to tell when to stop and wich is better?) child found, add it to last picking statement
-         * **/
+        //parse statement as AST, find first allOf expression or addit if missing
+        Statement parsedStatement = StaticJavaParser.parseStatement(statement);
 
+        //2- check children to be more specific
+        improveStatementWithChildrensOf(action.getWidget(), parsedStatement);
 
         //3- check parent to be more specific
-        /**
-         * Search for parents
-         *  - id
-         *  - text
-         *  - content description
-         *
-         * Use this info, or if any of the parents has specific position on a view use that info
-         * **/
+        improveStatementWithParentsOf(action.getWidget(), parsedStatement);
 
 
+        //update last statement with improved statement
+        testCodeLines.remove(testCodeLines.size() - 1);
+        testCodeLines.add(parsedStatement.toString());
+
+
+        /*
+        This is no longer necessary because of above algorithm
+
+        //withText("i")
+//ViewInteraction android_view_ViewGroup = onView(allOf(classOrSuperClassesName(is("android.view.ViewGroup")),withParent(allOf(classOrSuperClassesName(is("android.widget.FrameLayout")),withParent(allOf(withId(R.id.pelisList),withParent(classOrSuperClassesName(is("android.view.ViewGroup")))))))));
         ActionType actionType = action.getActionType();
         Widget target = action.getWidget();
 
@@ -236,7 +261,7 @@ public class TestCodeMapper {
         Widget childrenWithRId = target.getChildrenWithRId();
 
         if (childrenWithSomeText != null &&
-                !statement.contains("withContentDescription") &&
+                !statement.contains(WITH_CONTENT_DESCRIPTION) &&
                 !statement.contains("withText")) {
             // there as a child with some text to make the statement more specific
 
@@ -251,7 +276,7 @@ public class TestCodeMapper {
             variableName = addViewPickingStatement(new Action(childrenWithRId, actionType), testCodeLines);
 
         } else if (!target.getChildren().isEmpty() &&
-                !statement.contains("withContentDescription") &&
+                !statement.contains(WITH_CONTENT_DESCRIPTION) &&
                 !statement.contains("withText") &&
                 !statement.contains("R.id")) {
             // there is a child that might make this statement more specific
@@ -265,9 +290,159 @@ public class TestCodeMapper {
         }
 
         // System.out.println("Statement post rewrite: " + testCodeLines.get(0));
-
+*/
         return variableName;
     }
+
+
+    private MethodCallExpr findRootAllOfExpression(Statement statement){
+        //Finds first "allOf" method call expression on statemente. Walks ast in pre-order
+        return statement.findFirst(
+                        MethodCallExpr.class,
+                        methodCallExpr -> methodCallExpr.getName().toString().equals(ALL_OF)
+                ).orElse(null);
+    }
+
+
+    /**
+     * Search for a childs with any of the following
+     *  - id
+     *  - text
+     *  - content description
+     *
+     * For every child found, add it to picking statement
+     * **/
+    private void improveStatementWithChildrensOf(Widget widget, Statement statement){
+        for (Widget child : widget.getChildren()){
+            List<Expression> arguments = new ArrayList<>();
+            addWithIdExpressionIfPossible(child, arguments);
+            addWithContentDescriptionExpressionIfPossible(child, arguments);
+            addWithTextExpressionIfPossible(child, arguments);
+
+            if (!arguments.isEmpty()){
+                Expression hasDescendantExpr = getHasDescendantExpression(arguments);
+                addAllOfToFirstMethodCallIfAbsent(statement);
+                findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
+            }
+        }
+    }
+
+
+    /**
+     * Search for parents
+     *  -
+     * **/
+    private void improveStatementWithParentsOf(Widget widget, Statement statement){
+        Widget parent = widget.getParent();
+        if (parent != null) {
+            Expression isDescendanExpr = getIsDescendantOfExpression(parent);
+            addAllOfToFirstMethodCallIfAbsent(statement);
+            findRootAllOfExpression(statement).addArgument(isDescendanExpr);
+        }
+
+    }
+
+
+
+
+    private void addWithTextExpressionIfPossible(Widget widget, List<Expression> arguments) {
+        String text = widget.getText();
+        if(text != null && !text.isEmpty()){
+            MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(text));
+            arguments.add(new MethodCallExpr(WITH_TEXT, equalToIgnoringCaseMethod));
+        }
+    }
+
+    private void addWithContentDescriptionExpressionIfPossible(Widget widget, List<Expression> arguments) {
+        String contentDesc = widget.getContentDesc();
+        if(contentDesc != null && !contentDesc.isEmpty()){
+            MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(contentDesc));
+            arguments.add(new MethodCallExpr(WITH_CONTENT_DESCRIPTION, equalToIgnoringCaseMethod));
+        }
+    }
+
+    private boolean addWithIdExpressionIfPossible(Widget widget, List<Expression> arguments) {
+        String id = widget.getResourceID();
+        if (id != null) {
+            String strLiteral = convertIdToTestCodeFormat(id);
+            if (strLiteral.startsWith("R.id.")) {
+                arguments.add(new MethodCallExpr(WITH_ID, StaticJavaParser.parseExpression(strLiteral)));
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
+
+
+
+    /**
+     * adds allOf to first method call of statement if there is no "allOf" call on the statement
+     * **/
+    private void addAllOfToFirstMethodCallIfAbsent(Statement statement) {
+        if (!firstMethodCallIsOnViewWithArgumentAllOf(statement)){//statement does not have onView(allOf(..))
+            statement.findFirst(MethodCallExpr.class).ifPresent(onViewMethodCallExpr -> {
+                NodeList<Expression> onViewArgument = onViewMethodCallExpr.getArguments();
+                MethodCallExpr allOfExpr = new MethodCallExpr(null, ALL_OF, onViewArgument);
+                onViewMethodCallExpr.setArguments(NodeList.nodeList(allOfExpr));
+            });
+        }
+    }
+
+    /**
+     * Generates hasDescendant expression with "arguments" as arguments
+     * **/
+    private Expression getHasDescendantExpression(List<Expression> arguments) {
+        Expression hasDescendantArgument;
+        if (arguments.size() == 1)
+            hasDescendantArgument = arguments.get(0);
+        else
+            hasDescendantArgument = new MethodCallExpr(null, ALL_OF, new NodeList<Expression>(arguments));
+
+        return new MethodCallExpr(HAS_DESCENDANT, hasDescendantArgument);
+    }
+
+    /**
+     * Generates isDescendantOfA(@param widget) expression.
+     * **/
+    private @Nullable Expression getIsDescendantOfExpression(Widget widget) {
+        List<Expression> arguments = new ArrayList<>();
+
+        addWithIdExpressionIfPossible(widget, arguments);
+        addWithContentDescriptionExpressionIfPossible(widget, arguments);
+        if (widget.getParent() != null) {
+            Expression parentExpr = getIsDescendantOfExpression(widget.getParent());
+            if (parentExpr != null) arguments.add(parentExpr);
+        }
+
+        Expression isDescendantOfArgument;
+        if (arguments.size() == 0)//no hay argumentos, no hay matcher para este widget
+            return null;
+        else if (arguments.size() == 1)//un solo argumento, no agrego ALL_OF
+            isDescendantOfArgument = arguments.get(0);
+        else//agrego ALL_OF
+            isDescendantOfArgument = new MethodCallExpr(null, ALL_OF, new NodeList<>(arguments));
+
+
+        return new MethodCallExpr(IS_DESCENDANT_OF, isDescendantOfArgument);
+    }
+
+
+    /**
+     * Answers if the first method call is "onView" with argumente "allOf"}
+     *  ie: true if first method call looks like onView(allOf(...))
+     * **/
+    private boolean firstMethodCallIsOnViewWithArgumentAllOf(Statement statement) {
+        Optional<MethodCallExpr> firstMethodCall = statement.findFirst(MethodCallExpr.class);
+        return firstMethodCall.isPresent() &&
+                firstMethodCall.get().getName().toString().equals("onView") &&
+                firstMethodCall.get().getArguments().isNonEmpty() &&
+                firstMethodCall.get().getArguments().get(0).isMethodCallExpr() &&
+                firstMethodCall.get().getArguments().get(0).asMethodCallExpr().getName().toString().equals(ALL_OF);
+    }
+
 
     private void refineReceiverOfAction(Action action) {
         Widget receiverOfAction = action.getWidget().getReceiverOfClickInCoordinates(action.getWidget().getX(), action.getWidget().getY());
@@ -362,7 +537,6 @@ public class TestCodeMapper {
         boolean addIsDisplayed = checkIsDisplayed && index == 0;
         MatcherBuilder matcherBuilder = new MatcherBuilder();
 
-        //que significa que sea vacio un widget?
         if (isEmpty(widget)
                 // Cannot use child position for the last element, since no parent descriptor available.
                 || widget.getParent() == null && isEmptyIgnoringChildPosition(widget)
@@ -411,11 +585,15 @@ public class TestCodeMapper {
 
         mIsChildAtPositionAdded = mIsChildAtPositionAdded || groupViewChildPosition != -1;
 
-        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? "," : "")
-                + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
-                + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
-                + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
-                + (addIsDisplayed ? ",\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
+        //comento la parte recursiva, dejando solo lo que se macheaba sobre el widget actual
+//        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? "," : "")
+//                + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
+//                + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
+//                + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
+//                + (addIsDisplayed ? "\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
+        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() +
+                (addIsDisplayed ? ((matcherBuilder.getMatcherCount() > 0 ? ", " : "") + getIsDisplayedMatcher()) : "") +
+                (addAllOf ? ")" : "");
     }
 
 
@@ -438,14 +616,15 @@ public class TestCodeMapper {
 //      testCodeId = parsedId.getFirst() + "." + testCodeId;
 //    }
 
+        testCodeId = testCodeId.split("-")[0];//converts com.pkg:id/anId-child-3:android.widget.FrameLayout
+
         return testCodeId;
     }
 
-    private String createActionStatement(String variableName, int recyclerViewChildPosition, String action, boolean addScrollTo) {
+    private String createActionStatement(String variableName, int recyclerViewChildPosition, String action) {
         mIsRecyclerViewActionAdded = mIsRecyclerViewActionAdded || recyclerViewChildPosition != -1;
-
         // No need to explicitly scroll to perform an action on a RecyclerView child.
-        String completeAction = (addScrollTo && recyclerViewChildPosition == -1 ? getScrollToAction() + ", " : "") + action;
+        String completeAction = action;
         completeAction = recyclerViewChildPosition == -1
                 ? completeAction
                 : getActionOnItemAtPositionMethodCallPrefix() + recyclerViewChildPosition + ", " + completeAction + ")";
