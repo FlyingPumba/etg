@@ -363,7 +363,7 @@ public class TestCodeMapper {
 
     private boolean addWithIdExpressionIfPossible(Widget widget, List<Expression> arguments) {
         String id = widget.getResourceID();
-        if (id != null) {
+        if (id != null && !id.startsWith("android:id")) {//if widget is from android and not from app view we don't want it
             String strLiteral = convertIdToTestCodeFormat(id);
             if (strLiteral.startsWith("R.id.")) {
                 arguments.add(new MethodCallExpr(WITH_ID, StaticJavaParser.parseExpression(strLiteral)));
