@@ -25,7 +25,7 @@ task wrapper(type: Wrapper) {
 
 run {
     args = [
-            "/home/christian/tesis/gitProjects/etg/config/pelis.config"
+            "path to config file"
     ]
 }
 
