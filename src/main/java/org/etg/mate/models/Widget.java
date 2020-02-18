@@ -563,7 +563,6 @@ public class Widget {
     }
 
 
-    //todo ver que onda esto
     private boolean receivesClickOnCoordinates(int x, int y){
         return isInRange(x, x1, x2) && isInRange(y, y1, y2);
     }
