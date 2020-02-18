@@ -27,7 +27,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.ViewAction;\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule;\n" +
-                "import androidx.test.ext.junit.runners.AndroidJUnit4;\n" +
+                "import androidx.test.runner.AndroidJUnit4;\n" +
                 "import androidx.test.filters.LargeTest;\n" +
                 "#else\n" +
                 "import android.support.test.rule.ActivityTestRule;\n" +
@@ -58,7 +58,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "import org.hamcrest.TypeSafeMatcher;\n" +
                 "import org.hamcrest.core.IsInstanceOf;\n" +
-                "import org.jetbrains.annotations.NotNull;\n" +
                 "import org.junit.After;\n" +
                 "import org.junit.Before;\n" +
                 "import org.junit.Rule;\n" +
@@ -71,6 +70,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "@RunWith(AndroidJUnit4.class)\n" +
                 "public class ${ClassName} {\n" +
                 "\n" +
+                "    #if (${AddTryCatchImport})\n" +
                 "private int errorCount;\n" +
                 "\n" +
                 "    @Before\n" +
@@ -83,6 +83,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "        System.out.println(\"Error count: \" + errorCount);\n" +
                 "    }" +
                 "\n" +
+                "    #end\n" +
                 "    @Rule\n" +
                 "    public ActivityTestRule<${TestActivityName}> mActivityTestRule = new ActivityTestRule<>(${TestActivityName}.class);\n" +
                 "\n" +
@@ -164,7 +165,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    }\n" +
                 "    #end\n" +
                 "#if (${swipeActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
                 "                new GeneralSwipeAction(\n" +
@@ -190,7 +190,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    } \n"+
                 "#end\n" +
                 "#if (${clickActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
                 "        return new ClickWithoutVisibilityConstraint(\n" +
                 "                Tap.SINGLE,\n" +
@@ -201,7 +200,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    }\n" +
                 "#end\n" +
                 "#if (${longClickActionAdded})\n" +
-                "@NotNull\n" +
                 "    private ClickWithoutVisibilityConstraint getLongClickAction() {\n" +
                 "        return new ClickWithoutVisibilityConstraint(\n" +
                 "                Tap.LONG,\n" +

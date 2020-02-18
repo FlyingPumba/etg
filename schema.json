@@ -1,0 +1,295 @@
+{
+  "definitions": {
+    "point": {
+      "type": "object",
+      "title": "Just a point (i.e., pair of integers)",
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "integer",
+          "title": "X coordinate",
+          "default": 0
+        },
+        "y": {
+          "type": "integer",
+          "title": "Y coordinate",
+          "default": 0
+        }
+      }
+    },
+    "widget": {
+      "type": "object",
+      "title": "The Widget target of an action",
+      "required": [
+        "checkable",
+        "checked",
+        "parent",
+        "children",
+        "clazz",
+        "clickable",
+        "contentDesc",
+        "enabled",
+        "focusable",
+        "hint",
+        "longClickable",
+        "maxLength",
+        "packageName",
+        "password",
+        "resourceID",
+        "scrollable",
+        "selected",
+        "text",
+        "x1",
+        "x2",
+        "y1",
+        "y2",
+        "x",
+        "y",
+        "editable"
+      ],
+      "properties": {
+        "checkable": {
+          "type": "boolean",
+          "title": "Whether the widget is checkable or not",
+          "default": false
+        },
+        "checked": {
+          "type": "boolean",
+          "title": "Whether the widget is checked or not",
+          "default": false
+        },
+        "parent": {
+          "title": "The parent of this widget",
+          "$ref": "#/definitions/widget"
+        },
+        "children": {
+          "type": "array",
+          "title": "The children of this widget",
+          "items": {
+            "$ref": "#/definitions/widget"
+          }
+        },
+        "clazz": {
+          "type": "string",
+          "title": "The classname of this widget",
+          "default": "",
+          "examples": [
+            "android.widget.ImageButton"
+          ]
+        },
+        "clickable": {
+          "type": "boolean",
+          "title": "Whether the widget is clickable or not",
+          "default": false
+        },
+        "contentDesc": {
+          "type": "string",
+          "title": "The content description of this widget",
+          "default": ""
+        },
+        "enabled": {
+          "type": "boolean",
+          "title": "Whether the widget is enabled or not",
+          "default": false
+        },
+        "focusable": {
+          "type": "boolean",
+          "title": "Whether the widget is focusable or not",
+          "default": false
+        },
+        "hint": {
+          "type": "string",
+          "title": "The hint of this widget",
+          "default": ""
+        },
+        "longClickable": {
+          "type": "boolean",
+          "title": "Whether the widget is long clickable or not",
+          "default": false
+        },
+        "maxLength": {
+          "type": "integer",
+          "title": "The max length for this widget (in case it is a text field)",
+          "default": -1
+        },
+        "packageName": {
+          "type": "string",
+          "title": "The package name of this widget",
+          "default": "",
+          "examples": [
+            "it.feio.android.omninotes.foss"
+          ]
+        },
+        "password": {
+          "type": "boolean",
+          "title": "Whether the widget is a password field or not",
+          "default": false
+        },
+        "resourceID": {
+          "type": "string",
+          "title": "The resource id of this widget",
+          "default": "",
+          "examples": [
+            "it.feio.android.omninotes.foss:id/fab_expand_menu_button"
+          ]
+        },
+        "scrollable": {
+          "type": "boolean",
+          "title": "Whether the widget is scrollable or not",
+          "default": false
+        },
+        "selected": {
+          "type": "boolean",
+          "title": "Whether the widget is selected or not",
+          "default": false
+        },
+        "text": {
+          "type": "string",
+          "title": "The text of this widget",
+          "default": ""
+        },
+        "x1": {
+          "type": "integer",
+          "title": "X coordinate of top left corner",
+          "default": 0
+        },
+        "x2": {
+          "type": "integer",
+          "title": "X coordinate of bottom right corner",
+          "default": 0
+        },
+        "y1": {
+          "type": "integer",
+          "title": "Y coordinate of top left corner",
+          "default": 0
+        },
+        "y2": {
+          "type": "integer",
+          "title": "Y coordinate of bottom right corner",
+          "default": 0
+        },
+        "x": {
+          "type": "integer",
+          "title": "X coordinate at which action took place",
+          "default": 0
+        },
+        "y": {
+          "type": "integer",
+          "title": "Y coordinate at which action took place",
+          "default": 0
+        },
+        "editable": {
+          "type": "boolean",
+          "title": "Whether the widget is editable or not",
+          "default": false
+        }
+      }
+    }
+  },
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "title": "An array of widget-based event sequences",
+  "items": {
+    "type": "object",
+    "title": "A widget-based event sequence",
+    "required": [
+      "crashDetected",
+      "eventSequence",
+      "visitedActivities"
+    ],
+    "properties": {
+      "crashDetected": {
+        "type": "boolean",
+        "title": "Whether this sequence led to a crash or not",
+        "default": false
+      },
+      "eventSequence": {
+        "type": "array",
+        "title": "The array of widget actions",
+        "items": {
+          "type": "object",
+          "title": "A widget action",
+          "required": [
+            "actionType",
+            "extraInfo",
+            "swipe",
+            "timeToWait",
+            "widget"
+          ],
+          "properties": {
+            "actionType": {
+              "type": "string",
+              "title": "The action type of this widget action",
+              "default": "",
+              "examples": [
+                "CLICK",
+                "LONG_CLICK",
+                "TYPE_TEXT",
+                "SWIPE_UP",
+                "SWIPE_DOWN",
+                "SWIPE_LEFT",
+                "SWIPE_RIGHT",
+                "WAIT",
+                "BACK",
+                "MENU",
+                "CLEAR_WIDGET",
+                "ENTER"
+              ]
+            },
+            "extraInfo": {
+              "type": "string",
+              "title": "Extra info to be considered for this action",
+              "default": ""
+            },
+            "swipe": {
+              "type": "object",
+              "title": "Extra info to be considered if the action is a swipe",
+              "default": null,
+              "required": [
+                "initialPosition",
+                "finalPosition",
+                "steps"
+              ],
+              "properties": {
+                "initialPosition": {
+                  "$ref": "#/definitions/point"
+                },
+                "finalPosition": {
+                  "$ref": "#/definitions/point"
+                },
+                "steps": {
+                  "type": "integer",
+                  "title": "Steps that took this swipe (i.e., the speed)",
+                  "default": 0
+                }
+              }
+            },
+            "timeToWait": {
+              "type": "integer",
+              "title": "Time delay to wait before executing the action",
+              "default": 0
+            },
+            "widget": {
+              "$ref": "#/definitions/widget"
+            }
+          }
+        }
+      },
+      "visitedActivities": {
+        "type": "array",
+        "title": "The Activities visited during the execution of this event sequence",
+        "items": {
+          "type": "string",
+          "title": "An Activity's name",
+          "default": "",
+          "examples": [
+            "it.feio.android.omninotes.MainActivity"
+          ]
+        }
+      }
+    }
+  }
+}

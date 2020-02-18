@@ -79,8 +79,6 @@ public class TestCodeMapper {
     private boolean longClickActionAdded = false;
     private boolean clickActionAdded = false;
 
-
-
     /**
      * Needed templates, every extra templata that we need must be listed here
      * **/
@@ -92,7 +90,7 @@ public class TestCodeMapper {
     /**
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
-    private final Map<String, Integer> mVariableNameIndexes = new HashMap<>();
+    private Map<String, Integer> mVariableNameIndexes = new HashMap<>();
     private int performCount = 0;
 
     public TestCodeMapper(ETGProperties properties) throws Exception {
@@ -133,6 +131,9 @@ public class TestCodeMapper {
             if (mSurroundPerformsWithTryCatch) {
                 statement = surroundPerformWithTryCatch(statement);
             }
+
+            statement += "\n";
+
             testCodeLines.add(statement);
             return;
 
@@ -141,6 +142,9 @@ public class TestCodeMapper {
             if (mSurroundPerformsWithTryCatch) {
                 statement = surroundPerformWithTryCatch(statement);
             }
+
+            statement += "\n";
+
             testCodeLines.add(statement);
             return;
         }
@@ -260,8 +264,10 @@ public class TestCodeMapper {
         Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
         Widget childrenWithRId = target.getChildrenWithRId();
 
+        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
+
         if (childrenWithSomeText != null &&
-                !statement.contains(WITH_CONTENT_DESCRIPTION) &&
+                !statement.contains("withContentDescription") &&
                 !statement.contains("withText")) {
             // there as a child with some text to make the statement more specific
 
@@ -276,7 +282,7 @@ public class TestCodeMapper {
             variableName = addViewPickingStatement(new Action(childrenWithRId, actionType), testCodeLines);
 
         } else if (!target.getChildren().isEmpty() &&
-                !statement.contains(WITH_CONTENT_DESCRIPTION) &&
+                !statement.contains("withContentDescription") &&
                 !statement.contains("withText") &&
                 !statement.contains("R.id")) {
             // there is a child that might make this statement more specific
@@ -635,17 +641,17 @@ public class TestCodeMapper {
             performStatement = surroundPerformWithTryCatch(performStatement);
         }
 
+        performStatement += "\n";
+
         return performStatement;
     }
-
-
 
     private String surroundPerformWithTryCatch(String performStatement) {
         performStatement = "\ntry {\n" +
                 performStatement + "\n" +
                 "} catch (Exception e) {\n" +
                 "System.out.println(buildPerformExceptionMessage(e, " + performCount + "))" + getStatementTerminator() + "\n" +
-                "}\n";
+                "}";
 
         performCount++;
 
@@ -748,11 +754,16 @@ public class TestCodeMapper {
     }
 
     private String getIsDisplayedMatcher() {
-        return "isDisplayed()";
+        return "\nisDisplayed()";
     }
 
     private String getIsRootMatcher() {
         return "isRoot()";
     }
 
+    public void setSurroundPerformsWithTryCatch(boolean mSurroundPerformsWithTryCatch) {
+        this.mSurroundPerformsWithTryCatch = mSurroundPerformsWithTryCatch;
+        this.performCount = 0;
+        this.mVariableNameIndexes = new HashMap<>();
+    }
 }

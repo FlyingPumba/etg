@@ -49,8 +49,8 @@ public class EspressoTestRunner {
 
     private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
         String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s.test/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
-                properties.getPackageName(), junitRunner);
+                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
+                properties.getCompiledTestPackageName(), junitRunner);
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
@@ -72,17 +72,42 @@ public class EspressoTestRunner {
     }
 
     private static String getJunitRunner(ETGProperties properties) throws Exception {
-        String junitRunner = "";
-        if (properties.getEspressoPackageName().contains("androidx")) {
-            junitRunner = "androidx.test.runner.AndroidJUnitRunner";
-        } else {
-            junitRunner = "android.support.test.runner.AndroidJUnitRunner";
+        String buildGradlePath = properties.getBuildGradlePath();
+        String findRunnerCmd = String.format("cat %s | grep testInstrumentationRunner", buildGradlePath);
+        String[] findRunnerResult = ProcessRunner.runCommand(findRunnerCmd).split("\n");
+
+        String validRunnerLine = null;
+        for (String rawLine : findRunnerResult) {
+            String line = rawLine.trim();
+            if (!line.startsWith("//")) {
+                if (validRunnerLine == null) {
+                    validRunnerLine = line;
+                } else {
+                    throw new Exception("Couldn't decide which Instrumentation Runner was declared: " + String.join("\n", findRunnerResult));
+                }
+            }
         }
-        return junitRunner;
+
+        String testRunner = "";
+        if (validRunnerLine == null) {
+            // no custom test runner, infer it based on Espresso dependencies
+            if (properties.getEspressoPackageName().contains("androidx")) {
+                testRunner = "androidx.test.runner.AndroidJUnitRunner";
+            } else {
+                testRunner = "android.support.test.runner.AndroidJUnitRunner";
+            }
+        } else {
+            // there is a custom test runner, use that one
+            testRunner = validRunnerLine.split("testInstrumentationRunner ")[1];
+            testRunner = testRunner.replace("\"", "");
+            testRunner = testRunner.replace("'", "");
+        }
+
+        return testRunner;
     }
 
     private static void clearPackage(ETGProperties properties) {
-        String clearCmd = String.format("adb shell pm clear %s", properties.getPackageName());
+        String clearCmd = String.format("adb shell pm clear %s", properties.getCompiledPackageName());
         ProcessRunner.runCommand(clearCmd);
     }
 
@@ -99,11 +124,26 @@ public class EspressoTestRunner {
             throw new Exception("Unable to find compiled Espresso Tests");
         }
 
-        String[] apks = findApkResult.split("\n");
+        String[] apkPaths = findApkResult.split("\n");
         List<String> filteredApks = new ArrayList<>();
-        for (String apk : apks) {
-            if (apk.contains(properties.getBuildVariant())) {
-                filteredApks.add(apk);
+        for (String apkPath : apkPaths) {
+            String[] aux = apkPath.split("/");
+            String apkFileName = aux[aux.length-1];
+            String lowerCaseAPK = apkFileName.toLowerCase();
+            if (!lowerCaseAPK.contains(properties.getBuildType().toLowerCase())) {
+                continue;
+            }
+
+            boolean discard = false;
+            for (String productFlavor : properties.getProductFlavors()) {
+                if (!lowerCaseAPK.contains(productFlavor.toLowerCase())) {
+                    discard = true;
+                    break;
+                }
+            }
+
+            if (!discard) {
+                filteredApks.add(apkPath);
             }
         }
 

@@ -32,14 +32,41 @@ public class ETGProperties {
     }
 
     public String getTestPackageName() {
+        if (!properties.containsKey("testPackageName")) {
+            properties.setProperty("testPackageName", properties.getProperty("packageName"));
+        }
         return properties.getProperty("testPackageName");
     }
 
-    public String getBuildVariant() {
-        if (!properties.containsKey("buildVariant")) {
-            properties.setProperty("buildVariant", "");
+    public String getCompiledPackageName() {
+        if (!properties.containsKey("compiledPackageName")) {
+            properties.setProperty("compiledPackageName", properties.getProperty("packageName") + ".test");
         }
-        return properties.getProperty("buildVariant");
+        return properties.getProperty("compiledPackageName");
+    }
+
+    public String getCompiledTestPackageName() {
+        if (!properties.containsKey("compiledTestPackageName")) {
+            properties.setProperty("compiledTestPackageName", properties.getProperty("packageName") + ".test");
+        }
+        return properties.getProperty("compiledTestPackageName");
+    }
+
+    public String getBuildType() {
+        if (!properties.containsKey("buildType")) {
+            properties.setProperty("buildType", "debug");
+        }
+        return properties.getProperty("buildType");
+    }
+
+    public String[] getProductFlavors() {
+        if (!properties.containsKey("productFlavors")) {
+            properties.setProperty("productFlavors", "");
+        }
+
+
+        String productFlavors = properties.getProperty("productFlavors");
+        return productFlavors.split(",");
     }
 
     public String getRootProjectPath() {
@@ -48,6 +75,14 @@ public class ETGProperties {
 
     public String getOutputPath() {
         return properties.getProperty("outputPath");
+    }
+
+    public String getBuildGradlePath() throws Exception {
+        if (!properties.containsKey("buildGradlePath")) {
+            String applicationFolderPath = getApplicationFolderPath();
+            properties.setProperty("buildGradlePath", applicationFolderPath + "build.gradle");
+        }
+        return properties.getProperty("buildGradlePath");
     }
 
     public String getApplicationFolderPath() throws Exception {
@@ -59,7 +94,12 @@ public class ETGProperties {
     }
 
     private String getApplicationFolderPath(String rootProjectFolderPath) throws Exception {
-        String grepCmd = String.format("grep -l -R \"apply plugin: 'com.android.application'\" %s | grep build.gradle", rootProjectFolderPath);
+        String rawCmd = "grep -l -R \"'com.android.application'\" %s ";
+        rawCmd += "| xargs -I {} grep -L \"com.google.android.support:wearable\" {}";
+        rawCmd += "| xargs -I {} grep -L \"com.google.android.wearable:wearable\" {}";
+        rawCmd += "| grep \"build.gradle$\"";
+
+        String grepCmd = String.format(rawCmd, rootProjectFolderPath);
         String[] grepResult = ProcessRunner.runCommand(grepCmd).split("\n");
         if (grepResult.length != 1) {
             throw new Exception("Unable to find application path inside project.");
@@ -110,7 +150,20 @@ public class ETGProperties {
             throw new Exception("Couldn't find Espresso library in project. Are you sure it has Espresso setup?");
         }
 
-        String version = findEspressoCoreResult.split("espresso-core:")[1].split("'")[0];
+        String[] firstSplit = findEspressoCoreResult.split("espresso-core:");
+        if (firstSplit.length < 2) {
+            throw new Exception("Couldn't find Espresso library in project. Found the following but it doesn't seem right: " + findEspressoCoreResult);
+        }
+
+        String[] secondSplit = firstSplit[1].split("'");
+        String version = secondSplit[0];
         return version;
+    }
+
+    public String getJsonMD5() {
+        String jsonPath = this.getJsonPath();
+        String md5Cmd = String.format("md5sum %s ", jsonPath);
+        String md5Result = ProcessRunner.runCommand(md5Cmd);
+        return md5Result.split(" ")[0];
     }
 }
