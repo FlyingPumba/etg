@@ -37,7 +37,12 @@ public class ETG {
             System.out.println("Pruning failing performs from Espresso tests");
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 espressoTestCase.pruneFailingPerforms(properties);
+
                 espressoTestCase.addToProject(properties, false);
+
+                double coverage = espressoTestCase.getCoverage(properties);
+                System.out.println(String.format("TEST %s got COVERAGE: %.2f",
+                        espressoTestCase.getTestName(), coverage));
             }
 
             System.out.println("ETG finished");

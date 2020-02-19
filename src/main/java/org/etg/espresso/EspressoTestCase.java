@@ -187,4 +187,8 @@ public class EspressoTestCase {
         }
         testCodeLines = newTestCodeLines;
     }
+
+    public double getCoverage(ETGProperties properties) throws Exception {
+        return EspressoTestRunner.getTestCoverage(properties, this);
+    }
 }

@@ -18,23 +18,11 @@ public class EspressoTestRunner {
     }
 
     public static ArrayList<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
-        if (!animationsDisabled) {
-            disableAnimations();
-        }
+        String junitRunner = prepareForTestRun(properties);
 
         ArrayList<Integer> failingPerforms = new ArrayList<>();
 
-        compileTests(properties);
-
-        String apkTestPath = getAndroidTestApkPath(properties);
-
-        installApk(apkTestPath);
-
-        clearPackage(properties);
-
-        String junitRunner = getJunitRunner(properties);
-
-        String testResult = fireTest(properties, espressoTestCase, junitRunner);
+        String testResult = fireTest(properties, espressoTestCase, junitRunner, false);
 
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
@@ -47,10 +35,38 @@ public class EspressoTestRunner {
         return failingPerforms;
     }
 
-    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
-        String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
+    private static String prepareForTestRun(ETGProperties properties) throws Exception {
+        if (!animationsDisabled) {
+            disableAnimations();
+        }
+
+        compileTests(properties);
+
+        String apkTestPath = getAndroidTestApkPath(properties);
+
+        installApk(apkTestPath);
+
+        clearPackage(properties);
+
+        return getJunitRunner(properties);
+    }
+
+    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase,
+                                   String junitRunner, boolean coverage) {
+        String instrumentCmd = "adb shell am instrument -w -r";
+
+        if (coverage) {
+            instrumentCmd += " -e coverage true";
+            instrumentCmd += String.format(" -e coverageFile /data/data/%s/coverage.ec",
+                    properties.getCompiledPackageName());
+        } else {
+            instrumentCmd += " -e emma true -e debug false";
+        }
+
+        instrumentCmd += String.format(" -e class %s.%s %s/%s",
+                properties.getTestPackageName(), espressoTestCase.getTestName(),
                 properties.getCompiledTestPackageName(), junitRunner);
+
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
@@ -165,5 +181,31 @@ public class EspressoTestRunner {
         if (!compileResult.contains("BUILD SUCCESSFUL")) {
             throw new Exception("Unable to compile Espresso Tests:\n" + compileResult);
         }
+    }
+
+    static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+        // delete previous coverage reports
+        String rmCmd = String.format("find %s -type d -name coverage -delete", properties.getApplicationFolderPath());
+        ProcessRunner.runCommand(rmCmd);
+
+        // generate a new one
+        String createReportCmd = String.format("%sgradlew -p %s createDebugCoverageReport " +
+                "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s > /dev/null 2>&1",
+                properties.getRootProjectPath(), properties.getRootProjectPath(),
+                properties.getCompiledPackageName(), espressoTestCase.getTestName());
+        ProcessRunner.runCommand(createReportCmd);
+
+        // find where was located the index.html file
+        String findCoverageFolderCmd = String.format("find %s -type d -name coverage", properties.getApplicationFolderPath());
+        String coverageFolderPath = ProcessRunner.runCommand(findCoverageFolderCmd);
+        String findIndexHtml = String.format("find %s -maxdepth 2 -type f -name index.html", coverageFolderPath);
+        String indexHtmlPath = ProcessRunner.runCommand(findIndexHtml);
+
+        // Get the total percentage of statements covered using the html in the report
+        String xpath = "html/body/table/tfoot/tr/td[3]/text()";
+        String xpathCmd = String.format("xmllint --html -xpath \"%s\" %s", xpath, indexHtmlPath);
+        String coveragePercentage = ProcessRunner.runCommand(xpathCmd);
+
+        return Double.parseDouble(coveragePercentage.replace("%", ""));
     }
 }
