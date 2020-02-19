@@ -7,6 +7,7 @@ import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.VelocityTemplateConverter;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
+import org.etg.utils.ProcessRunner;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -64,11 +65,11 @@ public class EspressoTestCase {
             codeMapper.addTestCodeLinesForAction(action, testCodeLines);
         }
 
-        writeToFolder(properties.getOutputPath());
+        writeToFolder(properties.getOutputPath(), !addTryCatchs);
         writeCustomUsedClasses(properties.getOutputPath());
     }
 
-    private void writeToFolder(String outputFolderPath) throws Exception {
+    private void writeToFolder(String outputFolderPath, boolean prettify) throws Exception {
         VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         String testContent = templateConverter.applyContextToTemplate(testCaseTemplate);
         String outputFilePath = outputFolderPath + getTestName() + ".java";
@@ -76,6 +77,12 @@ public class EspressoTestCase {
         PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
         out.print(testContent);
         out.close();
+
+        if (prettify) {
+            // run Google Java formatter on the output file
+            String formatCmd = String.format("java -jar google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
+            ProcessRunner.runCommand(formatCmd);
+        }
     }
 
     private void writeCustomUsedClasses(String outputFolderPath) throws Exception {
