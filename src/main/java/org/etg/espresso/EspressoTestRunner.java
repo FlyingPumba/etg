@@ -22,7 +22,7 @@ public class EspressoTestRunner {
 
         ArrayList<Integer> failingPerforms = new ArrayList<>();
 
-        String testResult = fireTest(properties, espressoTestCase, junitRunner, false);
+        String testResult = fireTest(properties, espressoTestCase, junitRunner);
 
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
@@ -51,22 +51,10 @@ public class EspressoTestRunner {
         return getJunitRunner(properties);
     }
 
-    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase,
-                                   String junitRunner, boolean coverage) {
-        String instrumentCmd = "adb shell am instrument -w -r";
-
-        if (coverage) {
-            instrumentCmd += " -e coverage true";
-            instrumentCmd += String.format(" -e coverageFile /data/data/%s/coverage.ec",
-                    properties.getCompiledPackageName());
-        } else {
-            instrumentCmd += " -e emma true -e debug false";
-        }
-
-        instrumentCmd += String.format(" -e class %s.%s %s/%s",
-                properties.getTestPackageName(), espressoTestCase.getTestName(),
+    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
+        String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
+                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
                 properties.getCompiledTestPackageName(), junitRunner);
-
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
