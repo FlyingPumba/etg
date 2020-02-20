@@ -40,14 +40,21 @@ public class EspressoTestCase {
         testCodeLines = new ArrayList<>();
     }
 
+    /**
+     * Perform fixed-point removal of failing performs in the test case
+     *
+     * @param properties
+     * @throws Exception
+     */
     public void pruneFailingPerforms(ETGProperties properties) throws Exception {
-        // Perform fixed-point removal of failing performs in the test case
+        generateTestCodeLines(true);
 
+        // run test case iteratively
         ArrayList<Integer> failingPerformLines;
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            addToProject(properties, true);
+            addToProject(properties, false);
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
 
             if (newFailingPerformLines.size() > 0) {
@@ -56,16 +63,18 @@ public class EspressoTestCase {
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
 
-    public void addToProject(ETGProperties properties, boolean addTryCatchs) throws Exception {
-        testCodeLines.clear();
-
+    private void generateTestCodeLines(boolean addTryCatchs) {
         codeMapper.setSurroundPerformsWithTryCatch(addTryCatchs);
+
+        testCodeLines.clear();
         Vector<Action> actions = widgetTestCase.getEventSequence();
         for (Action action : actions) {
             codeMapper.addTestCodeLinesForAction(action, testCodeLines);
         }
+    }
 
-        writeToFolder(properties.getOutputPath(), !addTryCatchs);
+    public void addToProject(ETGProperties properties, boolean prettify) throws Exception {
+        writeToFolder(properties.getOutputPath(), prettify);
         writeCustomUsedClasses(properties.getOutputPath());
     }
 

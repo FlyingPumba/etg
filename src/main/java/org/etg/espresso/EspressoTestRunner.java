@@ -44,10 +44,14 @@ public class EspressoTestRunner {
         compileTests(properties);
 
         String apkTestPath = getAndroidTestApkPath(properties);
-
+        uninstallPackage(properties.getCompiledTestPackageName());
         installApk(apkTestPath);
 
-        clearPackage(properties);
+        // just in case..
+        clearPackage(properties.getCompiledPackageName());
+        clearPackage(properties.getCompiledTestPackageName());
+        clearPackage(properties.getPackageName());
+        clearPackage(properties.getTestPackageName());
 
         return getJunitRunner(properties);
     }
@@ -111,14 +115,19 @@ public class EspressoTestRunner {
         return testRunner;
     }
 
-    private static void clearPackage(ETGProperties properties) {
-        String clearCmd = String.format("adb shell pm clear %s", properties.getCompiledPackageName());
+    private static void clearPackage(String packageName) {
+        String clearCmd = String.format("adb shell pm clear %s", packageName);
         ProcessRunner.runCommand(clearCmd);
     }
 
     private static void installApk(String apkTestPath) {
         String installCmd = String.format("adb install %s", apkTestPath);
         ProcessRunner.runCommand(installCmd);
+    }
+
+    private static void uninstallPackage(String packageName) {
+        String uninstallCmd = String.format("adb uninstall %s", packageName);
+        ProcessRunner.runCommand(uninstallCmd);
     }
 
     private static String getAndroidTestApkPath(ETGProperties properties) throws Exception {
@@ -173,6 +182,8 @@ public class EspressoTestRunner {
     }
 
     static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+        prepareForTestRun(properties);
+
         // delete previous coverage reports
         String rmCmd = String.format("find %s -type d -name coverage -exec rm -r {} +", properties.getApplicationFolderPath());
         ProcessRunner.runCommand(rmCmd);
