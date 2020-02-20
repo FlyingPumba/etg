@@ -1,7 +1,5 @@
 package org.etg.mate.models;
 
-import org.etg.utils.Randomness;
-
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -510,7 +508,6 @@ public class Widget {
 
     public Widget getChildrenWithRId() {
         Vector<Widget> children = getChildren();
-        Randomness.shuffleList(children);
         for (Widget child : children) {
             // first, try to find a leaf element that has R.id in the hierarchy of my child
             Widget childrenWithRId = child.getChildrenWithRId();
@@ -529,7 +526,6 @@ public class Widget {
 
     public Widget getChildrenWithContentDescriptionOrText() {
         Vector<Widget> children = getChildren();
-        Randomness.shuffleList(children);
         for (Widget child : children) {
             // first, try to find a leaf element that has content description or text in the hierarchy of my child
             Widget childrenWithSomeText = child.getChildrenWithContentDescriptionOrText();

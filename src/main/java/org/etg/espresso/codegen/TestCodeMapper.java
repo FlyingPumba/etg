@@ -22,7 +22,6 @@ import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
 import org.etg.mate.models.Swipe;
 import org.etg.mate.models.Widget;
-import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 
 import java.util.HashMap;
@@ -236,7 +235,7 @@ public class TestCodeMapper {
             // there is a child that might make this statement more specific
 
             while (!target.getChildren().isEmpty()) {
-                target = Randomness.randomElement(target.getChildren());
+                target = target.getChildren().get(0);
             }
 
             testCodeLines.remove(testCodeLines.size() - 1);
