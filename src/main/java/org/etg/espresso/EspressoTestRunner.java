@@ -211,10 +211,18 @@ public class EspressoTestRunner {
         }
 
         // Get the total percentage of statements covered using the html in the report
-        String xpath = "html/body/table/tfoot/tr/td[3]/text()";
-        String xpathCmd = String.format("xmllint --html -xpath \"%s\" %s", xpath, indexHtmlPath);
-        String coveragePercentage = ProcessRunner.runCommand(xpathCmd);
+        String xpathMissedLines = "html/body/table/tfoot/tr/td[8]/text()";
+        String xpathMissedLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathMissedLines, indexHtmlPath);
+        String missedLinesStr = ProcessRunner.runCommand(xpathMissedLinesCmd);
 
-        return Double.parseDouble(coveragePercentage.replace("%", ""));
+        String xpathTotalLines = "html/body/table/tfoot/tr/td[9]/text()";
+        String xpathTotalLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathTotalLines, indexHtmlPath);
+        String totalLinesStr = ProcessRunner.runCommand(xpathTotalLinesCmd);
+
+        double missedLines = Double.parseDouble(missedLinesStr);
+        double totalLines = Double.parseDouble(totalLinesStr);
+        double coveredLines = totalLines - missedLines;
+
+        return coveredLines/totalLines;
     }
 }
