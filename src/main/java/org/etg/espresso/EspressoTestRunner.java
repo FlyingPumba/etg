@@ -185,7 +185,7 @@ public class EspressoTestRunner {
 
     static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
         // delete previous coverage reports
-        String rmCmd = String.format("find %s -type d -name coverage -delete", properties.getApplicationFolderPath());
+        String rmCmd = String.format("find %s -type d -name coverage -exec rm -r {} +", properties.getApplicationFolderPath());
         ProcessRunner.runCommand(rmCmd);
 
         // generate a new one
