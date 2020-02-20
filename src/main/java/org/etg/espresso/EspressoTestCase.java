@@ -59,6 +59,8 @@ public class EspressoTestCase {
 
             if (newFailingPerformLines.size() > 0) {
                 removePerformsByNumber(newFailingPerformLines);
+                System.out.println(String.format("Removed %d/%d failing lines from TEST %s",
+                        newFailingPerformLines.size(), testCodeLines.size(), getTestName()));
             }
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
@@ -89,7 +91,7 @@ public class EspressoTestCase {
 
         if (prettify) {
             // run Google Java formatter on the output file
-            String formatCmd = String.format("java -jar google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
+            String formatCmd = String.format("java -jar $(pwd)/google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
             ProcessRunner.runCommand(formatCmd);
         }
     }

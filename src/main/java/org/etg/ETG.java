@@ -38,11 +38,11 @@ public class ETG {
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 espressoTestCase.pruneFailingPerforms(properties);
 
-                espressoTestCase.addToProject(properties, true);
-
                 double coverage = espressoTestCase.getCoverage(properties);
-                System.out.println(String.format("TEST %s got COVERAGE: %.2f",
+                System.out.println(String.format("TEST: %s COVERAGE: %.2f",
                         espressoTestCase.getTestName(), coverage));
+
+                espressoTestCase.addToProject(properties, true);
             }
 
             System.out.println("ETG finished");
