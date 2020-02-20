@@ -27,7 +27,8 @@ public class EspressoTestRunner {
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
             System.out.println(testResult);
-            throw new Exception("There was an error running test case: " + espressoTestCase.getTestName());
+            throw new Exception("There was an error running test case: " + espressoTestCase.getTestName() + "\n"
+                    + testResult);
         }
 
         parseFailingPerforms(failingPerforms);
