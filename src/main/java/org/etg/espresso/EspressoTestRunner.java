@@ -190,16 +190,25 @@ public class EspressoTestRunner {
 
         // generate a new one
         String createReportCmd = String.format("%sgradlew -p %s createDebugCoverageReport " +
-                "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s > /dev/null 2>&1",
+                "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s",
                 properties.getRootProjectPath(), properties.getRootProjectPath(),
                 properties.getCompiledPackageName(), espressoTestCase.getTestName());
-        ProcessRunner.runCommand(createReportCmd);
+        String createReportCmdResult = ProcessRunner.runCommand(createReportCmd);
 
         // find where was located the index.html file
         String findCoverageFolderCmd = String.format("find %s -type d -name coverage", properties.getApplicationFolderPath());
         String coverageFolderPath = ProcessRunner.runCommand(findCoverageFolderCmd);
+        if (coverageFolderPath.trim().isEmpty()) {
+            throw new Exception("Unable to find coverage folder for Test: " + espressoTestCase.getTestName()
+                    + "\n" + createReportCmdResult);
+        }
+
         String findIndexHtml = String.format("find %s -maxdepth 2 -type f -name index.html", coverageFolderPath);
         String indexHtmlPath = ProcessRunner.runCommand(findIndexHtml);
+        if (indexHtmlPath.trim().isEmpty()) {
+            throw new Exception("Unable to find index.html coverage file for Test: " + espressoTestCase.getTestName()
+                    + "\n" + createReportCmdResult);
+        }
 
         // Get the total percentage of statements covered using the html in the report
         String xpath = "html/body/table/tfoot/tr/td[3]/text()";
