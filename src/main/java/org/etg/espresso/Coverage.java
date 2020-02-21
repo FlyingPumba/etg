@@ -12,8 +12,11 @@ import static org.etg.espresso.EspressoTestRunner.prepareForTestRun;
 
 public class Coverage {
     static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+        String workingFolder = System.getProperty("user.dir");
+        String resultsFolder = workingFolder + "/results";
+
         prepareForTestRun(properties);
-        String coverageSrcFolderPath = prepareForTestCoverage(properties);
+        String coverageSrcFolderPath = prepareForTestCoverage(properties, resultsFolder);
 
         // delete previous coverage reports
         String rmCmd = String.format("find %s -type d -name coverage -exec rm -r {} +", properties.getApplicationFolderPath());
@@ -34,12 +37,19 @@ public class Coverage {
                     + "\n" + createReportCmdResult);
         }
 
+        // TODO: this is a hack, there has to be a better way
+        String jacocoBinPath = "bin/jacococli.jar";
+        if (!workingFolder.endsWith("etg/")) {
+            jacocoBinPath = "etg/" + jacocoBinPath;
+        }
+
         // Build the Jacoco report using the coverage.ec file just obtained and the classes and source files prepared before
-        ProcessRunner.runCommand(String.format("java -jar bin/jacococli.jar report \"%s\" " +
+        ProcessRunner.runCommand(String.format("java -jar %s report \"%s\" " +
                 "--classfiles %s/classes " +
                 "--sourcefiles %s/java " +
                 "--xml %s/jacoco_report.xml " +
                 "--html %s/jacoco_html_report",
+                jacocoBinPath,
                 coverageEcPath, coverageSrcFolderPath, coverageSrcFolderPath,
                 coverageSrcFolderPath, coverageSrcFolderPath));
 
@@ -67,10 +77,10 @@ public class Coverage {
      * @throws Exception
      * @return
      */
-    private static String prepareForTestCoverage(ETGProperties properties) throws Exception {
-        String coverageSrcFolderPath = String.format("%s.src/", properties.getCompiledPackageName());
+    private static String prepareForTestCoverage(ETGProperties properties, String resultsFolder) throws Exception {
+        String coverageSrcFolderPath = String.format("%s/%s/", resultsFolder, properties.getCompiledPackageName());
         ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
-        ProcessRunner.runCommand(String.format("mkdir %s", coverageSrcFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
 
         String[] classFiles = ProcessRunner.runCommand(
                 String.format("find %s -name \"*.class\" -type f",

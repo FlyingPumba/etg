@@ -90,8 +90,15 @@ public class EspressoTestCase {
         out.close();
 
         if (prettify) {
+            // TODO: this is a hack, there has to be a better way
+            String workingFolder = System.getProperty("user.dir");
+            String googleBinPath = "bin/google-java-format-1.7-all-deps.jar";
+            if (!workingFolder.endsWith("etg/")) {
+                googleBinPath = "etg/" + googleBinPath;
+            }
+
             // run Google Java formatter on the output file
-            String formatCmd = String.format("java -jar bin/google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
+            String formatCmd = String.format("java -jar %s -i %s", googleBinPath, outputFilePath);
             ProcessRunner.runCommand(formatCmd);
         }
     }
