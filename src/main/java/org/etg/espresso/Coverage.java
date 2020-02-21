@@ -44,7 +44,8 @@ public class Coverage {
                 coverageSrcFolderPath, coverageSrcFolderPath));
 
         // Get the total percentage of statements covered using the html in the report
-        String indexHtmlPath = String.format("%s/jacoco_html_report/index.html", coverageSrcFolderPath);
+        String indexHtmlPath = new File(String.format("%s/jacoco_html_report/index.html", coverageSrcFolderPath))
+                .getAbsolutePath();
         String xpathMissedLines = "html/body/table/tfoot/tr/td[8]/text()";
         String xpathMissedLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathMissedLines, indexHtmlPath);
         String missedLinesStr = ProcessRunner.runCommand(xpathMissedLinesCmd);
