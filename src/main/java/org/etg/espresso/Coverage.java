@@ -39,7 +39,7 @@ public class Coverage {
 
         // TODO: this is a hack, there has to be a better way
         String jacocoBinPath = "bin/jacococli.jar";
-        if (!workingFolder.endsWith("etg/")) {
+        if (!workingFolder.endsWith("etg")) {
             jacocoBinPath = "etg/" + jacocoBinPath;
         }
 

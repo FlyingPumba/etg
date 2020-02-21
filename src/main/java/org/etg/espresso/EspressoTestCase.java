@@ -93,7 +93,7 @@ public class EspressoTestCase {
             // TODO: this is a hack, there has to be a better way
             String workingFolder = System.getProperty("user.dir");
             String googleBinPath = "bin/google-java-format-1.7-all-deps.jar";
-            if (!workingFolder.endsWith("etg/")) {
+            if (!workingFolder.endsWith("etg")) {
                 googleBinPath = "etg/" + googleBinPath;
             }
 
