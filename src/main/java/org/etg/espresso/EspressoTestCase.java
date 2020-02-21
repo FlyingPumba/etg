@@ -91,7 +91,7 @@ public class EspressoTestCase {
 
         if (prettify) {
             // run Google Java formatter on the output file
-            String formatCmd = String.format("java -jar $(pwd)/google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
+            String formatCmd = String.format("java -jar bin/google-java-format-1.7-all-deps.jar -i %s", outputFilePath);
             ProcessRunner.runCommand(formatCmd);
         }
     }
@@ -200,6 +200,6 @@ public class EspressoTestCase {
     }
 
     public double getCoverage(ETGProperties properties) throws Exception {
-        return EspressoTestRunner.getTestCoverage(properties, this);
+        return Coverage.getTestCoverage(properties, this);
     }
 }

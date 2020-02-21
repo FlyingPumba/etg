@@ -36,7 +36,7 @@ public class EspressoTestRunner {
         return failingPerforms;
     }
 
-    private static String prepareForTestRun(ETGProperties properties) throws Exception {
+    public static String prepareForTestRun(ETGProperties properties) throws Exception {
         if (!animationsDisabled) {
             disableAnimations();
         }
@@ -179,50 +179,5 @@ public class EspressoTestRunner {
         if (!compileResult.contains("BUILD SUCCESSFUL")) {
             throw new Exception("Unable to compile Espresso Tests:\n" + compileResult);
         }
-    }
-
-    static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
-        prepareForTestRun(properties);
-
-        // delete previous coverage reports
-        String rmCmd = String.format("find %s -type d -name coverage -exec rm -r {} +", properties.getApplicationFolderPath());
-        ProcessRunner.runCommand(rmCmd);
-
-        // generate a new one
-        String createReportCmd = String.format("%sgradlew -p %s createDebugCoverageReport " +
-                "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s",
-                properties.getRootProjectPath(), properties.getRootProjectPath(),
-                properties.getCompiledPackageName(), espressoTestCase.getTestName());
-        String createReportCmdResult = ProcessRunner.runCommand(createReportCmd);
-
-        // find where was located the index.html file
-        String findCoverageFolderCmd = String.format("find %s -type d -name coverage", properties.getApplicationFolderPath());
-        String coverageFolderPath = ProcessRunner.runCommand(findCoverageFolderCmd);
-        if (coverageFolderPath.trim().isEmpty()) {
-            throw new Exception("Unable to find coverage folder for Test: " + espressoTestCase.getTestName()
-                    + "\n" + createReportCmdResult);
-        }
-
-        String findIndexHtml = String.format("find %s -maxdepth 2 -type f -name index.html", coverageFolderPath);
-        String indexHtmlPath = ProcessRunner.runCommand(findIndexHtml);
-        if (indexHtmlPath.trim().isEmpty()) {
-            throw new Exception("Unable to find index.html coverage file for Test: " + espressoTestCase.getTestName()
-                    + "\n" + createReportCmdResult);
-        }
-
-        // Get the total percentage of statements covered using the html in the report
-        String xpathMissedLines = "html/body/table/tfoot/tr/td[8]/text()";
-        String xpathMissedLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathMissedLines, indexHtmlPath);
-        String missedLinesStr = ProcessRunner.runCommand(xpathMissedLinesCmd);
-
-        String xpathTotalLines = "html/body/table/tfoot/tr/td[9]/text()";
-        String xpathTotalLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathTotalLines, indexHtmlPath);
-        String totalLinesStr = ProcessRunner.runCommand(xpathTotalLinesCmd);
-
-        double missedLines = Double.parseDouble(missedLinesStr);
-        double totalLines = Double.parseDouble(totalLinesStr);
-        double coveredLines = totalLines - missedLines;
-
-        return coveredLines/totalLines;
     }
 }

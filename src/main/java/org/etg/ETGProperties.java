@@ -66,7 +66,11 @@ public class ETGProperties {
 
 
         String productFlavors = properties.getProperty("productFlavors");
-        return productFlavors.split(",");
+        if (productFlavors.isEmpty()) {
+            return new String[0];
+        } else {
+            return productFlavors.split(",");
+        }
     }
 
     public String getRootProjectPath() {
