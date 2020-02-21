@@ -58,9 +58,9 @@ public class EspressoTestCase {
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
 
             if (newFailingPerformLines.size() > 0) {
-                removePerformsByNumber(newFailingPerformLines);
-                System.out.println(String.format("Removed %d/%d failing lines from TEST %s",
+                System.out.println(String.format("Removing %d/%d failing lines from TEST %s",
                         newFailingPerformLines.size(), testCodeLines.size(), getTestName()));
+                removePerformsByNumber(newFailingPerformLines);
             }
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
