@@ -230,7 +230,6 @@ public class TestCodeMapper {
             return addDataPickingStatement(action, testCodeLines);
         }
 
-
         //1- refine action according receiver of action according to coordenates
         refineReceiverOfAction(action);
         String variableName = addViewPickingStatement(action, testCodeLines);
@@ -249,7 +248,6 @@ public class TestCodeMapper {
         //update last statement with improved statement
         testCodeLines.remove(testCodeLines.size() - 1);
         testCodeLines.add(parsedStatement.toString());
-
 
         /*
         This is no longer necessary because of above algorithm
@@ -342,8 +340,12 @@ public class TestCodeMapper {
         Widget parent = widget.getParent();
         if (parent != null) {
             Expression isDescendanExpr = getIsDescendantOfExpression(parent);
-            addAllOfToFirstMethodCallIfAbsent(statement);
-            findRootAllOfExpression(statement).addArgument(isDescendanExpr);
+            //Puede pasar mirando para arriba que ningun parent tenda id o content description
+            //motibo por el cual no se puede hacer expresion con los parents
+            if (isDescendanExpr != null) {
+                addAllOfToFirstMethodCallIfAbsent(statement);
+                findRootAllOfExpression(statement).addArgument(isDescendanExpr);
+            }
         }
 
     }
