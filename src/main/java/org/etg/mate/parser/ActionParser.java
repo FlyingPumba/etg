@@ -33,6 +33,10 @@ public class ActionParser {
             Point finalP = new Point(node.get("swipe").get("finalPosition").get("x").asInt(), node.get("swipe").get("finalPosition").get("y").asInt());
             action.setSwipe(new Swipe(initial, finalP, 15));
         }
+        final JsonNode extraInfo = node.get("extraInfo");
+        if (extraInfo !=null){
+            action.setExtraInfo(extraInfo.asText());
+        }
         return action;
     }
 }
