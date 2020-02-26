@@ -38,6 +38,8 @@ public class EspressoTestCase {
         this.testCaseTemplate = testCaseTemplate;
         codeMapper = new TestCodeMapper(properties);
         testCodeLines = new ArrayList<>();
+
+        generateTestCodeLines(true);
     }
 
     /**
@@ -47,9 +49,6 @@ public class EspressoTestCase {
      * @throws Exception
      */
     public void pruneFailingPerforms(ETGProperties properties) throws Exception {
-        generateTestCodeLines(true);
-
-        // run test case iteratively
         ArrayList<Integer> failingPerformLines;
         ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
         do {
