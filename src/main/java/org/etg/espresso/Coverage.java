@@ -106,8 +106,6 @@ public class Coverage {
         }
 
         List<String> filteredClassFiles = new ArrayList<>();
-        List<String> filteredClassFileNames = new ArrayList<>();
-
         for (String classFile : classFiles) {
             if (classFile.contains(buildVariant)
                 && !classFile.contains("AndroidTest")
@@ -116,8 +114,7 @@ public class Coverage {
                 && !classFile.contains("R.class")
                 && !classFile.contains("BuildConfig.class")
                 && !classFile.contains("/EmmaInstrument/")
-                && !classFile.contains("/android/")
-                && !classFile.contains("/jacoco/")
+                && !classFile.contains("/jacoco_instrumented_classes/")
                 && !classFile.contains("/kapt3/")
             ) {
                 filteredClassFiles.add(classFile);
@@ -132,13 +129,12 @@ public class Coverage {
         // -> We should copy from the /debug/ folder onwards
         // 'subjects/com.a42crash.iarcuschin.a42crash/app/build/intermediates/javac/debug/compileDebugJavaWithJavac/classes/com/a42crash/iarcuschin/a42crash/MainActivity_ViewBinding.class'
         // -> We should copy from the /classes/ folder onwards
+
         List<String> classFolders = new ArrayList<>();
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
         for (String classFile : filteredClassFiles) {
             File aux = new File(classFile);
             String classFileFolder = aux.getParentFile().getAbsolutePath();
-
-            filteredClassFileNames.add(aux.getName());
 
             if (classFileFolder.endsWith(packageNamePath)) {
                 String classFolder = classFileFolder.split(packageNamePath)[0];
@@ -150,36 +146,16 @@ public class Coverage {
         }
 
         // copy class folders with their directory structure
+        ProcessRunner.runCommand(String.format("mkdir -p %s/%s", coverageClassesFolderPath, packageNamePath));
         for (String classFolder : classFolders) {
-            ProcessRunner.runCommand(String.format("rsync -a %s/ %s", classFolder, coverageClassesFolderPath));
+            ProcessRunner.runCommand(String.format("rsync -a --prune-empty-dirs --exclude=\"*EmmaInstrument*/\" " +
+                            "--exclude=\"*AndroidTest*/\" --exclude=\"*UnitTest*/\" --exclude=\"*kapt3*/\" " +
+                            "--exclude=\"*jacoco_instrumented_classes*/\" --exclude=\"R\\$*.class\" " +
+                            "--exclude=\"BuildConfig.class\" --exclude=\"R.class\" --include=\"*.class\" " +
+                            "--include=\"*/\" --exclude=\"*\" " +
+                            "%s/%s/ %s/%s",
+                    classFolder, packageNamePath, coverageClassesFolderPath, packageNamePath));
         }
-
-        // delete all files we were not supposed to copy
-        String[] copiedFiles = ProcessRunner.runCommand(String.format("find %s -type f", coverageClassesFolderPath))
-                .split("\n");
-
-        StringBuilder filesToDelete = new StringBuilder();
-        for (String copiedFile : copiedFiles) {
-            if (copiedFile.isEmpty()) {
-                continue;
-            }
-
-            File aux = new File(copiedFile);
-            String copiedFileName = aux.getName();
-            if (!filteredClassFileNames.contains(copiedFileName)) {
-                // we should delete this file
-                String aux2 = copiedFile.replace("$", "\\$");
-                filesToDelete.append(" \"");
-                filesToDelete.append(aux2);
-                filesToDelete.append("\"");
-            }
-
-        }
-
-        ProcessRunner.runCommand(String.format("rm %s", filesToDelete.toString()));
-
-        // delete remaining empty folders
-        ProcessRunner.runCommand(String.format("find %s -type d -delete > /dev/null 2>&1", coverageClassesFolderPath));
 
         // Find and copy source root folder
         File appFolder = new File(classFolders.get(0)).getParentFile();
