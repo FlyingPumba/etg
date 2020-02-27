@@ -64,8 +64,8 @@ public class Coverage {
         String xpathTotalLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathTotalLines, indexHtmlPath);
         String totalLinesStr = ProcessRunner.runCommand(xpathTotalLinesCmd);
 
-        double missedLines = Double.parseDouble(missedLinesStr);
-        double totalLines = Double.parseDouble(totalLinesStr);
+        double missedLines = Double.parseDouble(missedLinesStr.replace(",", ""));
+        double totalLines = Double.parseDouble(totalLinesStr.replace(",", ""));
         double coveredLines = totalLines - missedLines;
 
         return coveredLines/totalLines;
