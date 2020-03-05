@@ -26,7 +26,7 @@ public class Coverage {
         String createReportCmd = String.format("%sgradlew -p %s createDebugCoverageReport " +
                         "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s",
                 properties.getRootProjectPath(), properties.getRootProjectPath(),
-                properties.getCompiledPackageName(), espressoTestCase.getTestName());
+                properties.getTestPackageName(), espressoTestCase.getTestName());
         String createReportCmdResult = ProcessRunner.runCommand(createReportCmd);
 
         // find where was located the .ec file
