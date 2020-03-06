@@ -140,13 +140,18 @@ public class ETGProperties {
 
     public String getEspressoVersion() throws Exception {
         if (!properties.containsKey("espressoVersion")) {
-            String espressoVersion = getEspressoVersion(getRootProjectPath());
+            String espressoVersion = getEspressoVersionFromGradleFile(getRootProjectPath());
+            if (espressoVersion.startsWith("$")) {
+                // The actual version is defined elsewhere
+                // Try to use the gradle dependencies command to get the value.
+                espressoVersion = getEspressoVersionFromGradleDependencies(getRootProjectPath());
+            }
             properties.setProperty("espressoVersion", espressoVersion);
         }
         return properties.getProperty("espressoVersion");
     }
 
-    private String getEspressoVersion(String rootProjectFolderPath) throws Exception {
+    private String getEspressoVersionFromGradleFile(String rootProjectFolderPath) throws Exception {
         String findEspressoCoreCmd = String.format("find %s -name \"*.gradle\" -type f -exec grep \"espresso-core\" {} \\;",
                 rootProjectFolderPath);
         String findEspressoCoreResult = ProcessRunner.runCommand(findEspressoCoreCmd);
@@ -160,6 +165,25 @@ public class ETGProperties {
         }
 
         String[] secondSplit = firstSplit[1].split("'");
+        String version = secondSplit[0];
+        return version;
+    }
+
+    private String getEspressoVersionFromGradleDependencies(String rootProjectFolderPath) throws Exception {
+        String dependenciesCmd = String.format("%sgradlew -p %s app:dependencies | grep espresso-core | head -n 1",
+                rootProjectFolderPath, rootProjectFolderPath);
+        String dependenciesResult = ProcessRunner.runCommand(dependenciesCmd);
+
+        if (dependenciesResult.isEmpty()) {
+            throw new Exception("Couldn't find Espresso library in project after looking at gradle dependencies");
+        }
+
+        String[] firstSplit = dependenciesResult.split("espresso-core:");
+        if (firstSplit.length < 2) {
+            throw new Exception("Couldn't find Espresso library in project after looking at gradle dependencies. Found the following but it doesn't seem right: " + dependenciesResult);
+        }
+
+        String[] secondSplit = firstSplit[1].split(" ");
         String version = secondSplit[0];
         return version;
     }
