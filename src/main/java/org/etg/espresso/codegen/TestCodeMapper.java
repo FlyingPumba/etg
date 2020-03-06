@@ -80,7 +80,7 @@ public class TestCodeMapper {
         return neededTemplates;
     }
 
-    public void addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
+    public int addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
         String lastStatement = null;
         if (testCodeLines.size() > 0) {
             lastStatement = testCodeLines.get(testCodeLines.size() - 1);
@@ -106,7 +106,7 @@ public class TestCodeMapper {
             statement += "\n";
 
             testCodeLines.add(statement);
-            return;
+            return performCount-1;
 
         } else if (action.getActionType() == ActionType.MENU) {
             String statement = getPressMenuKeyAction() + getStatementTerminator();
@@ -117,7 +117,7 @@ public class TestCodeMapper {
             statement += "\n";
 
             testCodeLines.add(statement);
-            return;
+            return performCount-1;
         }
 
 //        if (event.isDelayedMessagePost()) {
@@ -165,6 +165,8 @@ public class TestCodeMapper {
         if (doesNeedStandaloneCloseSoftKeyboardAction(action)) {
             addStandaloneCloseSoftKeyboardAction(action, testCodeLines);
         }
+
+        return performCount-1;
     }
 
     private void addStandaloneCloseSoftKeyboardAction(Action action, List<String> testCodeLines) {

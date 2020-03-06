@@ -4,6 +4,7 @@ import org.etg.ETGProperties;
 import org.etg.utils.ProcessRunner;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EspressoTestRunner {
@@ -17,10 +18,8 @@ public class EspressoTestRunner {
         ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
     }
 
-    public static ArrayList<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+    public static List<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
         String junitRunner = prepareForTestRun(properties);
-
-        ArrayList<Integer> failingPerforms = new ArrayList<>();
 
         String testResult = fireTest(properties, espressoTestCase, junitRunner);
 
@@ -31,9 +30,7 @@ public class EspressoTestRunner {
                     + testResult);
         }
 
-        parseFailingPerforms(failingPerforms);
-
-        return failingPerforms;
+        return parseFailingPerforms();
     }
 
     public static String prepareForTestRun(ETGProperties properties) throws Exception {
@@ -63,7 +60,9 @@ public class EspressoTestRunner {
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
-    private static void parseFailingPerforms(ArrayList<Integer> failingPerforms) {
+    private static List<Integer> parseFailingPerforms() {
+        List<Integer> failingPerforms = new ArrayList<>();
+
         String logcatCmd = "adb logcat -d -s System.out";
         String[] logcatLines = ProcessRunner.runCommand(logcatCmd).split("\n");
         for (int i = logcatLines.length - 1; i >= 0; i--) {
@@ -78,6 +77,11 @@ public class EspressoTestRunner {
                 failingPerforms.add(performNumber);
             }
         }
+
+        // sort by lowest number first.
+        failingPerforms.sort(Comparator.comparingInt(Integer::intValue));
+
+        return failingPerforms;
     }
 
     private static String getJunitRunner(ETGProperties properties) throws Exception {
