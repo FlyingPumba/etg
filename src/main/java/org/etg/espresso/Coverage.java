@@ -8,33 +8,25 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.etg.espresso.EspressoTestRunner.prepareForTestRun;
-
 public class Coverage {
     static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
         String workingFolder = System.getProperty("user.dir");
         String resultsFolder = workingFolder + "/results";
 
-        prepareForTestRun(properties);
         String coverageSrcFolderPath = prepareForTestCoverage(properties, resultsFolder);
+        String coverageEcPath = String.format("%scoverage.ec", coverageSrcFolderPath);
 
-        // delete previous coverage reports
-        String rmCmd = String.format("find %s -type d -name coverage -exec rm -r {} +", properties.getApplicationFolderPath());
-        ProcessRunner.runCommand(rmCmd);
+        // send broadcast to dump coverage file
+        // String dumpCoverageCmd = String.format("adb shell am broadcast -a evolutiz.emma.COLLECT_COVERAGE -n %s/%s.EmmaInstrument.CollectCoverageReceiver",
+        //         properties.getCompiledPackageName(), properties.getPackageName());
+        // String dumpCoverageCmdResult = ProcessRunner.runCommand(dumpCoverageCmd);
 
-        // generate a new one
-        String createReportCmd = String.format("%sgradlew -p %s createDebugCoverageReport " +
-                        "-Pandroid.testInstrumentationRunnerArguments.class=%s.%s",
-                properties.getRootProjectPath(), properties.getRootProjectPath(),
-                properties.getTestPackageName(), espressoTestCase.getTestName());
-        String createReportCmdResult = ProcessRunner.runCommand(createReportCmd);
+        // pull coverage.ec file
+        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(properties), coverageSrcFolderPath);
+        String pullCmdResult = ProcessRunner.runCommand(pullCmd);
 
-        // find where was located the .ec file
-        String findCoverageEcCmd = String.format("find %s -type f -name \"*.ec\"", properties.getApplicationFolderPath());
-        String coverageEcPath = ProcessRunner.runCommand(findCoverageEcCmd);
-        if (coverageEcPath.trim().isEmpty()) {
-            throw new Exception("Unable to find coverage.ec file for Test: " + espressoTestCase.getTestName()
-                    + "\n" + createReportCmdResult);
+        if (pullCmdResult.contains("error")) {
+            throw new Exception("Unable to fetch coverage.ec file: " + pullCmdResult);
         }
 
         // TODO: this is a hack, there has to be a better way
@@ -44,14 +36,15 @@ public class Coverage {
         }
 
         // Build the Jacoco report using the coverage.ec file just obtained and the classes and source files prepared before
-        ProcessRunner.runCommand(String.format("java -jar %s report \"%s\" " +
-                "--classfiles %s/classes " +
-                "--sourcefiles %s/java " +
-                "--xml %s/jacoco_report.xml " +
-                "--html %s/jacoco_html_report",
+        String jacocoCmd = String.format("java -jar %s report \"%s\" " +
+                        "--classfiles %s/classes " +
+                        "--sourcefiles %s/java " +
+                        "--xml %s/jacoco_report.xml " +
+                        "--html %s/jacoco_html_report",
                 jacocoBinPath,
                 coverageEcPath, coverageSrcFolderPath, coverageSrcFolderPath,
-                coverageSrcFolderPath, coverageSrcFolderPath));
+                coverageSrcFolderPath, coverageSrcFolderPath);
+        String jacocoCmdResult = ProcessRunner.runCommand(jacocoCmd);
 
         // Get the total percentage of statements covered using the html in the report
         String indexHtmlPath = new File(String.format("%s/jacoco_html_report/index.html", coverageSrcFolderPath))
@@ -68,7 +61,8 @@ public class Coverage {
         double totalLines = Double.parseDouble(totalLinesStr.replace(",", ""));
         double coveredLines = totalLines - missedLines;
 
-        return coveredLines/totalLines;
+        double coverage = coveredLines / totalLines;
+        return coverage;
     }
 
     /**
@@ -193,5 +187,9 @@ public class Coverage {
         }
 
         return coverageSrcFolderPath;
+    }
+
+    public static String getRemoteCoverageEcPath(ETGProperties properties) {
+        return String.format("/data/user/0/%s/files/coverage.ec", properties.getPackageName());
     }
 }

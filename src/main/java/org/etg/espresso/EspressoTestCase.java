@@ -65,7 +65,7 @@ public class EspressoTestCase {
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
             addToProject(properties, false);
-            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
+            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this, false);
 
             if (newFailingPerformLines.size() > 0) {
                 Integer tryCatchNumber = newFailingPerformLines.get(0);
@@ -205,6 +205,17 @@ public class EspressoTestCase {
     }
 
     public double getCoverage(ETGProperties properties) throws Exception {
+        // get root permissions for adb
+        ProcessRunner.runCommand("adb root");
+
+        // delete coverage.ec file remotely
+        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(properties));
+        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
+
+        // run test case with coverage enabled to create coverage.ec file
+        EspressoTestRunner.runTestCase(properties, this, true);
+
+        // fetch and process the newly created file
         return Coverage.getTestCoverage(properties, this);
     }
 }

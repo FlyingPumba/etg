@@ -18,10 +18,10 @@ public class EspressoTestRunner {
         ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
     }
 
-    public static List<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+    public static List<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase, boolean coverage) throws Exception {
         String junitRunner = prepareForTestRun(properties);
 
-        String testResult = fireTest(properties, espressoTestCase, junitRunner);
+        String testResult = fireTest(properties, espressoTestCase, junitRunner, coverage);
 
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
@@ -53,9 +53,16 @@ public class EspressoTestRunner {
         return getJunitRunner(properties);
     }
 
-    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
-        String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
+    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner,
+                                   boolean coverage) {
+        String coverageFlags = "";
+        if (coverage) {
+            coverageFlags = String.format("-e coverage true -e coverageFile %s",
+                    Coverage.getRemoteCoverageEcPath(properties));
+        }
+
+        String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +
+                        "%s.%s %s/%s", coverageFlags, properties.getTestPackageName(), espressoTestCase.getTestName(),
                 properties.getCompiledTestPackageName(), junitRunner);
         return ProcessRunner.runCommand(instrumentCmd);
     }
