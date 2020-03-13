@@ -170,7 +170,7 @@ public class ETGProperties {
     }
 
     private String getEspressoVersionFromGradleDependencies(String rootProjectFolderPath) throws Exception {
-        String dependenciesCmd = String.format("%sgradlew -p %s app:dependencies | grep espresso-core | head -n 1",
+        String dependenciesCmd = String.format("%sgradlew -p %s androidDependencies 2>&1 | grep espresso-core | head -n 1",
                 rootProjectFolderPath, rootProjectFolderPath);
         String dependenciesResult = ProcessRunner.runCommand(dependenciesCmd);
 
@@ -184,7 +184,8 @@ public class ETGProperties {
         }
 
         String[] secondSplit = firstSplit[1].split(" ");
-        String version = secondSplit[0];
+        String[] thirdSplit = secondSplit[1].split("@aar");
+        String version = thirdSplit[0];
         return version;
     }
 
