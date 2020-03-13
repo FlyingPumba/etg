@@ -109,6 +109,7 @@ public class Coverage {
                 && !classFile.contains("BuildConfig.class")
                 && !classFile.contains("/EmmaInstrument/")
                 && !classFile.contains("/jacoco_instrumented_classes/")
+                && !classFile.contains("/jacoco/")
                 && !classFile.contains("/kapt3/")
             ) {
                 filteredClassFiles.add(classFile);
@@ -145,6 +146,7 @@ public class Coverage {
             ProcessRunner.runCommand(String.format("rsync -a --prune-empty-dirs --exclude=\"*EmmaInstrument*/\" " +
                             "--exclude=\"*AndroidTest*/\" --exclude=\"*UnitTest*/\" --exclude=\"*kapt3*/\" " +
                             "--exclude=\"*jacoco_instrumented_classes*/\" --exclude=\"R\\$*.class\" " +
+                            "--exclude=\"*jacoco*/\" " +
                             "--exclude=\"BuildConfig.class\" --exclude=\"R.class\" --include=\"*.class\" " +
                             "--include=\"*/\" --exclude=\"*\" " +
                             "%s/%s/ %s/%s",
