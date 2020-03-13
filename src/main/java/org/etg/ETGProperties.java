@@ -184,7 +184,7 @@ public class ETGProperties {
         }
 
         String[] secondSplit = firstSplit[1].split(" ");
-        String[] thirdSplit = secondSplit[1].split("@aar");
+        String[] thirdSplit = secondSplit[0].split("@aar");
         String version = thirdSplit[0];
         return version;
     }
