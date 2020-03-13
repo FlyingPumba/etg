@@ -130,14 +130,33 @@ public class Coverage {
         List<String> classFolders = new ArrayList<>();
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
         for (String classFile : filteredClassFiles) {
-            File aux = new File(classFile);
-            String classFileFolder = aux.getParentFile().getAbsolutePath();
+            boolean shouldInspect = true;
+            for (String folder: classFolders) {
+                if (classFile.startsWith(folder)) {
+                    shouldInspect = false;
+                    break;
+                }
+            }
+            if (!shouldInspect) {
+                // we already have the folder for this class file
+                continue;
+            }
 
-            if (classFileFolder.endsWith(packageNamePath)) {
-                String classFolder = classFileFolder.split(packageNamePath)[0];
 
-                if (!classFolders.contains(classFolder)) {
-                    classFolders.add(classFolder);
+            File aux = new File(classFile).getParentFile();
+            String classFileFolder = aux.getAbsolutePath();
+            while (!classFileFolder.endsWith("subjects")) {
+                if (classFileFolder.endsWith(packageNamePath)) {
+                    String classFolder = classFileFolder.split(packageNamePath)[0];
+
+                    if (!classFolders.contains(classFolder)) {
+                        classFolders.add(classFolder);
+                    }
+
+                    break;
+                } else {
+                    aux = aux.getParentFile();
+                    classFileFolder = aux.getAbsolutePath();
                 }
             }
         }
