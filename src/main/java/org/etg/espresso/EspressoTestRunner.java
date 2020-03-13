@@ -57,8 +57,11 @@ public class EspressoTestRunner {
                                    boolean coverage) {
         String coverageFlags = "";
         if (coverage) {
+            // Add coverage flags to command and make sure folder exists
             coverageFlags = String.format("-e coverage true -e coverageFile %s",
                     Coverage.getRemoteCoverageEcPath(properties));
+            ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
+                    Coverage.getRemoteCoverageEcFolderPath(properties)));
         }
 
         String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +

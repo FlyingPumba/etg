@@ -192,4 +192,8 @@ public class Coverage {
     public static String getRemoteCoverageEcPath(ETGProperties properties) {
         return String.format("/data/user/0/%s/files/coverage.ec", properties.getCompiledPackageName());
     }
+
+    public static String getRemoteCoverageEcFolderPath(ETGProperties properties) {
+        return String.format("/data/user/0/%s/files/", properties.getCompiledPackageName());
+    }
 }
