@@ -81,9 +81,12 @@ public class Coverage {
                 properties.getApplicationFolderPath())).split("\n");
 
         String buildVariant = "debug";
+        String buildVariantPath = buildVariant;
+
         String[] productFlavors = properties.getProductFlavors();
         if (productFlavors.length > 0) {
             StringBuilder productFlavorsCombined = new StringBuilder();
+            StringBuilder productFlavorsCombinedPath = new StringBuilder();
             for (int i = 0; i < productFlavors.length; i++) {
                 String flavor = productFlavors[i];
                 if (i == 0) {
@@ -92,16 +95,21 @@ public class Coverage {
                     String cap = flavor.substring(0, 1).toUpperCase() + flavor.substring(1);
                     productFlavorsCombined.append(cap);
                 }
+
+                productFlavorsCombinedPath.append("/");
+                productFlavorsCombinedPath.append(flavor.toLowerCase());
             }
 
             String cap = properties.getBuildType().substring(0, 1).toUpperCase() +
                     properties.getBuildType().substring(1);
             buildVariant = productFlavorsCombined + cap;
+
+            buildVariantPath = productFlavorsCombinedPath.toString() + "/" + properties.getBuildType() + "/";
         }
 
         List<String> filteredClassFiles = new ArrayList<>();
         for (String classFile : classFiles) {
-            if (classFile.contains(buildVariant)
+            if ((classFile.contains(buildVariant) || classFile.contains(buildVariantPath))
                 && !classFile.contains("AndroidTest")
                 && !classFile.contains("androidTest")
                 && !classFile.contains("UnitTest")
