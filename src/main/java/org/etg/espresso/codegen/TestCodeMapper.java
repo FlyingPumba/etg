@@ -162,20 +162,7 @@ public class TestCodeMapper {
             throw new RuntimeException("Unsupported event type: " + action.getActionType());
         }
 
-        if (doesNeedStandaloneCloseSoftKeyboardAction(action)) {
-            addStandaloneCloseSoftKeyboardAction(action, testCodeLines);
-        }
-
         return performCount-1;
-    }
-
-    private void addStandaloneCloseSoftKeyboardAction(Action action, List<String> testCodeLines) {
-        // Simulate an artificial close soft keyboard event.
-        Action closeSoftKeyboardAction = new Action(action.getWidget(), action.getActionType());
-
-        testCodeLines.add("");
-        String variableName = addPickingStatement(closeSoftKeyboardAction, testCodeLines);
-        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), getCloseSoftKeyboard(), false));
     }
 
     private boolean doesNeedStandaloneCloseSoftKeyboardAction(Action action) {
