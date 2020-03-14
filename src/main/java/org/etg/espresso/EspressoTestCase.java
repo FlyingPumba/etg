@@ -168,7 +168,7 @@ public class EspressoTestCase {
             Action action = widgetActions.get(i);
             List<String> testCodeLinesForAction = new ArrayList<>();
 
-            int tryCatchIndex = codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction) - 1;
+            int tryCatchIndex = codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction);
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
 
