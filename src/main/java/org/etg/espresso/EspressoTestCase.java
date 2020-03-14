@@ -68,8 +68,8 @@ public class EspressoTestCase {
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this, false);
 
             if (newFailingPerformLines.size() > 0) {
-                Integer tryCatchNumber = newFailingPerformLines.get(0);
-                this.lowestFailingWidgetActionIndex = widgetActionIndexPerTryCatchNumber.get(tryCatchNumber);
+                Integer tryCatchIndex = newFailingPerformLines.get(0);
+                this.lowestFailingWidgetActionIndex = widgetActionIndexPerTryCatchNumber.get(tryCatchIndex);
 
                 System.out.println(String.format("Lowest failing widget action index is %d (out of %d) TEST %s",
                         lowestFailingWidgetActionIndex, widgetActions.size(), getTestName()));
@@ -168,12 +168,12 @@ public class EspressoTestCase {
             Action action = widgetActions.get(i);
             List<String> testCodeLinesForAction = new ArrayList<>();
 
-            int tryCatchNumber = codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction);
+            int tryCatchIndex = codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction) - 1;
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
 
-            if (!widgetActionIndexPerTryCatchNumber.containsKey(tryCatchNumber)) {
-                widgetActionIndexPerTryCatchNumber.put(tryCatchNumber, i);
+            if (!widgetActionIndexPerTryCatchNumber.containsKey(tryCatchIndex)) {
+                widgetActionIndexPerTryCatchNumber.put(tryCatchIndex, i);
             }
         }
     }
