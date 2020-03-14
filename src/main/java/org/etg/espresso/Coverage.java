@@ -72,6 +72,8 @@ public class Coverage {
      * @return
      */
     private static String prepareForTestCoverage(ETGProperties properties, String resultsFolder) throws Exception {
+        String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
+
         String coverageSrcFolderPath = String.format("%s/%s/", resultsFolder, properties.getCompiledPackageName());
         ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
         ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
@@ -105,6 +107,10 @@ public class Coverage {
             buildVariant = productFlavorsCombined + cap;
 
             buildVariantPath = productFlavorsCombinedPath.toString() + "/" + properties.getBuildType() + "/";
+
+            if (packageNamePath.endsWith(productFlavorsCombined.toString())) {
+                packageNamePath = packageNamePath.split("/" + productFlavorsCombined.toString())[0];
+            }
         }
 
         List<String> filteredClassFiles = new ArrayList<>();
@@ -136,7 +142,6 @@ public class Coverage {
         // -> We should copy from the /classes/ folder onwards
 
         List<String> classFolders = new ArrayList<>();
-        String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
         for (String classFile : filteredClassFiles) {
             boolean shouldInspect = true;
             for (String folder: classFolders) {
