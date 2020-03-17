@@ -4,6 +4,7 @@ import org.etg.ETGProperties;
 import org.etg.utils.ProcessRunner;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class EspressoTestRunner {
@@ -17,44 +18,61 @@ public class EspressoTestRunner {
         ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
     }
 
-    public static ArrayList<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
-        if (!animationsDisabled) {
-            disableAnimations();
-        }
+    public static List<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase, boolean coverage) throws Exception {
+        String junitRunner = prepareForTestRun(properties);
 
-        ArrayList<Integer> failingPerforms = new ArrayList<>();
-
-        compileTests(properties);
-
-        String apkTestPath = getAndroidTestApkPath(properties);
-
-        installApk(apkTestPath);
-
-        clearPackage(properties);
-
-        String junitRunner = getJunitRunner(properties);
-
-        String testResult = fireTest(properties, espressoTestCase, junitRunner);
+        String testResult = fireTest(properties, espressoTestCase, junitRunner, coverage);
 
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
             System.out.println(testResult);
-            return failingPerforms;
+            throw new Exception("There was an error running test case: " + espressoTestCase.getTestName() + "\n"
+                    + testResult);
         }
 
-        parseFailingPerforms(failingPerforms);
-
-        return failingPerforms;
+        return parseFailingPerforms();
     }
 
-    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner) {
-        String instrumentCmd = String.format("adb shell am instrument -w -r -e emma true -e debug false -e class " +
-                        "%s.%s %s/%s", properties.getTestPackageName(), espressoTestCase.getTestName(),
+    public static String prepareForTestRun(ETGProperties properties) throws Exception {
+        if (!animationsDisabled) {
+            disableAnimations();
+        }
+
+        compileTests(properties);
+
+        String apkTestPath = getAndroidTestApkPath(properties);
+        uninstallPackage(properties.getCompiledTestPackageName());
+        installApk(apkTestPath);
+
+        // just in case..
+        clearPackage(properties.getCompiledPackageName());
+        clearPackage(properties.getCompiledTestPackageName());
+        clearPackage(properties.getPackageName());
+        clearPackage(properties.getTestPackageName());
+
+        return getJunitRunner(properties);
+    }
+
+    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner,
+                                   boolean coverage) {
+        String coverageFlags = "";
+        if (coverage) {
+            // Add coverage flags to command and make sure folder exists
+            coverageFlags = String.format("-e coverage true -e coverageFile %s",
+                    Coverage.getRemoteCoverageEcPath(properties));
+            ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
+                    Coverage.getRemoteCoverageEcFolderPath(properties)));
+        }
+
+        String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +
+                        "%s.%s %s/%s", coverageFlags, properties.getTestPackageName(), espressoTestCase.getTestName(),
                 properties.getCompiledTestPackageName(), junitRunner);
         return ProcessRunner.runCommand(instrumentCmd);
     }
 
-    private static void parseFailingPerforms(ArrayList<Integer> failingPerforms) {
+    private static List<Integer> parseFailingPerforms() {
+        List<Integer> failingPerforms = new ArrayList<>();
+
         String logcatCmd = "adb logcat -d -s System.out";
         String[] logcatLines = ProcessRunner.runCommand(logcatCmd).split("\n");
         for (int i = logcatLines.length - 1; i >= 0; i--) {
@@ -69,6 +87,11 @@ public class EspressoTestRunner {
                 failingPerforms.add(performNumber);
             }
         }
+
+        // sort by lowest number first.
+        failingPerforms.sort(Comparator.comparingInt(Integer::intValue));
+
+        return failingPerforms;
     }
 
     private static String getJunitRunner(ETGProperties properties) throws Exception {
@@ -106,14 +129,19 @@ public class EspressoTestRunner {
         return testRunner;
     }
 
-    private static void clearPackage(ETGProperties properties) {
-        String clearCmd = String.format("adb shell pm clear %s", properties.getCompiledPackageName());
+    private static void clearPackage(String packageName) {
+        String clearCmd = String.format("adb shell pm clear %s", packageName);
         ProcessRunner.runCommand(clearCmd);
     }
 
     private static void installApk(String apkTestPath) {
         String installCmd = String.format("adb install %s", apkTestPath);
         ProcessRunner.runCommand(installCmd);
+    }
+
+    private static void uninstallPackage(String packageName) {
+        String uninstallCmd = String.format("adb uninstall %s", packageName);
+        ProcessRunner.runCommand(uninstallCmd);
     }
 
     private static String getAndroidTestApkPath(ETGProperties properties) throws Exception {

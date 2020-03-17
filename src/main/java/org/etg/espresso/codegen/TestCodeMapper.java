@@ -34,7 +34,6 @@ import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
 import org.etg.mate.models.Swipe;
 import org.etg.mate.models.Widget;
-import org.etg.utils.Randomness;
 import org.etg.utils.Tuple;
 
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ public class TestCodeMapper {
         return neededTemplates;
     }
 
-    public void addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
+    public int addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
         String lastStatement = null;
         if (testCodeLines.size() > 0) {
             lastStatement = testCodeLines.get(testCodeLines.size() - 1);
@@ -135,7 +134,7 @@ public class TestCodeMapper {
             statement += "\n";
 
             testCodeLines.add(statement);
-            return;
+            return performCount-1;
 
         } else if (action.getActionType() == ActionType.MENU) {
             String statement = getPressMenuKeyAction() + getStatementTerminator();
@@ -146,7 +145,7 @@ public class TestCodeMapper {
             statement += "\n";
 
             testCodeLines.add(statement);
-            return;
+            return performCount-1;
         }
 
 //        if (event.isDelayedMessagePost()) {
@@ -191,18 +190,7 @@ public class TestCodeMapper {
             throw new RuntimeException("Unsupported event type: " + action.getActionType());
         }
 
-        if (doesNeedStandaloneCloseSoftKeyboardAction(action)) {
-            addStandaloneCloseSoftKeyboardAction(action, testCodeLines);
-        }
-    }
-
-    private void addStandaloneCloseSoftKeyboardAction(Action action, List<String> testCodeLines) {
-        // Simulate an artificial close soft keyboard event.
-        Action closeSoftKeyboardAction = new Action(action.getWidget(), action.getActionType());
-
-        testCodeLines.add("");
-        String variableName = addPickingStatement(closeSoftKeyboardAction, testCodeLines);
-        testCodeLines.add(createActionStatement(variableName, closeSoftKeyboardAction.getWidget().getRecyclerViewChildPosition(), getCloseSoftKeyboard()));
+        return performCount-1;
     }
 
     private boolean doesNeedStandaloneCloseSoftKeyboardAction(Action action) {
@@ -286,7 +274,7 @@ public class TestCodeMapper {
             // there is a child that might make this statement more specific
 
             while (!target.getChildren().isEmpty()) {
-                target = Randomness.randomElement(target.getChildren());
+                target = target.getChildren().get(0);
             }
 
             testCodeLines.remove(testCodeLines.size() - 1);

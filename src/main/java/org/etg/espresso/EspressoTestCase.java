@@ -7,68 +7,82 @@ import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.VelocityTemplateConverter;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
+import org.etg.utils.ProcessRunner;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Vector;
 
 public class EspressoTestCase {
 
     private final String packageName;
     private final String testPackageName;
+    private ETGProperties etgProperties;
     private WidgetTestCase widgetTestCase;
     private String testCaseName;
     private String espressoPackageName;
-    private final TestCodeMapper codeMapper;
-    private List<String> testCodeLines;
+
+    private TestCodeMapper codeMapper;
     private VelocityTemplate testCaseTemplate;
+
+    private HashMap<Integer, List<String>> testCodeLinesPerWidgetActionIndex;
+    private HashMap<Integer, Integer> widgetActionIndexPerTryCatchNumber;
+    private List<Action> widgetActions;
+    private int lowestFailingWidgetActionIndex;
 
 
     public EspressoTestCase(ETGProperties properties,
                             WidgetTestCase widgetTestCase,
                             String testCaseName,
                             VelocityTemplate testCaseTemplate) throws Exception {
+        this.etgProperties = properties;
         this.packageName = properties.getPackageName();
         this.testPackageName = properties.getTestPackageName();
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
         this.espressoPackageName = properties.getEspressoPackageName();
+
         this.testCaseTemplate = testCaseTemplate;
-        codeMapper = new TestCodeMapper(properties);
-        testCodeLines = new ArrayList<>();
+
+        this.testCodeLinesPerWidgetActionIndex = new HashMap<Integer, List<String>>();
+        this.widgetActionIndexPerTryCatchNumber = new HashMap<Integer, Integer>();
+        this.widgetActions = widgetTestCase.getEventSequence();
+        this.lowestFailingWidgetActionIndex = this.widgetActions.size();
+
+        generateTestCodeLines(true);
     }
 
+    /**
+     * Perform fixed-point removal of failing performs in the test case
+     *
+     * @param properties
+     * @throws Exception
+     */
     public void pruneFailingPerforms(ETGProperties properties) throws Exception {
-        // Perform fixed-point removal of failing performs in the test case
-
-        ArrayList<Integer> failingPerformLines;
-        ArrayList<Integer> newFailingPerformLines = new ArrayList<>();
+        List<Integer> failingPerformLines;
+        List<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            addToProject(properties, true);
-            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this);
+            addToProject(properties, false);
+            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this, false);
 
             if (newFailingPerformLines.size() > 0) {
-                removePerformsByNumber(newFailingPerformLines);
+                Integer tryCatchIndex = newFailingPerformLines.get(0);
+                this.lowestFailingWidgetActionIndex = widgetActionIndexPerTryCatchNumber.get(tryCatchIndex);
+
+                System.out.println(String.format("Lowest failing widget action index is %d (out of %d) TEST %s",
+                        lowestFailingWidgetActionIndex, widgetActions.size(), getTestName()));
             }
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
 
-    public void addToProject(ETGProperties properties, boolean addTryCatchs) throws Exception {
-        testCodeLines.clear();
-
-        codeMapper.setSurroundPerformsWithTryCatch(addTryCatchs);
-        Vector<Action> actions = widgetTestCase.getEventSequence();
-        for (Action action : actions) {
-            codeMapper.addTestCodeLinesForAction(action, testCodeLines);
-        }
-
-        writeToFolder(properties.getOutputPath());
+    public void addToProject(ETGProperties properties, boolean prettify) throws Exception {
+        writeToFolder(properties.getOutputPath(), prettify);
         writeCustomUsedClasses(properties.getOutputPath());
     }
 
-    private void writeToFolder(String outputFolderPath) throws Exception {
+    private void writeToFolder(String outputFolderPath, boolean prettify) throws Exception {
         VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         String testContent = templateConverter.applyContextToTemplate(testCaseTemplate);
         String outputFilePath = outputFolderPath + getTestName() + ".java";
@@ -76,6 +90,19 @@ public class EspressoTestCase {
         PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
         out.print(testContent);
         out.close();
+
+        if (prettify) {
+            // TODO: this is a hack, there has to be a better way
+            String workingFolder = System.getProperty("user.dir");
+            String googleBinPath = "bin/google-java-format-1.7-all-deps.jar";
+            if (!workingFolder.endsWith("etg")) {
+                googleBinPath = "etg/" + googleBinPath;
+            }
+
+            // run Google Java formatter on the output file
+            String formatCmd = String.format("java -jar %s -i %s", googleBinPath, outputFilePath);
+            ProcessRunner.runCommand(formatCmd);
+        }
     }
 
     private void writeCustomUsedClasses(String outputFolderPath) throws Exception {
@@ -122,7 +149,7 @@ public class EspressoTestCase {
         velocityContext.put("AddClassOrSuperClassesNameMethod", codeMapper.isClassOrSuperClassesNameAdded());
         velocityContext.put("AddTryCatchImport", codeMapper.isTryCatchAdded());
 
-        velocityContext.put("TestCode", testCodeLines);
+        velocityContext.put("TestCode", getTestCodeLines());
 
         velocityContext.put("longClickActionAdded", codeMapper.isLongClickActionAdded());
         velocityContext.put("clickActionAdded", codeMapper.isClickActionAdded());
@@ -132,7 +159,44 @@ public class EspressoTestCase {
         return velocityContext;
     }
 
+    private void generateTestCodeLines(boolean addTryCatchs) throws Exception {
+        this.codeMapper = new TestCodeMapper(this.etgProperties);
+        codeMapper.setSurroundPerformsWithTryCatch(addTryCatchs);
+        testCodeLinesPerWidgetActionIndex.clear();
+
+        for (int i = 0; i < widgetActions.size(); i++) {
+            Action action = widgetActions.get(i);
+            List<String> testCodeLinesForAction = new ArrayList<>();
+
+            int tryCatchIndex = codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction);
+
+            testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
+
+            if (!widgetActionIndexPerTryCatchNumber.containsKey(tryCatchIndex)) {
+                widgetActionIndexPerTryCatchNumber.put(tryCatchIndex, i);
+            }
+        }
+    }
+
     public List<String> getTestCodeLines() {
+        List<String> testCodeLines = new ArrayList<>();
+        for (int i = 0; i < widgetActions.size(); i++) {
+            List<String> testCodeLinesForAction = testCodeLinesPerWidgetActionIndex.get(i);
+
+            if (i >= lowestFailingWidgetActionIndex) {
+                // comment out failing lines
+                for (int j = 0; j < testCodeLinesForAction.size(); j++) {
+                    String testCodeLine = testCodeLinesForAction.get(j);
+                    String[] lines = testCodeLine.split("\n");
+                    for (String line: lines) {
+                        testCodeLines.add("// " + line);
+                    }
+                }
+            } else {
+                testCodeLines.addAll(testCodeLinesForAction);
+            }
+        }
+
         return testCodeLines;
     }
 
@@ -140,44 +204,18 @@ public class EspressoTestCase {
         return testCaseName;
     }
 
-    public void removePerformsByNumber(ArrayList<Integer> lineNumbers) {
-        List<String> newTestCodeLines = new ArrayList<>();
-        int performNumber = 0;
-        for (int i = 0; i < testCodeLines.size();) {
-            String statement = testCodeLines.get(i);
+    public double getCoverage(ETGProperties properties, String resultsFolder) throws Exception {
+        // get root permissions for adb
+        ProcessRunner.runCommand("adb root");
 
-            if (statement.contains("onView")) {
-                // not a perform, but check if it's related to next one
-                if (i+1 < testCodeLines.size()) {
+        // delete coverage.ec file remotely
+        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(properties));
+        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
 
-                    String variableName = statement.split("ViewInteraction ")[1].split(" = ")[0];
-                    String nextStatement = testCodeLines.get(i + 1);
+        // run test case with coverage enabled to create coverage.ec file
+        EspressoTestRunner.runTestCase(properties, this, true);
 
-                    if (!nextStatement.contains("onView") && nextStatement.contains(variableName)
-                            && lineNumbers.contains(performNumber)) {
-                        // both this and next statement are related, and the next statement is a perform that should be removed
-                        // skip both and increase perform number
-                        i++;
-                        performNumber++;
-
-                    } else {
-                        newTestCodeLines.add(statement);
-                    }
-
-                } else {
-                    newTestCodeLines.add(statement);
-                }
-
-            } else {
-                if (!lineNumbers.contains(performNumber)) {
-                    newTestCodeLines.add(statement);
-                }
-
-                performNumber++;
-            }
-
-            i++;
-        }
-        testCodeLines = newTestCodeLines;
+        // fetch and process the newly created file
+        return Coverage.getTestCoverage(properties, this, resultsFolder);
     }
 }

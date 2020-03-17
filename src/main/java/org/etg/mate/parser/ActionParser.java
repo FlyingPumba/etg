@@ -28,15 +28,18 @@ public class ActionParser {
         Widget widget = WidgetParser.parse(mapper, node.get("widget"));
         ActionType actionType = mapper.convertValue(node.get("actionType"), ActionType.class);
         Action action = new Action(widget, actionType);
+
         if (!node.get("swipe").isNull()){
             Point initial = new Point(node.get("swipe").get("initialPosition").get("x").asInt(), node.get("swipe").get("initialPosition").get("y").asInt());
             Point finalP = new Point(node.get("swipe").get("finalPosition").get("x").asInt(), node.get("swipe").get("finalPosition").get("y").asInt());
             action.setSwipe(new Swipe(initial, finalP, 15));
         }
+
         final JsonNode extraInfo = node.get("extraInfo");
-        if (extraInfo !=null){
+        if (extraInfo != null){
             action.setExtraInfo(extraInfo.asText());
         }
+
         return action;
     }
 }

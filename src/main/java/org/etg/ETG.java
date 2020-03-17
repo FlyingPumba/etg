@@ -24,6 +24,13 @@ public class ETG {
             System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
             System.out.println("JSON file MD5: " + properties.getJsonMD5());
 
+            String workingFolder = System.getProperty("user.dir");
+            String resultsPath = workingFolder + "/results";
+            if (args.length > 1) {
+                resultsPath = args[1];
+            }
+            System.out.println("Output folder: " + resultsPath);
+
             System.out.println("Parsing widget test cases");
             List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPath());
 
@@ -37,7 +44,12 @@ public class ETG {
             System.out.println("Pruning failing performs from Espresso tests");
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 espressoTestCase.pruneFailingPerforms(properties);
-                espressoTestCase.addToProject(properties, false);
+
+                double coverage = espressoTestCase.getCoverage(properties, resultsPath);
+                System.out.println(String.format("TEST: %s COVERAGE: %.8f",
+                        espressoTestCase.getTestName(), coverage));
+
+                espressoTestCase.addToProject(properties, true);
             }
 
             System.out.println("ETG finished");
