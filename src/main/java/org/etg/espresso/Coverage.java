@@ -9,17 +9,11 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Coverage {
-    static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase) throws Exception {
+    static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase, String resultsFolder) throws Exception {
         String workingFolder = System.getProperty("user.dir");
-        String resultsFolder = workingFolder + "/results";
 
         String coverageSrcFolderPath = prepareForTestCoverage(properties, resultsFolder);
         String coverageEcPath = String.format("%scoverage.ec", coverageSrcFolderPath);
-
-        // send broadcast to dump coverage file
-        // String dumpCoverageCmd = String.format("adb shell am broadcast -a evolutiz.emma.COLLECT_COVERAGE -n %s/%s.EmmaInstrument.CollectCoverageReceiver",
-        //         properties.getCompiledPackageName(), properties.getPackageName());
-        // String dumpCoverageCmdResult = ProcessRunner.runCommand(dumpCoverageCmd);
 
         // pull coverage.ec file
         String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(properties), coverageSrcFolderPath);
@@ -74,7 +68,7 @@ public class Coverage {
     private static String prepareForTestCoverage(ETGProperties properties, String resultsFolder) throws Exception {
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
 
-        String coverageSrcFolderPath = String.format("%s/%s/", resultsFolder, properties.getCompiledPackageName());
+        String coverageSrcFolderPath = String.format("%s/coverage/", resultsFolder);
         ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
         ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
 

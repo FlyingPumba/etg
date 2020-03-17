@@ -204,7 +204,7 @@ public class EspressoTestCase {
         return testCaseName;
     }
 
-    public double getCoverage(ETGProperties properties) throws Exception {
+    public double getCoverage(ETGProperties properties, String resultsFolder) throws Exception {
         // get root permissions for adb
         ProcessRunner.runCommand("adb root");
 
@@ -216,6 +216,6 @@ public class EspressoTestCase {
         EspressoTestRunner.runTestCase(properties, this, true);
 
         // fetch and process the newly created file
-        return Coverage.getTestCoverage(properties, this);
+        return Coverage.getTestCoverage(properties, this, resultsFolder);
     }
 }
