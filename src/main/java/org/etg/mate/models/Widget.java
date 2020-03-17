@@ -73,6 +73,7 @@ public class Widget {
 
     public void setParent(Widget parent) {
         this.parent = parent;
+        parent.addChild(this);
     }
 
     public String getId() {
@@ -347,7 +348,10 @@ public class Widget {
     }
 
     public void addChild(Widget widget) {
-        children.add(widget);
+        if (!children.contains(widget)) {
+            children.add(widget);
+            widget.setParent(this);
+        }
     }
 
     public String getNextChildsText() {
@@ -542,4 +546,29 @@ public class Widget {
         // otherwise, return null
         return null;
     }
+
+
+    public Widget getReceiverOfClickInCoordinates(int x, int y){
+        for(Widget child: children){
+            Widget receiver = child.getReceiverOfClickInCoordinates(x, y);
+            if (receiver != null) return receiver;
+        }
+
+        if (receivesClickOnCoordinates(x, y)) return this;
+        else return null;
+    }
+
+
+    private boolean receivesClickOnCoordinates(int x, int y){
+        return isInRange(x, x1, x2) && isInRange(y, y1, y2);
+    }
+
+
+    private boolean isInRange(int c, int c1, int c2){
+        return (c1 <= c && c <= c2) || (c2 <= c && c <= c1);
+    }
+
+
+
+
 }
