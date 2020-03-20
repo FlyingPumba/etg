@@ -1,6 +1,7 @@
 package org.etg.espresso;
 
 import org.etg.ETGProperties;
+import org.etg.espresso.codegen.TestCodeGenerator;
 import org.etg.utils.ProcessRunner;
 
 import java.util.ArrayList;
@@ -193,5 +194,12 @@ public class EspressoTestRunner {
         if (!compileResult.contains("BUILD SUCCESSFUL")) {
             throw new Exception("Unable to compile Espresso Tests:\n" + compileResult);
         }
+    }
+
+    public static void cleanOutputPath(ETGProperties properties) {
+        // delete existing ETG test cases
+        String rmCmd = String.format("%s/%s*.java", properties.getOutputPath(),
+                TestCodeGenerator.getETGTestCaseNamePrefix());
+        ProcessRunner.runCommand(rmCmd);
     }
 }

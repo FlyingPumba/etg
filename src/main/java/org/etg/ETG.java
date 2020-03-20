@@ -3,6 +3,7 @@ package org.etg;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.espresso.EspressoTestCase;
+import org.etg.espresso.EspressoTestRunner;
 import org.etg.espresso.codegen.TestCodeGenerator;
 import org.etg.mate.models.WidgetTestCase;
 import org.etg.mate.parser.TestCaseParser;
@@ -23,6 +24,8 @@ public class ETG {
             ETGProperties properties = ETGProperties.loadProperties(args[0]);
             System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
             System.out.println("JSON file MD5: " + properties.getJsonMD5());
+
+            EspressoTestRunner.cleanOutputPath(properties);
 
             String workingFolder = System.getProperty("user.dir");
             String resultsPath = workingFolder + "/results";

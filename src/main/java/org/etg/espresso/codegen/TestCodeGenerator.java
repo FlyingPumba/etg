@@ -22,11 +22,16 @@ public class TestCodeGenerator {
         for (int i = 0; i < widgetTestCases.size(); i++) {
             WidgetTestCase widgetTestCase = widgetTestCases.get(i);
 
-            EspressoTestCase testCase = new EspressoTestCase(properties, widgetTestCase, String.format("ETGTestCase%d", i), new TestCodeTemplate());
+            EspressoTestCase testCase = new EspressoTestCase(properties, widgetTestCase,
+                    String.format("%s%d", getETGTestCaseNamePrefix(), i), new TestCodeTemplate());
 
             espressoTestCases.add(testCase);
         }
 
         return espressoTestCases;
+    }
+
+    public static String getETGTestCaseNamePrefix() {
+        return "ETGTestCase";
     }
 }
