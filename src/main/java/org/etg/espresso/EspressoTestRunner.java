@@ -209,7 +209,7 @@ public class EspressoTestRunner {
 
     public static void cleanOutputPath(ETGProperties properties) {
         // delete existing ETG test cases
-        String rmCmd = String.format("%s/%s*.java", properties.getOutputPath(),
+        String rmCmd = String.format("rm %s/%s*.java", properties.getOutputPath(),
                 TestCodeGenerator.getETGTestCaseNamePrefix());
         ProcessRunner.runCommand(rmCmd);
     }
