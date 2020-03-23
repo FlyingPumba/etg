@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ProcessRunner {
     private static final String[] WIN_RUNTIME = {"cmd.exe", "/C"};
@@ -50,6 +51,7 @@ public class ProcessRunner {
 
     public static String runCommand(String command) {
         System.out.println(String.format("Running command: %s", command));
+        long startTime = System.nanoTime();
 
         boolean win = false;
         String os = System.getProperty("os.name");
@@ -58,6 +60,13 @@ public class ProcessRunner {
         } else {
             command = "source ~/.bashrc; " + command;
         }
-        return ProcessRunner.runProcess(win, command);
+        String output = ProcessRunner.runProcess(win, command);
+
+        long endTime = System.nanoTime();
+        long elapsedTime = endTime - startTime;
+        long seconds = TimeUnit.SECONDS.convert(elapsedTime, TimeUnit.NANOSECONDS);
+        System.out.println("It took: " + seconds + " seconds");
+
+        return output;
     }
 }

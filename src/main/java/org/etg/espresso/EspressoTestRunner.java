@@ -68,7 +68,18 @@ public class EspressoTestRunner {
         String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +
                         "%s.%s %s/%s", coverageFlags, properties.getTestPackageName(), espressoTestCase.getTestName(),
                 properties.getCompiledTestPackageName(), junitRunner);
-        return ProcessRunner.runCommand(instrumentCmd);
+        String output = ProcessRunner.runCommand(instrumentCmd);
+
+        // Add some time sleep after executing test to avoid clogging the emulator
+        try {
+            System.out.println("Waiting 30 seconds after test");
+            int seconds = 30;
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            // do nothing
+        }
+
+        return output;
     }
 
     private static List<Integer> parseFailingPerforms() {
