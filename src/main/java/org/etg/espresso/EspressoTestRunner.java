@@ -48,8 +48,8 @@ public class EspressoTestRunner {
         // just in case..
         clearPackage(properties.getCompiledPackageName());
         clearPackage(properties.getCompiledTestPackageName());
-        clearPackage(properties.getPackageName());
-        clearPackage(properties.getTestPackageName());
+
+        grantAllPermissions(properties.getCompiledPackageName());
 
         return getJunitRunner(properties);
     }
@@ -144,6 +144,19 @@ public class EspressoTestRunner {
     private static void clearPackage(String packageName) {
         String clearCmd = String.format("adb shell pm clear %s", packageName);
         ProcessRunner.runCommand(clearCmd);
+    }
+
+    private static void grantAllPermissions(String packageName) {
+        String permissionsCmd = "adb shell pm list permissions -d -g | grep permission: | cut -d':' -f2";
+        String output = ProcessRunner.runCommand(permissionsCmd);
+        for (String permission: output.split("\n")) {
+            grantPermission(packageName, permission);
+        }
+    }
+
+    private static void grantPermission(String packageName, String permission) {
+        String grantCmd = String.format("adb shell pm grant %s %s >/dev/null 2>&1", packageName, permission);
+        ProcessRunner.runCommand(grantCmd);
     }
 
     private static void installApk(String apkTestPath) {
