@@ -71,7 +71,7 @@ public class EspressoTestCase {
                 Integer tryCatchIndex = newFailingPerformLines.get(0);
                 this.lowestFailingWidgetActionIndex = widgetActionIndexPerTryCatchNumber.get(tryCatchIndex);
 
-                System.out.println(String.format("Lowest failing widget action index is %d (out of %d) TEST %s",
+                System.out.println(String.format("Pruning actions starting after widget action with index %d (out of %d) TEST %s",
                         lowestFailingWidgetActionIndex, widgetActions.size(), getTestName()));
             }
         } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
@@ -203,5 +203,13 @@ public class EspressoTestCase {
 
         // fetch and process the newly created file
         return Coverage.getTestCoverage(properties, this, resultsFolder);
+    }
+
+    public int getLowestFailingWidgetActionIndex() {
+        return lowestFailingWidgetActionIndex;
+    }
+
+    public int getWidgetActionsCount(){
+        return widgetActions.size();
     }
 }

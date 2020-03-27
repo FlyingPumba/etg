@@ -51,6 +51,9 @@ public class ETG {
                 double coverage = espressoTestCase.getCoverage(properties, resultsPath);
                 System.out.println(String.format("TEST: %s COVERAGE: %.8f",
                         espressoTestCase.getTestName(), coverage));
+                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTIONS: %d TOTAL-ACTIONS: %d",
+                        espressoTestCase.getTestName(), espressoTestCase.getLowestFailingWidgetActionIndex(),
+                        espressoTestCase.getWidgetActionsCount()));
 
                 espressoTestCase.addToProject(properties, true);
             }
