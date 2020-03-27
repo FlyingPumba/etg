@@ -72,8 +72,8 @@ public class EspressoTestRunner {
 
         // Add some time sleep after executing test to avoid clogging the emulator
         try {
-            System.out.println("Waiting 15 seconds after test");
-            int seconds = 15;
+            System.out.println("Waiting 5 seconds after test");
+            int seconds = 5;
             Thread.sleep(seconds * 1000);
         } catch (InterruptedException e) {
             // do nothing
