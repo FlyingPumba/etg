@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.espresso.EspressoTestCase;
 import org.etg.espresso.EspressoTestRunner;
 import org.etg.espresso.codegen.TestCodeGenerator;
+import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
 import org.etg.mate.parser.TestCaseParser;
 
@@ -48,12 +49,34 @@ public class ETG {
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 espressoTestCase.pruneFailingPerforms(properties);
 
+                // calculate and output coverage after pruning
                 double coverage = espressoTestCase.getCoverage(properties, resultsPath);
                 System.out.println(String.format("TEST: %s COVERAGE: %.8f",
                         espressoTestCase.getTestName(), coverage));
-                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTIONS: %d TOTAL-ACTIONS: %d",
-                        espressoTestCase.getTestName(), espressoTestCase.getLowestFailingWidgetActionIndex(),
-                        espressoTestCase.getWidgetActionsCount()));
+
+                // calculate and output information about failing actions
+                int lowestFailingWidgetActionIndex = espressoTestCase.getLowestFailingWidgetActionIndex();
+                int widgetActionsCount = espressoTestCase.getWidgetActionsCount();
+                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-INDEX: %d TOTAL-ACTIONS: %d",
+                        espressoTestCase.getTestName(),
+                        lowestFailingWidgetActionIndex,
+                        widgetActionsCount));
+
+                Action lowestFailingAction = null;
+                Action highestSuccessfulAction = null;
+
+                if (lowestFailingWidgetActionIndex < widgetActionsCount) {
+                    lowestFailingAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex);
+
+                    if (lowestFailingWidgetActionIndex > 0) {
+                        highestSuccessfulAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex - 1);
+                    }
+                }
+
+                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-TYPE: %s HIGHEST-SUCCESSFUL-ACTION-TYPE: %s",
+                        espressoTestCase.getTestName(),
+                        lowestFailingAction == null? "-" : lowestFailingAction.getActionType().toString(),
+                        highestSuccessfulAction == null? "-" : highestSuccessfulAction.getActionType().toString()));
 
                 espressoTestCase.addToProject(properties, true);
             }

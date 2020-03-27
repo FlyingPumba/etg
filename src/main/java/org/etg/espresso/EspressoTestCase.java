@@ -212,4 +212,8 @@ public class EspressoTestCase {
     public int getWidgetActionsCount(){
         return widgetActions.size();
     }
+
+    public List<Action> getWidgetActions(){
+        return widgetActions;
+    }
 }
