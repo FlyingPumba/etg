@@ -83,7 +83,7 @@ public class EspressoTestCase {
     }
 
     private void writeToFolder(String outputFolderPath, boolean prettify) throws Exception {
-        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
+        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext(etgProperties));
         String testContent = templateConverter.applyContextToTemplate(testCaseTemplate);
         String outputFilePath = outputFolderPath + getTestName() + ".java";
 
@@ -106,7 +106,7 @@ public class EspressoTestCase {
     }
 
     private void writeCustomUsedClasses(String outputFolderPath) throws Exception {
-        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
+        VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext(etgProperties));
         for (VelocityTemplate vTemplate : codeMapper.getNeededTemplates()) {
             String classContent = templateConverter.applyContextToTemplate(vTemplate);
             String outputFilePath = outputFolderPath + vTemplate.getName();
@@ -117,24 +117,10 @@ public class EspressoTestCase {
         }
     }
 
-    private VelocityContext createVelocityContext() throws Exception {
+    private VelocityContext createVelocityContext(ETGProperties properties) throws Exception {
         VelocityContext velocityContext = new VelocityContext();
 
-        Object[] visitedActivities = widgetTestCase.getVisitedActivities().toArray();
-        if (visitedActivities.length == 0) {
-            throw new Exception("No valid activities found in widget test case");
-        }
-        if ("unknown".equals(visitedActivities[0].toString())|| !visitedActivities[0].toString().contains("/")) {
-            throw new Exception(String.format("No valid activity found in widget test case: %s", visitedActivities[0].toString()));
-        }
-
-        String activityName = visitedActivities[0].toString().split("/")[1];
-        if (activityName.startsWith(packageName)) {
-            velocityContext.put("TestActivityName", activityName);
-        } else {
-            velocityContext.put("TestActivityName", packageName + activityName);
-        }
-
+        velocityContext.put("TestActivityName", properties.getMainActivity());
         velocityContext.put("PackageName", testPackageName);
         velocityContext.put("ResourcePackageName", packageName);
 

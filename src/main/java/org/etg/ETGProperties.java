@@ -195,4 +195,23 @@ public class ETGProperties {
         String md5Result = ProcessRunner.runCommand(md5Cmd);
         return md5Result.split(" ")[0];
     }
+
+    public String getMainActivity() throws Exception {
+        if (!properties.containsKey("mainActivity")) {
+            String mainActivity = getMainActivityUsingADB();
+            properties.setProperty("mainActivity", mainActivity);
+        }
+
+        return properties.getProperty("mainActivity");
+    }
+
+    public String getMainActivityUsingADB() throws Exception {
+        String mainActivityCmd = String.format("adb shell pm dump %s |  grep -A 1 'filter' | head -n 1 | cut -d ' ' -f 10 | cut -d'/' -f 2", getCompiledPackageName());
+        String mainActivityResult = ProcessRunner.runCommand(mainActivityCmd).replace("\n", "");
+        if (mainActivityResult.isEmpty()) {
+            throw new Exception("Couldn't find Main Activity for package " + getCompiledPackageName());
+        }
+
+        return mainActivityResult;
+    }
 }
