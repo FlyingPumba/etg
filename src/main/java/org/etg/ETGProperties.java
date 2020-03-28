@@ -212,6 +212,10 @@ public class ETGProperties {
             throw new Exception("Couldn't find Main Activity for package " + getCompiledPackageName());
         }
 
+        if (mainActivityResult.startsWith(".")) {
+            mainActivityResult = getPackageName() + mainActivityResult;
+        }
+
         return mainActivityResult;
     }
 }
