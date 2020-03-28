@@ -206,16 +206,30 @@ public class ETGProperties {
     }
 
     public String getMainActivityUsingADB() throws Exception {
-        String mainActivityCmd = String.format("adb shell pm dump %s |  grep -A 1 'filter' | head -n 1 | cut -d ' ' -f 10 | cut -d'/' -f 2", getCompiledPackageName());
-        String mainActivityResult = ProcessRunner.runCommand(mainActivityCmd).replace("\n", "");
-        if (mainActivityResult.isEmpty()) {
+        String pmDumpCmd = String.format("adb shell pm dump %s", getCompiledPackageName());
+        String[] lines = ProcessRunner.runCommand(pmDumpCmd).split("\n");
+
+        String activity = "";
+        for (String line: lines) {
+            if (line.contains("filter")) {
+                // we found a new activity down the stream of pm dump
+                activity = line.split("/")[1].split(" ")[0];
+            }
+
+            if (line.contains("android.intent.category.LAUNCHER")) {
+                // the last activity we found is the one we want
+                break;
+            }
+        }
+
+        if (activity.isEmpty()) {
             throw new Exception("Couldn't find Main Activity for package " + getCompiledPackageName());
         }
 
-        if (mainActivityResult.startsWith(".")) {
-            mainActivityResult = getPackageName() + mainActivityResult;
+        if (activity.startsWith(".")) {
+            activity = getPackageName() + activity;
         }
 
-        return mainActivityResult;
+        return activity;
     }
 }
