@@ -94,8 +94,8 @@ public class EspressoTestRunner {
                 // we reached the beginning of the test run
                 break;
             } else if (logcatLine.contains("ERROR: when executing line number")) {
-                String lineNumberStr = logcatLine.split("perform number: ")[1];
-                Integer performNumber = Integer.valueOf(lineNumberStr);
+                String performNumberStr = logcatLine.split("perform number: ")[1];
+                Integer performNumber = Integer.valueOf(performNumberStr);
                 failingPerforms.add(performNumber);
             }
         }

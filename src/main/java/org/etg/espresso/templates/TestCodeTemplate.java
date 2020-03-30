@@ -161,7 +161,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "            }\n" +
                 "        }\n" +
                 "\n" +
-                "        return e.getMessage();\n" +
+                "        return \"ERROR: when executing line number: unknown, perform number: \" + performNumber;\n" +
                 "    }\n" +
                 "    #end\n" +
                 "#if (${swipeActionAdded})\n" +
