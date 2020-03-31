@@ -237,52 +237,6 @@ public class TestCodeMapper {
         testCodeLines.remove(testCodeLines.size() - 1);
         testCodeLines.add(parsedStatement.toString());
 
-        /*
-        This is no longer necessary because of above algorithm
-
-        //withText("i")
-//ViewInteraction android_view_ViewGroup = onView(allOf(classOrSuperClassesName(is("android.view.ViewGroup")),withParent(allOf(classOrSuperClassesName(is("android.widget.FrameLayout")),withParent(allOf(withId(R.id.pelisList),withParent(classOrSuperClassesName(is("android.view.ViewGroup")))))))));
-        ActionType actionType = action.getActionType();
-        Widget target = action.getWidget();
-
-        // check if this view pick statement is too unspecific.
-        // If so, try to start the creation of the statement with a more specific children
-        Widget childrenWithSomeText = target.getChildrenWithContentDescriptionOrText();
-        Widget childrenWithRId = target.getChildrenWithRId();
-
-        // System.out.println("Statement prior rewrite: " + testCodeLines.get(0));
-
-        if (childrenWithSomeText != null &&
-                !statement.contains("withContentDescription") &&
-                !statement.contains("withText")) {
-            // there as a child with some text to make the statement more specific
-
-            testCodeLines.remove(testCodeLines.size() - 1);
-            variableName = addViewPickingStatement(new Action(childrenWithSomeText, actionType), testCodeLines);
-
-        } else if (childrenWithRId != null &&
-                !statement.contains("R.id")) {
-            // there is a child with R.id to make the statement more specific
-
-            testCodeLines.remove(testCodeLines.size() - 1);
-            variableName = addViewPickingStatement(new Action(childrenWithRId, actionType), testCodeLines);
-
-        } else if (!target.getChildren().isEmpty() &&
-                !statement.contains("withContentDescription") &&
-                !statement.contains("withText") &&
-                !statement.contains("R.id")) {
-            // there is a child that might make this statement more specific
-
-            while (!target.getChildren().isEmpty()) {
-                target = target.getChildren().get(0);
-            }
-
-            testCodeLines.remove(testCodeLines.size() - 1);
-            variableName = addViewPickingStatement(new Action(target, actionType), testCodeLines);
-        }
-
-        // System.out.println("Statement post rewrite: " + testCodeLines.get(0));
-*/
         return variableName;
     }
 
