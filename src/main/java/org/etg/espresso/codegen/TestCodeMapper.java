@@ -56,10 +56,6 @@ import static org.etg.espresso.util.StringHelper.*;
 
 public class TestCodeMapper {
 
-    private static final int MAX_HIERARCHY_VIEW_LEVEL = 2;
-    private static final String VIEW_VARIABLE_CLASS_NAME = "ViewInteraction";
-    private static final String DATA_VARIABLE_CLASS_NAME = "DataInteraction";
-    private static final String CLASS_VIEW_PAGER = "android.support.v4.view.ViewPager";
     public static final String ALL_OF = "allOf";
     public static final String HAS_DESCENDANT = "hasDescendant";
     public static final String IS_DESCENDANT_OF = "isDescendantOfA";
@@ -67,7 +63,10 @@ public class TestCodeMapper {
     public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
     public static final String WITH_ID = "withId";
     public static final String EQUAL_TO_IGNORING_CASE = "equalToIgnoringCase";
-
+    private static final int MAX_HIERARCHY_VIEW_LEVEL = 2;
+    private static final String VIEW_VARIABLE_CLASS_NAME = "ViewInteraction";
+    private static final String DATA_VARIABLE_CLASS_NAME = "DataInteraction";
+    private static final String CLASS_VIEW_PAGER = "android.support.v4.view.ViewPager";
     private boolean mIsChildAtPositionAdded = false;
     private boolean mIsRecyclerViewActionAdded = false;
     private boolean mIsclassOrSuperClassesNameAdded = false;
@@ -98,6 +97,12 @@ public class TestCodeMapper {
         } else {
             mPressBackCmd = "pressBack";
         }
+    }
+
+    // TODO: This will not detect an adapter view action if the affected element's immediate parent is not an AdapterView
+    // (e.g., clicking on a button, whose parent's parent is AdapterView will not be detected as an AdapterView action).
+    private static boolean isAdapterViewAction(Action action) {
+        return action.getWidget().getAdapterViewChildPosition() != -1 && action.getWidget().getParent() != null;
     }
 
     private void addTemplateFor(TemplatesFactory.Template action) {
@@ -240,15 +245,13 @@ public class TestCodeMapper {
         return variableName;
     }
 
-
     private MethodCallExpr findRootAllOfExpression(Statement statement){
         //Finds first "allOf" method call expression on statemente. Walks ast in pre-order
         return statement.findFirst(
-                        MethodCallExpr.class,
-                        methodCallExpr -> methodCallExpr.getName().toString().equals(ALL_OF)
-                ).orElse(null);
+                MethodCallExpr.class,
+                methodCallExpr -> methodCallExpr.getName().toString().equals(ALL_OF)
+        ).orElse(null);
     }
-
 
     /**
      * Search for a childs with any of the following
@@ -273,7 +276,6 @@ public class TestCodeMapper {
         }
     }
 
-
     /**
      * Search for parents
      *  -
@@ -291,9 +293,6 @@ public class TestCodeMapper {
         }
 
     }
-
-
-
 
     private void addWithTextExpressionIfPossible(Widget widget, List<Expression> arguments) {
         String text = widget.getText();
@@ -322,11 +321,6 @@ public class TestCodeMapper {
         }
         return false;
     }
-
-
-
-
-
 
     /**
      * adds allOf to first method call of statement if there is no "allOf" call on the statement
@@ -379,7 +373,6 @@ public class TestCodeMapper {
         return new MethodCallExpr(IS_DESCENDANT_OF, isDescendantOfArgument);
     }
 
-
     /**
      * Answers if the first method call is "onView" with argumente "allOf"}
      *  ie: true if first method call looks like onView(allOf(...))
@@ -392,7 +385,6 @@ public class TestCodeMapper {
                 firstMethodCall.get().getArguments().get(0).isMethodCallExpr() &&
                 firstMethodCall.get().getArguments().get(0).asMethodCallExpr().getName().toString().equals(ALL_OF);
     }
-
 
     private void refineReceiverOfAction(Action action) {
         Widget receiverOfAction = action.getWidget().getReceiverOfClickInCoordinates(action.getWidget().getX(), action.getWidget().getY());
@@ -416,12 +408,6 @@ public class TestCodeMapper {
             return "val";
         }
         return isOnViewInteraction ? VIEW_VARIABLE_CLASS_NAME : DATA_VARIABLE_CLASS_NAME;
-    }
-
-    // TODO: This will not detect an adapter view action if the affected element's immediate parent is not an AdapterView
-    // (e.g., clicking on a button, whose parent's parent is AdapterView will not be detected as an AdapterView action).
-    private static boolean isAdapterViewAction(Action action) {
-        return action.getWidget().getAdapterViewChildPosition() != -1 && action.getWidget().getParent() != null;
     }
 
     private String addViewPickingStatement(Action action, List<String> testCodeLines) {
