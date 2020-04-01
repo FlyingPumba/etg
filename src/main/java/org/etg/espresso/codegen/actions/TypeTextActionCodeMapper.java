@@ -24,21 +24,9 @@ public class TypeTextActionCodeMapper extends ActionCodeMapper {
 
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
-        String closeSoftKeyboardAction = doesNeedStandaloneCloseSoftKeyboardAction(testCodeMapper) ? "" : (", " + getCloseSoftKeyboard());
         testCodeLines.add(createActionStatement(
-                variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")" + closeSoftKeyboardAction, testCodeMapper));
+                variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")", testCodeMapper));
 
         return null;
-    }
-
-    private boolean doesNeedStandaloneCloseSoftKeyboardAction(TestCodeMapper testCodeMapper) {
-        // Make text edit in a RecyclerView child always require a standalone close soft keyboard action since actionOnItemAtPosition
-        // accepts only a single action.
-        return testCodeMapper.mUseTextForElementMatching && action.getActionType() == ActionType.TYPE_TEXT
-                && (!isNullOrEmpty(action.getExtraInfo()) || action.getWidget().getRecyclerViewChildPosition() != -1);
-    }
-
-    private String getCloseSoftKeyboard() {
-        return "closeSoftKeyboard()";
     }
 }
