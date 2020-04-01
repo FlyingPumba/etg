@@ -166,7 +166,8 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
                 matcherBuilder.addMatcher(Id, convertIdToTestCodeFormat(resourceId), false, false);
             }
 
-            if (testCodeMapper.mUseTextForElementMatching) {
+            if (testCodeMapper.mUseTextForElementMatching &&
+                    !"android.widget.Switch".equals(widget.getClazz())) {
                 matcherBuilder.addMatcher(Text, widget.getText(), true, false);
             }
 
