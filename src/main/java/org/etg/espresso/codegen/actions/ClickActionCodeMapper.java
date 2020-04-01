@@ -22,6 +22,8 @@ public class ClickActionCodeMapper extends ActionCodeMapper {
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
         testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), testCodeMapper));
+        addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);
+
         testCodeMapper.addTemplateFor(TemplatesFactory.Template.CLICK_ACTION);
         testCodeMapper.clickActionAdded = true;
 

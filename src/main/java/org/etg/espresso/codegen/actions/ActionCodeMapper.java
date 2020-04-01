@@ -28,12 +28,6 @@ public abstract class ActionCodeMapper {
                 ? completeAction
                 : getActionOnItemAtPositionMethodCallPrefix(testCodeMapper) + recyclerViewChildPosition + ", " + completeAction + ")";
 
-        if (action.getSwipe() == null) {
-            // If action is a Swipe, then we don't need to preemptively close soft keyboard
-            // Otherwise, this is a Click, LongClick or TypeText action, that might need closing the soft keyboard.
-            completeAction += ", " + getCloseSoftKeyboard();
-        }
-
         String performStatement = variableName + ".perform(" + completeAction + ")" + testCodeMapper.getStatementTerminator();
 
         performStatement += "\n";
@@ -45,7 +39,11 @@ public abstract class ActionCodeMapper {
         return testCodeMapper.mIsKotlinTestClass ? "actionOnItemAtPosition<ViewHolder>(" : "actionOnItemAtPosition(";
     }
 
-    private String getCloseSoftKeyboard() {
-        return "closeSoftKeyboard()";
+    protected void addCloseSoftKeyboardAction(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+        testCodeLines.add(getCloseSoftKeyboardAction() + testCodeMapper.getStatementTerminator());
+    }
+
+    private String getCloseSoftKeyboardAction() {
+        return "Espresso.closeSoftKeyboard()";
     }
 }

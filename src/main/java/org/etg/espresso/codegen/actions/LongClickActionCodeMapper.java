@@ -22,6 +22,8 @@ public class LongClickActionCodeMapper extends ActionCodeMapper {
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
         testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getLongClickAction(), testCodeMapper));
+        addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);
+
         testCodeMapper.addTemplateFor(TemplatesFactory.Template.LONG_CLICK_ACTION);
         testCodeMapper.longClickActionAdded = true;
 

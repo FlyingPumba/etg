@@ -24,8 +24,9 @@ public class TypeTextActionCodeMapper extends ActionCodeMapper {
 
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
-        testCodeLines.add(createActionStatement(
-                variableName, recyclerViewChildPosition, "replaceText(" + boxString(action.getExtraInfo()) + ")", testCodeMapper));
+        testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition,
+                "replaceText(" + boxString(action.getExtraInfo()) + ")", testCodeMapper));
+        addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);
 
         return null;
     }
