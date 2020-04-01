@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.etg.espresso.codegen;
+package org.etg.espresso.codegen.viewPicking;
 
 import static org.etg.espresso.util.StringHelper.boxString;
 import static org.etg.espresso.util.StringHelper.isNullOrEmpty;

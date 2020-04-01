@@ -55,7 +55,7 @@ public class TestCodeMapper {
     private int performCount = 0;
     private ETGProperties etgProperties;
 
-    public TestCodeMapper(ETGProperties properties) throws Exception {
+    public TestCodeMapper(ETGProperties properties) {
         etgProperties = properties;
     }
 
