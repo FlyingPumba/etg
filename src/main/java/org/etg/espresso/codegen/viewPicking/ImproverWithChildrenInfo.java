@@ -1,19 +1,13 @@
 package org.etg.espresso.codegen.viewPicking;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import org.etg.mate.models.Widget;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator.convertIdToTestCodeFormat;
 
 public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
 
@@ -29,23 +23,29 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
      **/
     public static void improveStatementWithChildrensOf(Widget widget, Statement statement) {
         for (Widget child : widget.getChildren()) {
-            List<Expression> arguments = new ArrayList<>();
-            addWithIdExpressionIfPossible(child, arguments);
-            addWithContentDescriptionExpressionIfPossible(child, arguments);
-            addWithTextExpressionIfPossible(child, arguments);
+            Expression hasDescendantExpr = getHasDescendantExpression(child);
 
-            if (!arguments.isEmpty()) {
-                Expression hasDescendantExpr = getHasDescendantExpression(arguments);
-                addAllOfToFirstMethodCallIfAbsent(statement);
-                findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
-            }
+            addAllOfToFirstMethodCallIfAbsent(statement);
+            findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
         }
     }
 
     /**
      * Generates hasDescendant expression with "arguments" as arguments
-     **/
-    public static Expression getHasDescendantExpression(List<Expression> arguments) {
+     *
+     * @param widget*/
+    public static Expression getHasDescendantExpression(Widget widget) {
+        List<Expression> arguments = new ArrayList<>();
+
+        addWithIdExpressionIfPossible(widget, arguments);
+        addWithContentDescriptionExpressionIfPossible(widget, arguments);
+        addWithTextExpressionIfPossible(widget, arguments);
+
+        for (Widget child : widget.getChildren()) {
+            Expression hasDescendantExpr = getHasDescendantExpression(child);
+            arguments.add(hasDescendantExpr);
+        }
+
         Expression hasDescendantArgument;
         if (arguments.size() == 1)
             hasDescendantArgument = arguments.get(0);
