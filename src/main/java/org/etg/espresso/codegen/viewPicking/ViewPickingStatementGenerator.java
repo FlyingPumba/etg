@@ -63,7 +63,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
         //1- refine action according receiver of action according to coordenates
         refineReceiverOfAction(action);
-        String variableName = createViewPickingStatement(action, testCodeLines, testCodeMapper);
+        String variableName = createViewPickingStatement(testCodeLines, testCodeMapper);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
         //parse statement as AST, find first allOf expression or add it if missing
@@ -77,7 +77,8 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
         //update last statement with improved statement
         testCodeLines.remove(testCodeLines.size() - 1);
-        testCodeLines.add(parsedStatement.toString());
+        String improvedStatementString = parsedStatement.toString();
+        testCodeLines.add(improvedStatementString);
 
         return variableName;
     }
@@ -86,7 +87,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return action.getSwipe() != null;
     }
 
-    private String createViewPickingStatement(Action action, List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    private String createViewPickingStatement(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
         // Skip a level for RecyclerView children as they will be identified through their position.
         int startIndex = this.action.getWidget().getRecyclerViewChildPosition() != -1 && this.action.getWidget().getParent() != null ? 1 : 0;
 
@@ -141,12 +142,12 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
                 return "UNKNOWN";
             }
         }
-        return generateElementHierarchyConditionsRecursively(widget, !widget.isSonOfScrollable(), startIndex, testCodeMapper);
+        return generateElementHierarchyConditionsRecursively(widget, startIndex, testCodeMapper);
     }
 
-    private String generateElementHierarchyConditionsRecursively(Widget widget, boolean checkIsDisplayed, int index, TestCodeMapper testCodeMapper) {
+    private String generateElementHierarchyConditionsRecursively(Widget widget, int index, TestCodeMapper testCodeMapper) {
         // Add isDisplayed only to the innermost element.
-        boolean addIsDisplayed = checkIsDisplayed && index == 0;
+        boolean addIsDisplayed = index == 0;
         MatcherBuilder matcherBuilder = new MatcherBuilder();
 
         if (isEmpty(widget)
