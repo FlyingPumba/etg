@@ -11,9 +11,9 @@ import org.etg.utils.Tuple;
 
 import java.util.List;
 
+import static org.etg.espresso.codegen.viewPicking.ImproverWithChildrenInfo.improveStatementWithChildrensOf;
+import static org.etg.espresso.codegen.viewPicking.ImproverWithParentInfo.improveStatementWithParentsOf;
 import static org.etg.espresso.codegen.viewPicking.MatcherBuilder.Kind.*;
-import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementImprover.improveStatementWithChildrensOf;
-import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementImprover.improveStatementWithParentsOf;
 import static org.etg.espresso.util.StringHelper.isNullOrEmpty;
 import static org.etg.espresso.util.StringHelper.parseId;
 

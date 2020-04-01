@@ -18,53 +18,11 @@ import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator
 public class ViewPickingStatementImprover {
 
     public static final String ALL_OF = "allOf";
-    public static final String HAS_DESCENDANT = "hasDescendant";
-    public static final String IS_DESCENDANT_OF = "isDescendantOfA";
     public static final String WITH_TEXT = "withText";
     public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
     public static final String WITH_ID = "withId";
     public static final String EQUAL_TO_IGNORING_CASE = "equalToIgnoringCase";
 
-    /**
-     * Search for a childs with any of the following
-     * - id
-     * - text
-     * - content description
-     * <p>
-     * For every child found, add it to picking statement
-     **/
-    public static void improveStatementWithChildrensOf(Widget widget, Statement statement) {
-        for (Widget child : widget.getChildren()) {
-            List<Expression> arguments = new ArrayList<>();
-            addWithIdExpressionIfPossible(child, arguments);
-            addWithContentDescriptionExpressionIfPossible(child, arguments);
-            addWithTextExpressionIfPossible(child, arguments);
-
-            if (!arguments.isEmpty()) {
-                Expression hasDescendantExpr = getHasDescendantExpression(arguments);
-                addAllOfToFirstMethodCallIfAbsent(statement);
-                findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
-            }
-        }
-    }
-
-    /**
-     * Search for parents
-     * -
-     **/
-    public static void improveStatementWithParentsOf(Widget widget, Statement statement) {
-        Widget parent = widget.getParent();
-        if (parent != null) {
-            Expression isDescendanExpr = getIsDescendantOfExpression(parent);
-            //Puede pasar mirando para arriba que ningun parent tenda id o content description
-            //motibo por el cual no se puede hacer expresion con los parents
-            if (isDescendanExpr != null) {
-                addAllOfToFirstMethodCallIfAbsent(statement);
-                findRootAllOfExpression(statement).addArgument(isDescendanExpr);
-            }
-        }
-
-    }
 
     public static MethodCallExpr findRootAllOfExpression(Statement statement) {
         //Finds first "allOf" method call expression on statemente. Walks ast in pre-order
@@ -113,45 +71,6 @@ public class ViewPickingStatementImprover {
                 onViewMethodCallExpr.setArguments(NodeList.nodeList(allOfExpr));
             });
         }
-    }
-
-    /**
-     * Generates hasDescendant expression with "arguments" as arguments
-     **/
-    public static Expression getHasDescendantExpression(List<Expression> arguments) {
-        Expression hasDescendantArgument;
-        if (arguments.size() == 1)
-            hasDescendantArgument = arguments.get(0);
-        else
-            hasDescendantArgument = new MethodCallExpr(null, ALL_OF, new NodeList<Expression>(arguments));
-
-        return new MethodCallExpr(HAS_DESCENDANT, hasDescendantArgument);
-    }
-
-    /**
-     * Generates isDescendantOfA(@param widget) expression.
-     **/
-    public static @Nullable
-    Expression getIsDescendantOfExpression(Widget widget) {
-        List<Expression> arguments = new ArrayList<>();
-
-        addWithIdExpressionIfPossible(widget, arguments);
-        addWithContentDescriptionExpressionIfPossible(widget, arguments);
-        if (widget.getParent() != null) {
-            Expression parentExpr = getIsDescendantOfExpression(widget.getParent());
-            if (parentExpr != null) arguments.add(parentExpr);
-        }
-
-        Expression isDescendantOfArgument;
-        if (arguments.size() == 0)//no hay argumentos, no hay matcher para este widget
-            return null;
-        else if (arguments.size() == 1)//un solo argumento, no agrego ALL_OF
-            isDescendantOfArgument = arguments.get(0);
-        else//agrego ALL_OF
-            isDescendantOfArgument = new MethodCallExpr(null, ALL_OF, new NodeList<>(arguments));
-
-
-        return new MethodCallExpr(IS_DESCENDANT_OF, isDescendantOfArgument);
     }
 
     /**
