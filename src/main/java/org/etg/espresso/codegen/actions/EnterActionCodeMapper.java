@@ -13,7 +13,7 @@ public class EnterActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         String statement = getPressEnterKeyAction() + testCodeMapper.getStatementTerminator();
         statement += "\n";
         testCodeLines.add(statement);

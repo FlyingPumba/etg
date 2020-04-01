@@ -15,9 +15,9 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
-        String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper);
+        String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 

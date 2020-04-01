@@ -18,7 +18,7 @@ public abstract class ActionCodeMapper {
         this.action = action;
     }
 
-    public abstract String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper);
+    public abstract String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount);
 
     protected String createActionStatement(String variableName, int recyclerViewChildPosition, String statement, TestCodeMapper testCodeMapper) {
         testCodeMapper.mIsRecyclerViewActionAdded = testCodeMapper.mIsRecyclerViewActionAdded || recyclerViewChildPosition != -1;

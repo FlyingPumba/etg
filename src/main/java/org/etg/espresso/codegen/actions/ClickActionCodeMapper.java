@@ -15,14 +15,17 @@ public class ClickActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
-        String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper);
+        String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
         int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
 
         testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), testCodeMapper));
-        addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);
+
+        if (actionIndex != actionsCount-1) {
+            addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);
+        }
 
         testCodeMapper.addTemplateFor(TemplatesFactory.Template.CLICK_ACTION);
         testCodeMapper.clickActionAdded = true;

@@ -54,7 +54,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         if (isSwipeAction(action)) {
             return getRootPickingStatement(action, testCodeLines, testCodeMapper);
         } else if (isAdapterViewAction(action)) {

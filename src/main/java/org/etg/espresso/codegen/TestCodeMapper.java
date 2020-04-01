@@ -67,11 +67,11 @@ public class TestCodeMapper {
         return neededTemplates;
     }
 
-    public int addTestCodeLinesForAction(Action action, List<String> testCodeLines) {
+    public int addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
         ActionCodeMapper actionCodeMapper = ActionCodeMapperFactory.get(etgProperties, action);
 
         List<String> actionTestCodeLines = new ArrayList<>();
-        actionCodeMapper.addTestCodeLines(actionTestCodeLines, this);
+        actionCodeMapper.addTestCodeLines(actionTestCodeLines, this, actionIndex, actionsCount);
 
         if (mSurroundPerformsWithTryCatch) {
             // surround lines with try-catch

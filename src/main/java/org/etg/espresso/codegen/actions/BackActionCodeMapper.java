@@ -13,7 +13,7 @@ public class BackActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         String lastStatement = null;
         if (testCodeLines.size() > 0) {
             lastStatement = testCodeLines.get(testCodeLines.size() - 1);
