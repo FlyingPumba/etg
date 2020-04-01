@@ -3,7 +3,6 @@ package org.etg.espresso.codegen;
 import org.etg.ETGProperties;
 import org.etg.espresso.EspressoTestCase;
 import org.etg.espresso.templates.TestCodeTemplate;
-import org.etg.espresso.templates.TestCodeTemplate;
 import org.etg.mate.models.WidgetTestCase;
 
 import java.util.ArrayList;

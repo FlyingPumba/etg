@@ -130,16 +130,16 @@ public class EspressoTestCase {
 
         velocityContext.put("EspressoPackageName", espressoPackageName);
 
-        velocityContext.put("AddContribImport", codeMapper.isRecyclerViewActionAdded());
-        velocityContext.put("AddChildAtPositionMethod", codeMapper.isChildAtPositionAdded());
-        velocityContext.put("AddClassOrSuperClassesNameMethod", codeMapper.isClassOrSuperClassesNameAdded());
-        velocityContext.put("AddTryCatchImport", codeMapper.isTryCatchAdded());
+        velocityContext.put("AddContribImport", codeMapper.mIsRecyclerViewActionAdded);
+        velocityContext.put("AddChildAtPositionMethod", codeMapper.mIsChildAtPositionAdded);
+        velocityContext.put("AddClassOrSuperClassesNameMethod", codeMapper.mIsclassOrSuperClassesNameAdded);
+        velocityContext.put("AddTryCatchImport", codeMapper.mSurroundPerformsWithTryCatch);
 
         velocityContext.put("TestCode", getTestCodeLines());
 
-        velocityContext.put("longClickActionAdded", codeMapper.isLongClickActionAdded());
-        velocityContext.put("clickActionAdded", codeMapper.isClickActionAdded());
-        velocityContext.put("swipeActionAdded", codeMapper.isSwipeActionAdded());
+        velocityContext.put("longClickActionAdded", codeMapper.longClickActionAdded);
+        velocityContext.put("clickActionAdded", codeMapper.clickActionAdded);
+        velocityContext.put("swipeActionAdded", codeMapper.swipeActionAdded);
 
 
         return velocityContext;

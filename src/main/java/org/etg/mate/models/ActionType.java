@@ -1,7 +1,6 @@
 package org.etg.mate.models;
 
 public enum  ActionType {
-
     CLICK,
     LONG_CLICK,
     TYPE_TEXT,
@@ -16,5 +15,4 @@ public enum  ActionType {
     REINSTALL,
     CLEAR_WIDGET,
     ENTER
-
 }
