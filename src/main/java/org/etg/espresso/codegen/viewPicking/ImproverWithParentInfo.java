@@ -45,7 +45,12 @@ public class ImproverWithParentInfo extends ViewPickingStatementImprover {
         List<Expression> arguments = new ArrayList<>();
 
         addWithIdExpressionIfPossible(widget, arguments);
-        // addWithContentDescriptionExpressionIfPossible(widget, arguments);
+
+        if (arguments.size() == 0) {
+            // only when there is no other option, use content-description if possible
+            addWithContentDescriptionExpressionIfPossible(widget, arguments);
+        }
+
         if (widget.getParent() != null) {
             Expression parentExpr = getIsDescendantOfExpression(widget.getParent());
             if (parentExpr != null) arguments.add(parentExpr);

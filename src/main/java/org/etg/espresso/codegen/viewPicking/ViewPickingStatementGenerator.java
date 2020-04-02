@@ -171,8 +171,10 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
                 matcherBuilder.addMatcher(Text, widget.getText(), true, false);
             }
 
-            // Content description tends to give problems, we will leave it commented
-            // matcherBuilder.addMatcher(ContentDescription, widget.getContentDesc(), true, false);
+            // Content description tends to give problems, use only if there ire no other options
+            if(matcherBuilder.getMatcherCount() == 0) {
+                matcherBuilder.addMatcher(ContentDescription, widget.getContentDesc(), true, false);
+            }
         }
 
         // TODO: Consider minimizing the generated statement to improve test's readability and maintainability (e.g., by capping parent hierarchy).
