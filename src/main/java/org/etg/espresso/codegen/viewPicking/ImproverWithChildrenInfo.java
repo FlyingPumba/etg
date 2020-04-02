@@ -38,7 +38,7 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
         List<Expression> arguments = new ArrayList<>();
 
         addWithIdExpressionIfPossible(widget, arguments);
-        addWithTextExpressionIfPossible(widget, arguments);
+        addWithTextOrHintExpressionIfPossible(widget, arguments);
 
         if (arguments.size() == 0) {
             // only when there are no other option, use content-description if possible

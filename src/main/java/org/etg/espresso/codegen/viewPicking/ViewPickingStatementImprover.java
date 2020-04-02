@@ -8,8 +8,6 @@ import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
 import org.etg.mate.models.Widget;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +16,7 @@ import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator
 public class ViewPickingStatementImprover {
 
     public static final String ALL_OF = "allOf";
-    public static final String WITH_TEXT = "withText";
+    public static final String WITH_TEXT_OR_HINT = "withTextOrHint";
     public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
     public static final String WITH_ID = "withId";
     public static final String EQUAL_TO_IGNORING_CASE = "equalToIgnoringCase";
@@ -32,11 +30,11 @@ public class ViewPickingStatementImprover {
         ).orElse(null);
     }
 
-    public static void addWithTextExpressionIfPossible(Widget widget, List<Expression> arguments) {
+    public static void addWithTextOrHintExpressionIfPossible(Widget widget, List<Expression> arguments) {
         String text = widget.getText();
         if (text != null && !text.isEmpty()) {
             MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(text));
-            arguments.add(new MethodCallExpr(WITH_TEXT, equalToIgnoringCaseMethod));
+            arguments.add(new MethodCallExpr(WITH_TEXT_OR_HINT, equalToIgnoringCaseMethod));
         }
     }
 
