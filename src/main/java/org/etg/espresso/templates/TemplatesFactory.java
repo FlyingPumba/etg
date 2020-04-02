@@ -15,7 +15,7 @@ public class TemplatesFactory {
         switch (neededTemplate){
             case CLICK_ACTION:
             case LONG_CLICK_ACTION:
-                return new ClickWithoutConstraintTemplate();
+                return new ClickWithoutDisplayConstraintTemplate();
             default: throw new IllegalArgumentException("Invalid template");
         }
     }

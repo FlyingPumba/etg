@@ -1,10 +1,10 @@
 package org.etg.espresso.templates;
 
-public class ClickWithoutConstraintTemplate implements VelocityTemplate {
+public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
 
     @Override
     public String getName() {
-        return "ClickWithoutVisibilityConstraint.java";
+        return "ClickWithoutDisplayConstraint.java";
     }
 
     public String getAsRawString() {
@@ -26,6 +26,8 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.PrecisionDescriber;\n" +
                 "import ${EspressoPackageName}.espresso.action.Tap;\n" +
                 "import ${EspressoPackageName}.espresso.action.Tapper;\n" +
+                "import ${EspressoPackageName}.espresso.matcher.ViewMatchers;\n" +
+                "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.Visibility;\n" +
                 "import ${EspressoPackageName}.espresso.util.HumanReadables;\n" +
                 "import java.util.Locale;\n" +
                 "import java.util.Optional;\n" +
@@ -33,8 +35,8 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "import org.hamcrest.Matcher;\n" +
                 "\n" +
                 "\n" +
-                "public final class ClickWithoutVisibilityConstraint implements ViewAction {\n" +
-                "    private static final String TAG = \"ClickWithoutVisibilityConstraint\";\n" +
+                "public final class ClickWithoutDisplayConstraint implements ViewAction {\n" +
+                "    private static final String TAG = \"ClickWithoutDisplayConstraint\";\n" +
                 "\n" +
                 "    final CoordinatesProvider coordinatesProvider;\n" +
                 "    final Tapper tapper;\n" +
@@ -45,14 +47,14 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "\n" +
                 "    \n" +
                 "    @Deprecated\n" +
-                "    public ClickWithoutVisibilityConstraint(\n" +
+                "    public ClickWithoutDisplayConstraint(\n" +
                 "            Tapper tapper,\n" +
                 "            CoordinatesProvider coordinatesProvider,\n" +
                 "            PrecisionDescriber precisionDescriber) {\n" +
                 "        this(tapper, coordinatesProvider, precisionDescriber, 0, 0, null);\n" +
                 "    }\n" +
                 "\n" +
-                "    public ClickWithoutVisibilityConstraint(\n" +
+                "    public ClickWithoutDisplayConstraint(\n" +
                 "            Tapper tapper,\n" +
                 "            CoordinatesProvider coordinatesProvider,\n" +
                 "            PrecisionDescriber precisionDescriber,\n" +
@@ -62,7 +64,7 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "    }\n" +
                 "    \n" +
                 "    @Deprecated\n" +
-                "    public ClickWithoutVisibilityConstraint(\n" +
+                "    public ClickWithoutDisplayConstraint(\n" +
                 "            Tapper tapper,\n" +
                 "            CoordinatesProvider coordinatesProvider,\n" +
                 "            PrecisionDescriber precisionDescriber,\n" +
@@ -70,7 +72,7 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "        this(tapper, coordinatesProvider, precisionDescriber, 0, 0, rollbackAction);\n" +
                 "    }\n" +
                 "\n" +
-                "    public ClickWithoutVisibilityConstraint(\n" +
+                "    public ClickWithoutDisplayConstraint(\n" +
                 "            Tapper tapper,\n" +
                 "            CoordinatesProvider coordinatesProvider,\n" +
                 "            PrecisionDescriber precisionDescriber,\n" +
@@ -88,7 +90,7 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
                 "    @Override\n" +
                 "    @SuppressWarnings(\"unchecked\")\n" +
                 "    public Matcher<View> getConstraints() {\n" +
-                "        Matcher<View> standardConstraint = isDisplayed();\n" +
+                "        Matcher<View> standardConstraint = withEffectiveVisibility(Visibility.VISIBLE);\n" +
                 "        if (rollbackAction.isPresent()) {\n" +
                 "            return allOf(standardConstraint, rollbackAction.get().getConstraints());\n" +
                 "        } else {\n" +
@@ -210,7 +212,7 @@ public class ClickWithoutConstraintTemplate implements VelocityTemplate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ClickWithoutConstraintTemplate;
+        return o instanceof ClickWithoutDisplayConstraintTemplate;
     }
 
     @Override

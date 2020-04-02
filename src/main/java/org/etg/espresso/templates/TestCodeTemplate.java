@@ -190,8 +190,8 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    } \n"+
                 "#end\n" +
                 "#if (${clickActionAdded})\n" +
-                "    private ClickWithoutVisibilityConstraint getClickAction() {\n" +
-                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "    private ClickWithoutDisplayConstraint getClickAction() {\n" +
+                "        return new ClickWithoutDisplayConstraint(\n" +
                 "                Tap.SINGLE,\n" +
                 "                GeneralLocation.VISIBLE_CENTER,\n" +
                 "                Press.FINGER,\n" +
@@ -200,8 +200,8 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    }\n" +
                 "#end\n" +
                 "#if (${longClickActionAdded})\n" +
-                "    private ClickWithoutVisibilityConstraint getLongClickAction() {\n" +
-                "        return new ClickWithoutVisibilityConstraint(\n" +
+                "    private ClickWithoutDisplayConstraint getLongClickAction() {\n" +
+                "        return new ClickWithoutDisplayConstraint(\n" +
                 "                Tap.LONG,\n" +
                 "                GeneralLocation.CENTER,\n" +
                 "                Press.FINGER,\n" +
