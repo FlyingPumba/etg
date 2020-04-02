@@ -20,6 +20,7 @@ import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapperFactory;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
+import org.etg.espresso.templates.VisibleViewMatcherTemplate;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.Swipe;
 
@@ -57,6 +58,7 @@ public class TestCodeMapper {
 
     public TestCodeMapper(ETGProperties properties) {
         etgProperties = properties;
+        neededTemplates.add(new VisibleViewMatcherTemplate());
     }
 
     public void addTemplateFor(TemplatesFactory.Template action) {
