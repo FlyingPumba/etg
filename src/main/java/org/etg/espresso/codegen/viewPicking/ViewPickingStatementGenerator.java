@@ -95,7 +95,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         String variableName = generateVariableNameFromElementClassName(variableClassName, VIEW_VARIABLE_CLASS_NAME, testCodeMapper);
         String viewMatchers = generateElementHierarchyConditions(this.action, startIndex, testCodeMapper);
 
-        if (getIsDisplayedMatcher().equals(viewMatchers)) {
+        if (getIsVisibleMatcher().equals(viewMatchers)) {
             // this means that the action has an empty widget as a target
             viewMatchers = getIsRootMatcher();
         }
@@ -146,8 +146,8 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     private String generateElementHierarchyConditionsRecursively(Widget widget, int index, TestCodeMapper testCodeMapper) {
-        // Add isDisplayed only to the innermost element.
-        boolean addIsDisplayed = index == 0;
+        // Add visibility check only to the outermost element.
+        boolean addIsVisible = index == 0;
         MatcherBuilder matcherBuilder = new MatcherBuilder();
 
         if (isEmpty(widget)
@@ -179,18 +179,18 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
         // The last element has no parent.
         if (widget.getParent() == null || index > MAX_HIERARCHY_VIEW_LEVEL) {
-            if (matcherBuilder.getMatcherCount() > 1 || addIsDisplayed) {
+            if (matcherBuilder.getMatcherCount() > 1 || addIsVisible) {
                 String matchers = matcherBuilder.getMatchers();
                 if (!matchers.isEmpty()) {
-                    return "allOf(" + matchers + (addIsDisplayed ? ", " + getIsDisplayedMatcher() : "") + ")";
+                    return "allOf(" + matchers + (addIsVisible ? ", " + getIsVisibleMatcher() : "") + ")";
                 } else {
-                    return addIsDisplayed ? getIsDisplayedMatcher() : "";
+                    return addIsVisible ? getIsVisibleMatcher() : "";
                 }
             }
             return matcherBuilder.getMatchers();
         }
 
-        boolean addAllOf = matcherBuilder.getMatcherCount() > 0 || addIsDisplayed;
+        boolean addAllOf = matcherBuilder.getMatcherCount() > 0 || addIsVisible;
         int groupViewChildPosition = widget.getGroupViewChildPosition();
 
         // Do not use child position for ViewPager children as it changes dynamically and non-deterministically.
@@ -207,7 +207,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 //                + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
 //                + (addIsDisplayed ? "\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
         return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() +
-                (addIsDisplayed ? ((matcherBuilder.getMatcherCount() > 0 ? ", " : "") + getIsDisplayedMatcher()) : "") +
+                (addIsVisible ? ((matcherBuilder.getMatcherCount() > 0 ? ", " : "") + getIsVisibleMatcher()) : "") +
                 (addAllOf ? ")" : "");
     }
 
@@ -266,8 +266,8 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
                 && isEmptyIgnoringChildPosition(widget);
     }
 
-    private String getIsDisplayedMatcher() {
-        return "\nisDisplayed()";
+    private String getIsVisibleMatcher() {
+        return "\nwithEffectiveVisibility(Visibility.VISIBLE)";
     }
 
     private String getIsRootMatcher() {
