@@ -47,6 +47,9 @@ public class MatcherBuilder {
             } else if (kind == Kind.Id) {
                 matchers.append("\nwith").append(kind.name()).append("(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append(")");
+            } else if (kind == Kind.Text) {
+                matchers.append("\nwithTextOrHint(").append("equalToIgnoringCase(")
+                        .append(shouldBox ? boxString(matchedString) : matchedString).append("))");
             } else {
                 matchers.append("\nwith").append(kind.name()).append("(equalToIgnoringCase(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append("))");

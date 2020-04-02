@@ -165,6 +165,9 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "        return \"ERROR: when executing line number: unknown, perform number: \" + performNumber;\n" +
                 "    }\n" +
                 "    #end\n" +
+                "    private static Matcher<View> withTextOrHint(final Matcher<String> stringMatcher) {\n" +
+                "        return anyOf(withText(stringMatcher), withHint(stringMatcher));\n" +
+                "    }\n" +
                 "#if (${swipeActionAdded})\n" +
                 "    private ViewAction getSwipeAction(final int fromX, final int fromY, final int toX, final int toY) {\n" +
                 "        return ViewActions.actionWithAssertions(\n" +
