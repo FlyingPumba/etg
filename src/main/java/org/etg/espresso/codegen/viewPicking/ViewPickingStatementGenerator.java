@@ -269,7 +269,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     private String getIsVisibleMatcher() {
-        return "\nwithEffectiveVisibility(Visibility.VISIBLE)";
+        return "\nisVisible()";
     }
 
     private String getIsRootMatcher() {

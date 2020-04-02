@@ -51,6 +51,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import static ${EspressoPackageName}.espresso.action.ViewActions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.assertion.ViewAssertions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.matcher.ViewMatchers.*;\n" +
+                "import static ${PackageName}.VisibleViewMatcher.isVisible;\n" +
                 "\n" +
                 "import ${ResourcePackageName}.R;\n" +
                 "\n" +

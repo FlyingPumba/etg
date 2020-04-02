@@ -12,7 +12,7 @@ public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
                 "package ${PackageName};\n" +
                 "\n" +
                 "#end\n" +
-                "import static ${EspressoPackageName}.espresso.matcher.ViewMatchers.withEffectiveVisibility;\n" +
+                "import static ${PackageName}.VisibleViewMatcher.isVisible;\n" +
                 "import static org.hamcrest.Matchers.allOf;\n" +
                 "\n" +
                 "import android.util.Log;\n" +
@@ -26,7 +26,6 @@ public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.PrecisionDescriber;\n" +
                 "import ${EspressoPackageName}.espresso.action.Tap;\n" +
                 "import ${EspressoPackageName}.espresso.action.Tapper;\n" +
-                "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.Visibility;\n" +
                 "import ${EspressoPackageName}.espresso.util.HumanReadables;\n" +
                 "import java.util.Locale;\n" +
                 "import java.util.Optional;\n" +
@@ -89,7 +88,7 @@ public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
                 "    @Override\n" +
                 "    @SuppressWarnings(\"unchecked\")\n" +
                 "    public Matcher<View> getConstraints() {\n" +
-                "        Matcher<View> standardConstraint = withEffectiveVisibility(Visibility.VISIBLE);\n" +
+                "        Matcher<View> standardConstraint = isVisible();\n" +
                 "        if (rollbackAction.isPresent()) {\n" +
                 "            return allOf(standardConstraint, rollbackAction.get().getConstraints());\n" +
                 "        } else {\n" +
