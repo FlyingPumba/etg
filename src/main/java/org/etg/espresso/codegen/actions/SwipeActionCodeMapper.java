@@ -43,10 +43,6 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
         return methdCall;
     }
 
-    private String getScrollToAction() {
-        return "scrollTo()";
-    }
-
     private String getWaitToScrollEndStatement() {
         return "waitToScrollEnd()";
     }

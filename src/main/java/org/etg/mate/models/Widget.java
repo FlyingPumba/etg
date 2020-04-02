@@ -391,7 +391,9 @@ public class Widget {
     public boolean isSonOfScrollable() {
         Widget parent = this.parent;
         while (parent != null) {
-            if (parent.isScrollable())
+            if ("android.widget.ScrollView".equals(parent.clazz) ||
+                    "android.widget.HorizontalScrollView".equals(parent.clazz) ||
+                    "android.widget.ListView".equals(parent.clazz))
                 return true;
             else
                 parent = parent.getParent();

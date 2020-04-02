@@ -28,6 +28,10 @@ public abstract class ActionCodeMapper {
                 ? completeAction
                 : getActionOnItemAtPositionMethodCallPrefix(testCodeMapper) + recyclerViewChildPosition + ", " + completeAction + ")";
 
+        if(action.getWidget().isSonOfScrollable()) {
+            completeAction = getScrollToAction() + ", " + completeAction;
+        }
+
         String performStatement = variableName + ".perform(" + completeAction + ")" + testCodeMapper.getStatementTerminator();
 
         performStatement += "\n";
@@ -45,5 +49,9 @@ public abstract class ActionCodeMapper {
 
     private String getCloseSoftKeyboardAction() {
         return "Espresso.closeSoftKeyboard()";
+    }
+
+    private String getScrollToAction() {
+        return "scrollTo()";
     }
 }
