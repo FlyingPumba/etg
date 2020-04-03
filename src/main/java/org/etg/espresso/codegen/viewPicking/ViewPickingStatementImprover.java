@@ -31,6 +31,10 @@ public class ViewPickingStatementImprover {
     }
 
     public static void addWithTextOrHintExpressionIfPossible(Widget widget, List<Expression> arguments) {
+        if ("android.widget.Switch".equals(widget.getClazz())) {
+            return;
+        }
+
         String text = widget.getText();
         if (text != null && !text.isEmpty()) {
             MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(text));
