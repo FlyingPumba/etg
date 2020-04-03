@@ -28,9 +28,11 @@ public abstract class ActionCodeMapper {
                 ? completeAction
                 : getActionOnItemAtPositionMethodCallPrefix(testCodeMapper) + recyclerViewChildPosition + ", " + completeAction + ")";
 
-        if(action.getWidget().isSonOfScrollable()) {
-            completeAction = getScrollToAction() + ", " + completeAction;
-        }
+        // Although tecnically correct, the following causes a lot of problems.
+        // The scrollTo() action tends to fail quite often.
+        // if(action.getWidget().isSonOfScrollable()) {
+        //     completeAction = getScrollToAction() + ", " + completeAction;
+        // }
 
         String performStatement = variableName + ".perform(" + completeAction + ")" + testCodeMapper.getStatementTerminator();
 
