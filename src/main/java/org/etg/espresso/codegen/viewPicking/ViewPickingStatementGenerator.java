@@ -61,8 +61,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
             return addDataPickingStatement(action, testCodeLines, testCodeMapper);
         }
 
-        //1- refine action according receiver of action according to coordenates
-        refineReceiverOfAction(action);
+        //1- Create a basic view picking statement using info from target widget.
         String variableName = createViewPickingStatement(testCodeLines, testCodeMapper);
         String statement = testCodeLines.get(testCodeLines.size() - 1);
 
