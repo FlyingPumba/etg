@@ -25,8 +25,10 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
         for (Widget child : widget.getChildren()) {
             Expression hasDescendantExpr = getHasDescendantExpression(child);
 
-            addAllOfToFirstMethodCallIfAbsent(statement);
-            findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
+            if (hasDescendantExpr != null) {
+                addAllOfToFirstMethodCallIfAbsent(statement);
+                findRootAllOfExpression(statement).addArgument(hasDescendantExpr);
+            }
         }
     }
 
@@ -47,11 +49,13 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
 
         for (Widget child : widget.getChildren()) {
             Expression hasDescendantExpr = getHasDescendantExpression(child);
-            arguments.add(hasDescendantExpr);
+            if (hasDescendantExpr != null) arguments.add(hasDescendantExpr);
         }
 
         Expression hasDescendantArgument;
-        if (arguments.size() == 1)
+        if (arguments.size() == 0)
+            return null;
+        else if (arguments.size() == 1)
             hasDescendantArgument = arguments.get(0);
         else
             hasDescendantArgument = new MethodCallExpr(null, ALL_OF, new NodeList<Expression>(arguments));
