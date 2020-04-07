@@ -1,5 +1,6 @@
 package org.etg;
 
+import com.beust.jcommander.JCommander;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.espresso.EspressoTestCase;
@@ -18,22 +19,23 @@ import java.rmi.server.ExportException;
 import java.util.List;
 
 public class ETG {
-    public static void main(String[] args) {
+
+    public static void main(String[] argv) {
         System.out.println("ETG");
 
+        Args args = new Args();
+        JCommander.newBuilder()
+                .addObject(args)
+                .build()
+                .parse(argv);
+
         try {
-            ETGProperties properties = ETGProperties.loadProperties(args[0]);
+            ETGProperties properties = ETGProperties.loadProperties(args.getETGConfigPath());
             System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
             System.out.println("JSON file MD5: " + properties.getJsonMD5());
 
             EspressoTestRunner.cleanOutputPath(properties);
-
-            String workingFolder = System.getProperty("user.dir");
-            String resultsPath = workingFolder + "/results";
-            if (args.length > 1) {
-                resultsPath = args[1];
-            }
-            System.out.println("Output folder: " + resultsPath);
+            System.out.println("Output folder: " + args.getResultsPath());
 
             System.out.println("Parsing widget test cases");
             List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPath());
@@ -47,36 +49,39 @@ public class ETG {
 
             System.out.println("Pruning failing performs from Espresso tests");
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
-                espressoTestCase.pruneFailingPerforms(properties);
 
-                // calculate and output coverage after pruning
-                double coverage = espressoTestCase.getCoverage(properties, resultsPath);
-                System.out.println(String.format("TEST: %s COVERAGE: %.8f",
-                        espressoTestCase.getTestName(), coverage));
+                if (!args.isTranslateOnly()) {
+                    espressoTestCase.pruneFailingPerforms(properties);
 
-                // calculate and output information about failing actions
-                int lowestFailingWidgetActionIndex = espressoTestCase.getLowestFailingWidgetActionIndex();
-                int widgetActionsCount = espressoTestCase.getWidgetActionsCount();
-                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-INDEX: %d TOTAL-ACTIONS: %d",
-                        espressoTestCase.getTestName(),
-                        lowestFailingWidgetActionIndex,
-                        widgetActionsCount));
+                    // calculate and output coverage after pruning
+                    double coverage = espressoTestCase.getCoverage(properties, args.getResultsPath());
+                    System.out.println(String.format("TEST: %s COVERAGE: %.8f",
+                            espressoTestCase.getTestName(), coverage));
 
-                Action lowestFailingAction = null;
-                Action highestSuccessfulAction = null;
+                    // calculate and output information about failing actions
+                    int lowestFailingWidgetActionIndex = espressoTestCase.getLowestFailingWidgetActionIndex();
+                    int widgetActionsCount = espressoTestCase.getWidgetActionsCount();
+                    System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-INDEX: %d TOTAL-ACTIONS: %d",
+                            espressoTestCase.getTestName(),
+                            lowestFailingWidgetActionIndex,
+                            widgetActionsCount));
 
-                if (lowestFailingWidgetActionIndex < widgetActionsCount) {
-                    lowestFailingAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex);
+                    Action lowestFailingAction = null;
+                    Action highestSuccessfulAction = null;
 
-                    if (lowestFailingWidgetActionIndex > 0) {
-                        highestSuccessfulAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex - 1);
+                    if (lowestFailingWidgetActionIndex < widgetActionsCount) {
+                        lowestFailingAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex);
+
+                        if (lowestFailingWidgetActionIndex > 0) {
+                            highestSuccessfulAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex - 1);
+                        }
                     }
-                }
 
-                System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-TYPE: %s HIGHEST-SUCCESSFUL-ACTION-TYPE: %s",
-                        espressoTestCase.getTestName(),
-                        lowestFailingAction == null? "-" : lowestFailingAction.getActionType().toString(),
-                        highestSuccessfulAction == null? "-" : highestSuccessfulAction.getActionType().toString()));
+                    System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-TYPE: %s HIGHEST-SUCCESSFUL-ACTION-TYPE: %s",
+                            espressoTestCase.getTestName(),
+                            lowestFailingAction == null ? "-" : lowestFailingAction.getActionType().toString(),
+                            highestSuccessfulAction == null ? "-" : highestSuccessfulAction.getActionType().toString()));
+                }
 
                 espressoTestCase.addToProject(properties, true);
             }
