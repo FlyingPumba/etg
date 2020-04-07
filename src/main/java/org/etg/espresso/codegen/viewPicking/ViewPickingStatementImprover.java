@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator.convertIdToTestCodeFormat;
+import static org.etg.espresso.util.StringHelper.escapeStringCharacters;
 
 public class ViewPickingStatementImprover {
 
@@ -37,7 +38,7 @@ public class ViewPickingStatementImprover {
 
         String text = widget.getText();
         if (text != null && !text.isEmpty()) {
-            MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(text));
+            MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(escapeStringCharacters(text)));
             arguments.add(new MethodCallExpr(WITH_TEXT_OR_HINT, equalToIgnoringCaseMethod));
         }
     }
