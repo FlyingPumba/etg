@@ -10,9 +10,7 @@ import org.etg.mate.models.WidgetTestCase;
 import org.etg.utils.ProcessRunner;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class EspressoTestCase {
 
@@ -29,8 +27,7 @@ public class EspressoTestCase {
     private HashMap<Integer, List<String>> testCodeLinesPerWidgetActionIndex;
     private HashMap<Integer, Integer> widgetActionIndexPerTryCatchNumber;
     private List<Action> widgetActions;
-    private int lowestFailingWidgetActionIndex;
-
+    private Set<Integer> failingWidgetActionIndexes;
 
     public EspressoTestCase(ETGProperties properties,
                             WidgetTestCase widgetTestCase,
@@ -48,33 +45,9 @@ public class EspressoTestCase {
         this.testCodeLinesPerWidgetActionIndex = new HashMap<Integer, List<String>>();
         this.widgetActionIndexPerTryCatchNumber = new HashMap<Integer, Integer>();
         this.widgetActions = widgetTestCase.getEventSequence();
-        this.lowestFailingWidgetActionIndex = this.widgetActions.size();
+        this.failingWidgetActionIndexes = new HashSet<>();
 
         generateTestCodeLines(true);
-    }
-
-    /**
-     * Perform fixed-point removal of failing performs in the test case
-     *
-     * @param properties
-     * @throws Exception
-     */
-    public void pruneFailingPerforms(ETGProperties properties) throws Exception {
-        List<Integer> failingPerformLines;
-        List<Integer> newFailingPerformLines = new ArrayList<>();
-        do {
-            failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            addToProject(properties, false);
-            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, this, false);
-
-            if (newFailingPerformLines.size() > 0) {
-                Integer tryCatchIndex = newFailingPerformLines.get(0);
-                this.lowestFailingWidgetActionIndex = widgetActionIndexPerTryCatchNumber.get(tryCatchIndex);
-
-                System.out.println(String.format("Pruning actions starting after widget action with index %d (out of %d) TEST %s",
-                        lowestFailingWidgetActionIndex, widgetActions.size(), getTestName()));
-            }
-        } while (!failingPerformLines.equals(newFailingPerformLines) && newFailingPerformLines.size() > 0);
     }
 
     public void addToProject(ETGProperties properties, boolean prettify) throws Exception {
@@ -169,7 +142,7 @@ public class EspressoTestCase {
         for (int i = 0; i < widgetActions.size(); i++) {
             List<String> testCodeLinesForAction = testCodeLinesPerWidgetActionIndex.get(i);
 
-            if (i >= lowestFailingWidgetActionIndex) {
+            if (failingWidgetActionIndexes.contains(i)) {
                 // comment out failing lines
                 for (int j = 0; j < testCodeLinesForAction.size(); j++) {
                     String testCodeLine = testCodeLinesForAction.get(j);
@@ -205,15 +178,33 @@ public class EspressoTestCase {
         return Coverage.getTestCoverage(properties, this, resultsFolder);
     }
 
-    public int getLowestFailingWidgetActionIndex() {
-        return lowestFailingWidgetActionIndex;
+    public Set<Integer> getFailingWidgetActionIndexes() {
+        return failingWidgetActionIndexes;
+    }
+
+    public void addFailingWidgetActionIndex(int index) {
+        failingWidgetActionIndexes.add(index);
     }
 
     public int getWidgetActionsCount(){
         return widgetActions.size();
     }
 
+    public int geWidgetActionIndexForTryCatchIndex(int tryCatchIndex) {
+        return widgetActionIndexPerTryCatchNumber.get(tryCatchIndex);
+    }
+
     public List<Action> getWidgetActions(){
         return widgetActions;
+    }
+
+    public int getLowestFailingWidgetActionIndex() {
+        int min = widgetActions.size();
+        for (int index: failingWidgetActionIndexes) {
+            if (index < min) {
+                min = index;
+            }
+        }
+        return min;
     }
 }
