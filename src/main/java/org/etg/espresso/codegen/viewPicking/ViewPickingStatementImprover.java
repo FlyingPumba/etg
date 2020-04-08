@@ -20,7 +20,7 @@ public class ViewPickingStatementImprover {
     public static final String WITH_TEXT_OR_HINT = "withTextOrHint";
     public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
     public static final String WITH_ID = "withId";
-    public static final String EQUAL_TO_IGNORING_CASE = "equalToIgnoringCase";
+    public static final String EQUAL_TO_IGNORING_CASE = "equalToTrimmingAndIgnoringCase";
 
 
     public static MethodCallExpr findRootAllOfExpression(Statement statement) {

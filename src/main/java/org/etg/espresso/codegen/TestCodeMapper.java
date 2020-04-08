@@ -18,18 +18,13 @@ package org.etg.espresso.codegen;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapperFactory;
-import org.etg.espresso.templates.VelocityTemplate;
+import org.etg.espresso.templates.IsEqualTrimmingAndIgnoringCaseTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
+import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.VisibleViewMatcherTemplate;
 import org.etg.mate.models.Action;
-import org.etg.mate.models.Swipe;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class TestCodeMapper {
 
@@ -59,6 +54,7 @@ public class TestCodeMapper {
     public TestCodeMapper(ETGProperties properties) {
         etgProperties = properties;
         neededTemplates.add(new VisibleViewMatcherTemplate());
+        neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseTemplate());
     }
 
     public void addTemplateFor(TemplatesFactory.Template action) {

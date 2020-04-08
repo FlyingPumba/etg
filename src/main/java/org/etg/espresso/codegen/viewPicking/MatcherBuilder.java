@@ -48,10 +48,10 @@ public class MatcherBuilder {
                 matchers.append("\nwith").append(kind.name()).append("(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append(")");
             } else if (kind == Kind.Text) {
-                matchers.append("\nwithTextOrHint(").append("equalToIgnoringCase(")
+                matchers.append("\nwithTextOrHint(").append("equalToTrimmingAndIgnoringCase(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append("))");
             } else {
-                matchers.append("\nwith").append(kind.name()).append("(equalToIgnoringCase(")
+                matchers.append("\nwith").append(kind.name()).append("(equalToTrimmingAndIgnoringCase(")
                         .append(shouldBox ? boxString(matchedString) : matchedString).append("))");
             }
 
