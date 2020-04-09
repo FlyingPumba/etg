@@ -19,9 +19,7 @@ public class ClickActionCodeMapper extends ActionCodeMapper {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
         String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
-        int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
-
-        testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, getClickViewAction(), testCodeMapper));
+        testCodeLines.add(createActionStatement(variableName, getClickViewAction(), testCodeMapper));
 
         if (actionIndex != actionsCount-1) {
             addCloseSoftKeyboardAction(testCodeLines, testCodeMapper);

@@ -20,29 +20,18 @@ public abstract class ActionCodeMapper {
 
     public abstract String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount);
 
-    protected String createActionStatement(String variableName, int recyclerViewChildPosition, String statement, TestCodeMapper testCodeMapper) {
-        testCodeMapper.mIsRecyclerViewActionAdded = testCodeMapper.mIsRecyclerViewActionAdded || recyclerViewChildPosition != -1;
-        // No need to explicitly scroll to perform an action on a RecyclerView child.
-        String completeAction = statement;
-        completeAction = recyclerViewChildPosition == -1
-                ? completeAction
-                : getActionOnItemAtPositionMethodCallPrefix(testCodeMapper) + recyclerViewChildPosition + ", " + completeAction + ")";
-
+    protected String createActionStatement(String variableName, String statement, TestCodeMapper testCodeMapper) {
         // Although tecnically correct, the following causes a lot of problems.
         // The scrollTo() action tends to fail quite often.
         // if(action.getWidget().isSonOfScrollable()) {
         //     completeAction = getScrollToAction() + ", " + completeAction;
         // }
 
-        String performStatement = variableName + ".perform(" + completeAction + ")" + testCodeMapper.getStatementTerminator();
+        String performStatement = variableName + ".perform(" + statement + ")" + testCodeMapper.getStatementTerminator();
 
         performStatement += "\n";
 
         return performStatement;
-    }
-
-    private String getActionOnItemAtPositionMethodCallPrefix(TestCodeMapper testCodeMapper) {
-        return testCodeMapper.mIsKotlinTestClass ? "actionOnItemAtPosition<ViewHolder>(" : "actionOnItemAtPosition(";
     }
 
     protected void addCloseSoftKeyboardAction(List<String> testCodeLines, TestCodeMapper testCodeMapper) {

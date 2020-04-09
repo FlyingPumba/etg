@@ -19,19 +19,10 @@ import static org.etg.espresso.util.StringHelper.parseId;
 
 public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
-    private static final int MAX_HIERARCHY_VIEW_LEVEL = 2;
     private static final String VIEW_VARIABLE_CLASS_NAME = "ViewInteraction";
-    private static final String DATA_VARIABLE_CLASS_NAME = "DataInteraction";
-    private static final String CLASS_VIEW_PAGER = "android.support.v4.view.ViewPager";
 
     public ViewPickingStatementGenerator(ETGProperties etgProperties, Action action) {
         super(etgProperties, action);
-    }
-
-    // TODO: This will not detect an adapter view action if the affected element's immediate parent is not an AdapterView
-    // (e.g., clicking on a button, whose parent's parent is AdapterView will not be detected as an AdapterView action).
-    private static boolean isAdapterViewAction(Action action) {
-        return action.getWidget().getAdapterViewChildPosition() != -1 && action.getWidget().getParent() != null;
     }
 
     public static String convertIdToTestCodeFormat(String resourceId) {
@@ -57,8 +48,6 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         if (isSwipeAction(action)) {
             return getRootPickingStatement(action, testCodeLines, testCodeMapper);
-        } else if (isAdapterViewAction(action)) {
-            return addDataPickingStatement(action, testCodeLines, testCodeMapper);
         }
 
         //1- Create a basic view picking statement using info from target widget.
@@ -87,19 +76,17 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     private String createViewPickingStatement(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
-        // Skip a level for RecyclerView children as they will be identified through their position.
-        int startIndex = this.action.getWidget().getRecyclerViewChildPosition() != -1 && this.action.getWidget().getParent() != null ? 1 : 0;
+        String variableClassName = this.action.getWidget().getClazz();
 
-        String variableClassName = startIndex == 0 ? this.action.getWidget().getClazz() : this.action.getWidget().getParent().getClazz();
         String variableName = generateVariableNameFromElementClassName(variableClassName, VIEW_VARIABLE_CLASS_NAME, testCodeMapper);
-        String viewMatchers = generateElementHierarchyConditions(this.action, startIndex, testCodeMapper);
+        String viewMatchers = generateBasicPickingStatement(action.getWidget(), testCodeMapper);
 
         if (getIsVisibleMatcher().equals(viewMatchers)) {
             // this means that the action has an empty widget as a target
             viewMatchers = getIsRootMatcher();
         }
 
-        testCodeLines.add(getVariableTypeDeclaration(true, testCodeMapper) + " " + variableName + " = onView(" +
+        testCodeLines.add(getVariableTypeDeclaration(testCodeMapper) + " " + variableName + " = onView(" +
                 viewMatchers + ")" + testCodeMapper.getStatementTerminator());
 
         return variableName;
@@ -129,30 +116,10 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return variableName + unusedIndex;
     }
 
-    private String generateElementHierarchyConditions(Action action, int startIndex, TestCodeMapper testCodeMapper) {
-        // remove widgets in the hierarchy until we reach the desired index
-        Widget widget = action.getWidget();
-        while (startIndex > 0) {
-            widget = widget.getParent();
-            startIndex--;
-
-            // the widget hierarchy is not as deep as the desired startIndex
-            if (widget == null) {
-                return "UNKNOWN";
-            }
-        }
-        return generateElementHierarchyConditionsRecursively(widget, startIndex, testCodeMapper);
-    }
-
-    private String generateElementHierarchyConditionsRecursively(Widget widget, int index, TestCodeMapper testCodeMapper) {
-        // Add visibility check only to the outermost element.
-        boolean addIsVisible = index == 0;
+    private String generateBasicPickingStatement(Widget widget, TestCodeMapper testCodeMapper) {
         MatcherBuilder matcherBuilder = new MatcherBuilder();
 
-        if (isEmpty(widget)
-                // Cannot use child position for the last element, since no parent descriptor available.
-                || widget.getParent() == null && isEmptyIgnoringChildPosition(widget)
-                || index == 0 && isLoginRadioButton(widget)) {
+        if (isEmpty(widget)) {
             matcherBuilder.addMatcher(ClassName, widget.getClazz(), true, false);
             testCodeMapper.mIsclassOrSuperClassesNameAdded = true;
         } else {
@@ -176,40 +143,12 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
             }
         }
 
-        // TODO: Consider minimizing the generated statement to improve test's readability and maintainability (e.g., by capping parent hierarchy).
-
-        // The last element has no parent.
-        if (widget.getParent() == null || index > MAX_HIERARCHY_VIEW_LEVEL) {
-            if (matcherBuilder.getMatcherCount() > 1 || addIsVisible) {
-                String matchers = matcherBuilder.getMatchers();
-                if (!matchers.isEmpty()) {
-                    return "allOf(" + matchers + (addIsVisible ? ", " + getIsVisibleMatcher() : "") + ")";
-                } else {
-                    return addIsVisible ? getIsVisibleMatcher() : "";
-                }
-            }
-            return matcherBuilder.getMatchers();
+        String matchers = matcherBuilder.getMatchers();
+        if (!matchers.isEmpty()) {
+            return "allOf(" + matchers + ", " + getIsVisibleMatcher() + ")";
+        } else {
+            return getIsVisibleMatcher();
         }
-
-        boolean addAllOf = matcherBuilder.getMatcherCount() > 0 || addIsVisible;
-        int groupViewChildPosition = widget.getGroupViewChildPosition();
-
-        // Do not use child position for ViewPager children as it changes dynamically and non-deterministically.
-        if (CLASS_VIEW_PAGER.equals(widget.getParent().getClazz())) {
-            groupViewChildPosition = -1;
-        }
-
-        testCodeMapper.mIsChildAtPositionAdded = testCodeMapper.mIsChildAtPositionAdded || groupViewChildPosition != -1;
-
-        //comento la parte recursiva, dejando solo lo que se macheaba sobre el widget actual
-//        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() + (matcherBuilder.getMatcherCount() > 0 ? "," : "")
-//                + (groupViewChildPosition != -1 ? "childAtPosition(" : "withParent(")
-//                + generateElementHierarchyConditionsRecursively(widget.getParent(), checkIsDisplayed, index + 1)
-//                + (groupViewChildPosition != -1 ? ",\n" + groupViewChildPosition : "") + ")"
-//                + (addIsDisplayed ? "\n" + getIsDisplayedMatcher() : "") + (addAllOf ? ")" : "");
-        return (addAllOf ? "allOf(" : "") + matcherBuilder.getMatchers() +
-                (addIsVisible ? ((matcherBuilder.getMatcherCount() > 0 ? ", " : "") + getIsVisibleMatcher()) : "") +
-                (addAllOf ? ")" : "");
     }
 
     private boolean isAndroidFrameworkPrivateId(String resourceId) {
@@ -223,48 +162,16 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return variableName;
     }
 
-    private void refineReceiverOfAction(Action action) {
-        Widget receiverOfAction = action.getWidget().getReceiverOfClickInCoordinates(action.getWidget().getX(), action.getWidget().getY());
-        if (receiverOfAction == null) {
-            throw new RuntimeException("there is no receiver of click action for widget");
-        }
-        action.setWidget(receiverOfAction);
-    }
-
-    private String addDataPickingStatement(Action action, List<String> testCodeLines, TestCodeMapper testCodeMapper) {
-        String variableName = generateVariableNameFromElementClassName(action.getWidget().getClazz(), DATA_VARIABLE_CLASS_NAME, testCodeMapper);
-        // TODO: Add '.onChildView(...)' when we support AdapterView beyond the immediate parent of the affected element.
-        testCodeLines.add(getVariableTypeDeclaration(false, testCodeMapper) + " " + variableName + " = onData(anything())\n.inAdapterView(" +
-                generateElementHierarchyConditions(action, 1, testCodeMapper) + ")\n.atPosition(" + action.getWidget().getAdapterViewChildPosition() +
-                ")" + testCodeMapper.getStatementTerminator());
-        return variableName;
-    }
-
-    private String getVariableTypeDeclaration(boolean isOnViewInteraction, TestCodeMapper testCodeMapper) {
+    private String getVariableTypeDeclaration(TestCodeMapper testCodeMapper) {
         if (testCodeMapper.mIsKotlinTestClass) {
             return "val";
         }
-        return isOnViewInteraction ? VIEW_VARIABLE_CLASS_NAME : DATA_VARIABLE_CLASS_NAME;
-    }
-
-    /**
-     * TODO: This is a temporary workaround for picking a login option in a username-agnostic way
-     * such that the generated test is generic enough to run on other devices.
-     * TODO: Also, it assumes a single radio button choice (such that it could be identified by the class name).
-     */
-    private boolean isLoginRadioButton(Widget widget) {
-        return widget.getClazz().endsWith(".widget.AppCompatRadioButton")
-                && "R.id.welcome_account_list".equals(convertIdToTestCodeFormat(widget.getParent().getResourceID()));
-    }
-
-    public boolean isEmptyIgnoringChildPosition(Widget widget) {
-        return isNullOrEmpty(widget.getResourceID()) && isNullOrEmpty(widget.getText())
-                && isNullOrEmpty(widget.getContentDesc());
+        return VIEW_VARIABLE_CLASS_NAME;
     }
 
     public boolean isEmpty(Widget widget) {
-        return widget.getRecyclerViewChildPosition() == -1 && widget.getAdapterViewChildPosition() == -1 && widget.getGroupViewChildPosition() == -1
-                && isEmptyIgnoringChildPosition(widget);
+        return isNullOrEmpty(widget.getResourceID()) && isNullOrEmpty(widget.getText())
+                && isNullOrEmpty(widget.getContentDesc());
     }
 
     private String getIsVisibleMatcher() {

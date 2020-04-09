@@ -19,13 +19,11 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
         String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
-        int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
-
         Swipe swipe = action.getSwipe();
 
         String methdCall = getSwipeAction(swipe);
 
-        testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition, methdCall, testCodeMapper));
+        testCodeLines.add(createActionStatement(variableName, methdCall, testCodeMapper));
         testCodeLines.add(getWaitToScrollEndStatement() + testCodeMapper.getStatementTerminator() + "\n");
         testCodeMapper.swipeActionAdded = true;
 

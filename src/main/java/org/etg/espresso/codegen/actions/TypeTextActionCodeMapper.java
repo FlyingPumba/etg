@@ -20,9 +20,7 @@ public class TypeTextActionCodeMapper extends ActionCodeMapper {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
         String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
-        int recyclerViewChildPosition = action.getWidget().getRecyclerViewChildPosition();
-
-        testCodeLines.add(createActionStatement(variableName, recyclerViewChildPosition,
+        testCodeLines.add(createActionStatement(variableName,
                 "replaceText(" + boxString(action.getExtraInfo()) + ")", testCodeMapper));
 
         if (actionIndex != actionsCount-1) {
