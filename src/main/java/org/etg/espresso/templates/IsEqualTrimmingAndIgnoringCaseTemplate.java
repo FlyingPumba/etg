@@ -12,11 +12,11 @@ public class IsEqualTrimmingAndIgnoringCaseTemplate implements VelocityTemplate 
                 "package ${PackageName};\n" +
                 "\n" +
                 "#end\n" +
+                "import org.hamcrest.BaseMatcher;\n" +
                 "import org.hamcrest.Description;\n" +
-                "import org.hamcrest.TypeSafeMatcher;\n" +
                 "\n" +
                 "\n" +
-                "public class IsEqualTrimmingAndIgnoringCase extends TypeSafeMatcher<String> {\n" +
+                "public class IsEqualTrimmingAndIgnoringCase extends BaseMatcher<String> {\n" +
                 "\n" +
                 "    private final String string;\n" +
                 "\n" +
@@ -27,13 +27,11 @@ public class IsEqualTrimmingAndIgnoringCaseTemplate implements VelocityTemplate 
                 "        this.string = string;\n" +
                 "    }\n" +
                 "\n" +
-                "    @Override\n" +
                 "    public boolean matchesSafely(String item) {\n" +
                 "        return string.trim().equalsIgnoreCase(item.trim());\n" +
                 "    }\n" +
                 "\n" +
-                "    @Override\n" +
-                "    public void describeMismatchSafely(String item, Description mismatchDescription) {\n" +
+                "    private void describeMismatchSafely(String item, Description mismatchDescription) {\n" +
                 "        mismatchDescription.appendText(\"was \").appendText(item);\n" +
                 "    }\n" +
                 "\n" +
@@ -46,6 +44,20 @@ public class IsEqualTrimmingAndIgnoringCaseTemplate implements VelocityTemplate 
                 "\n" +
                 "    public static IsEqualTrimmingAndIgnoringCase equalToTrimmingAndIgnoringCase(String string) {\n" +
                 "        return new IsEqualTrimmingAndIgnoringCase(string);\n" +
+                "    }\n" +
+                "\n" +
+                "    @Override\n" +
+                "    public boolean matches(Object item) {\n" +
+                "        return item != null && matchesSafely(item.toString());\n" +
+                "    }\n" +
+                "\n" +
+                "    @Override\n" +
+                "    final public void describeMismatch(Object item, Description description) {\n" +
+                "        if (item == null) {\n" +
+                "            super.describeMismatch(item, description);\n" +
+                "        } else {\n" +
+                "            describeMismatchSafely(item.toString(), description);\n" +
+                "        }\n" +
                 "    }\n" +
                 "}";
     }
