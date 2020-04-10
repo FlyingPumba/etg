@@ -14,11 +14,7 @@ public class MenuActionCodeMapper extends ActionCodeMapper {
 
     @Override
     public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
-        String statement = getPressMenuKeyAction() + testCodeMapper.getStatementTerminator();
-
-        statement += "\n";
-
-        testCodeLines.add(statement);
+        testCodeLines.add(createActionStatementOnRoot(getPressMenuKeyAction(), testCodeMapper));
 
         return null;
     }

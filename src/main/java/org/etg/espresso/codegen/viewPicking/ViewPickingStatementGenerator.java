@@ -178,7 +178,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return "\nisVisible()";
     }
 
-    private String getIsRootMatcher() {
+    public static String getIsRootMatcher() {
         return "isRoot()";
     }
 }

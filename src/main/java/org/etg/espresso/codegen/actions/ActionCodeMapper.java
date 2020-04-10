@@ -6,6 +6,8 @@ import org.etg.mate.models.Action;
 
 import java.util.List;
 
+import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator.getIsRootMatcher;
+
 public abstract class ActionCodeMapper {
 
     protected ETGProperties etgProperties;
@@ -28,6 +30,14 @@ public abstract class ActionCodeMapper {
         // }
 
         String performStatement = variableName + ".perform(" + statement + ")" + testCodeMapper.getStatementTerminator();
+
+        performStatement += "\n";
+
+        return performStatement;
+    }
+
+    protected String createActionStatementOnRoot(String statement, TestCodeMapper testCodeMapper) {
+        String performStatement = "onView(" + getIsRootMatcher() + ").perform(" + statement + ")" + testCodeMapper.getStatementTerminator();
 
         performStatement += "\n";
 
