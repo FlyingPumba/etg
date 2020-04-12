@@ -45,7 +45,8 @@ public abstract class ActionCodeMapper {
     }
 
     protected void addCloseSoftKeyboardAction(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
-        testCodeLines.add(getCloseSoftKeyboardAction() + testCodeMapper.getStatementTerminator());
+        // The following does more harm than good, so we will keep it commented out.
+        // testCodeLines.add(getCloseSoftKeyboardAction() + testCodeMapper.getStatementTerminator());
     }
 
     private String getCloseSoftKeyboardAction() {
