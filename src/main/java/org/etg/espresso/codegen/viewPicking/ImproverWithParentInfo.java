@@ -53,7 +53,15 @@ public class ImproverWithParentInfo extends ViewPickingStatementImprover {
 
         if (widget.getParent() != null) {
             Expression parentExpr = getIsDescendantOfExpression(widget.getParent());
-            if (parentExpr != null) arguments.add(parentExpr);
+            if (parentExpr != null) {
+                if (arguments.size() == 0) {
+                    // There are no more arguments for this level, and parentExpr is already a isDescendantOf expression.
+                    // Return that expression to avoid unnecessary layers of isDescendantOf calls.
+                    return parentExpr;
+                } else {
+                    arguments.add(parentExpr);
+                }
+            }
         }
 
         Expression isDescendantOfArgument;

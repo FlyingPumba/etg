@@ -49,7 +49,15 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
 
         for (Widget child : widget.getChildren()) {
             Expression hasDescendantExpr = getHasDescendantExpression(child);
-            if (hasDescendantExpr != null) arguments.add(hasDescendantExpr);
+            if (hasDescendantExpr != null) {
+                if (arguments.size() == 0) {
+                    // There are no more arguments for this level, and hasDescendantExpr is already a hasDescendant expression.
+                    // Return that expression to avoid unnecessary layers of hasDescendant calls.
+                    return hasDescendantExpr;
+                } else {
+                    arguments.add(hasDescendantExpr);
+                }
+            }
         }
 
         Expression hasDescendantArgument;
