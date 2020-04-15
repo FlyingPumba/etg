@@ -26,5 +26,11 @@ public class OptimisticPruning extends PruningAlgorithm {
                 espressoTestCase.getTestName(),
                 espressoTestCase.getFailingWidgetActionIndexes().size(),
                 widgetActionsCount));
+
+        int lowestFailingWidgetActionIndex = espressoTestCase.getLowestFailingWidgetActionIndex();
+        System.out.println(String.format("TEST: %s LOWEST-FAILING-ACTION-INDEX: %d TOTAL-ACTIONS: %d",
+                espressoTestCase.getTestName(),
+                lowestFailingWidgetActionIndex,
+                widgetActionsCount));
     }
 }
