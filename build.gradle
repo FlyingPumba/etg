@@ -26,6 +26,7 @@ task wrapper(type: Wrapper) {
 
 run {
     args = [
+            "-p", "optimistic",
             "path to config file"
     ]
 }
