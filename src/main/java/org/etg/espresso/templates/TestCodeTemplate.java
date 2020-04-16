@@ -45,9 +45,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import static ${EspressoPackageName}.InstrumentationRegistry.getInstrumentation;\n" +
                 "import static ${EspressoPackageName}.espresso.Espresso.onView;\n" +
                 "import static ${EspressoPackageName}.espresso.Espresso.openActionBarOverflowOrOptionsMenu;\n" +
-                "#if (${AddContribImport})\n" +
-                "import static ${EspressoPackageName}.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition;\n" +
-                "#end\n" +
                 "import static ${EspressoPackageName}.espresso.action.ViewActions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.assertion.ViewAssertions.*;\n" +
                 "import static ${EspressoPackageName}.espresso.matcher.ViewMatchers.*;\n" +
@@ -97,26 +94,6 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "    #end\n" +
                 "    }\n" +
                 "\n" +
-                "    #if (${AddChildAtPositionMethod})\n" +
-                "    private static Matcher<View> childAtPosition(\n" +
-                "            final Matcher<View> parentMatcher, final int position) {\n" +
-                "\n" +
-                "        return new TypeSafeMatcher<View>() {\n" +
-                "            @Override\n" +
-                "            public void describeTo(Description description) {\n" +
-                "                description.appendText(\"Child at position \" + position + \" in parent \");\n" +
-                "                parentMatcher.describeTo(description);\n" +
-                "            }\n" +
-                "\n" +
-                "            @Override\n" +
-                "            public boolean matchesSafely(View view) {\n" +
-                "                ViewParent parent = view.getParent();\n" +
-                "                return parent instanceof ViewGroup && parentMatcher.matches(parent)\n" +
-                "                        && view.equals(((ViewGroup)parent).getChildAt(position));\n" +
-                "            }\n" +
-                "        };\n" +
-                "    }\n" +
-                "    #end\n" +
                 "    #if (${AddClassOrSuperClassesNameMethod})\n" +
                 "private static Matcher<View> classOrSuperClassesName(final Matcher<String> classNameMatcher) {\n" +
                 "\n" +

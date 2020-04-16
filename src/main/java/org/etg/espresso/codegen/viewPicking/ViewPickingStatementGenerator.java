@@ -163,9 +163,6 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     private String getVariableTypeDeclaration(TestCodeMapper testCodeMapper) {
-        if (testCodeMapper.mIsKotlinTestClass) {
-            return "val";
-        }
         return VIEW_VARIABLE_CLASS_NAME;
     }
 

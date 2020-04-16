@@ -2,6 +2,7 @@ package org.etg.espresso.pruning;
 
 import org.etg.ETGProperties;
 import org.etg.espresso.EspressoTestCase;
+import org.etg.espresso.EspressoTestCaseWriter;
 import org.etg.espresso.EspressoTestRunner;
 
 import java.util.ArrayList;
@@ -19,7 +20,11 @@ public abstract class PruningAlgorithm {
         List<Integer> newFailingPerformLines = new ArrayList<>();
         do {
             failingPerformLines = new ArrayList<>(newFailingPerformLines);
-            espressoTestCase.addToProject(properties, false);
+
+            EspressoTestCaseWriter.write(espressoTestCase)
+                    .withOption(EspressoTestCaseWriter.Option.SURROUND_WITH_TRY_CATCHS)
+                    .toProject();
+
             newFailingPerformLines = EspressoTestRunner.runTestCase(properties, espressoTestCase, false);
 
             if (newFailingPerformLines.size() > 0) {

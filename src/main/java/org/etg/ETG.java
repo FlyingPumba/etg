@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.espresso.EspressoTestCase;
+import org.etg.espresso.EspressoTestCaseWriter;
 import org.etg.espresso.EspressoTestRunner;
 import org.etg.espresso.codegen.TestCodeGenerator;
 import org.etg.espresso.pruning.PruningAlgorithm;
@@ -64,7 +65,9 @@ public class ETG {
                     pruningAlgorithm.printSummary(espressoTestCase);
                 }
 
-                espressoTestCase.addToProject(properties, true);
+                EspressoTestCaseWriter.write(espressoTestCase)
+                        .withOption(EspressoTestCaseWriter.Option.PRETTIFY)
+                        .toProject();
             }
 
             System.out.println("ETG finished");

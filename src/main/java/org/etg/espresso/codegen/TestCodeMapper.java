@@ -28,12 +28,8 @@ import java.util.*;
 
 public class TestCodeMapper {
 
-    public boolean mIsChildAtPositionAdded = false;
-    public boolean mIsRecyclerViewActionAdded = false;
     public boolean mIsclassOrSuperClassesNameAdded = false;
-    public boolean mIsKotlinTestClass = false;
     public boolean mUseTextForElementMatching = true;
-    public boolean mSurroundPerformsWithTryCatch = true;
     public boolean swipeActionAdded = false;
     public boolean longClickActionAdded = false;
     public boolean clickActionAdded = false;
@@ -48,7 +44,6 @@ public class TestCodeMapper {
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     public Map<String, Integer> mVariableNameIndexes = new HashMap<>();
-    private int performCount = 0;
     private ETGProperties etgProperties;
 
     public TestCodeMapper(ETGProperties properties) {
@@ -65,42 +60,16 @@ public class TestCodeMapper {
         return neededTemplates;
     }
 
-    public int addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
+    public void addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
         ActionCodeMapper actionCodeMapper = ActionCodeMapperFactory.get(etgProperties, action);
 
         List<String> actionTestCodeLines = new ArrayList<>();
         actionCodeMapper.addTestCodeLines(actionTestCodeLines, this, actionIndex, actionsCount);
 
-        if (mSurroundPerformsWithTryCatch) {
-            // surround lines with try-catch
-            surroundLinesWithTryCatch(actionTestCodeLines);
-        }
-
         testCodeLines.addAll(actionTestCodeLines);
-
-        return performCount-1;
     }
 
-    private void surroundLinesWithTryCatch(List<String> actionTestCodeLines) {
-        String tryStr = "\ntry {\n";
-        String catchStr = "\n" +
-                "} catch (Exception e) {\n" +
-                "System.out.println(buildPerformExceptionMessage(e, " + performCount + "))" + getStatementTerminator() + "\n" +
-                "}";
-
-        actionTestCodeLines.add(0, tryStr);
-        actionTestCodeLines.add(catchStr);
-
-        performCount++;
-    }
-
-    public void setSurroundPerformsWithTryCatch(boolean mSurroundPerformsWithTryCatch) {
-        this.mSurroundPerformsWithTryCatch = mSurroundPerformsWithTryCatch;
-        this.performCount = 0;
-        this.mVariableNameIndexes = new HashMap<>();
-    }
-
-    public String getStatementTerminator() {
-        return mIsKotlinTestClass ? "" : ";";
+    public static String getStatementTerminator() {
+        return ";";
     }
 }

@@ -14,9 +14,8 @@ import java.util.stream.Collectors;
 public class OptimisticPruning extends PruningAlgorithm {
     @Override
     void updateTestCase(EspressoTestCase espressoTestCase, List<Integer> newFailingPerformLines) {
-        for (int tryCatchIndex: newFailingPerformLines) {
-            int widgetActionIndex = espressoTestCase.geWidgetActionIndexForTryCatchIndex(tryCatchIndex);
-            espressoTestCase.addFailingWidgetActionIndex(widgetActionIndex);
+        for (int failingActionIndex: newFailingPerformLines) {
+            espressoTestCase.addFailingWidgetActionIndex(failingActionIndex);
         }
 
         System.out.println(String.format("Pruning %d widget actions (out of %d) TEST %s",

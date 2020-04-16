@@ -8,8 +8,7 @@ import java.util.List;
 public class PesimisticPruning extends PruningAlgorithm {
     @Override
     void updateTestCase(EspressoTestCase espressoTestCase, List<Integer> newFailingPerformLines) {
-        Integer tryCatchIndex = newFailingPerformLines.get(0);
-        int lowestFailingWidgetActionIndex = espressoTestCase.geWidgetActionIndexForTryCatchIndex(tryCatchIndex);
+        int lowestFailingWidgetActionIndex = newFailingPerformLines.get(0);
 
         for (int i = lowestFailingWidgetActionIndex; i < espressoTestCase.getWidgetActionsCount(); i++) {
             espressoTestCase.addFailingWidgetActionIndex(i);
