@@ -29,11 +29,29 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import androidx.test.rule.ActivityTestRule;\n" +
                 "import androidx.test.runner.AndroidJUnit4;\n" +
                 "import androidx.test.filters.LargeTest;\n" +
+
+                "#if (${AddScreenshotImport})\n" +
+                "import androidx.test.runner.screenshot.ScreenCapture;\n" +
+                "import androidx.test.runner.screenshot.Screenshot;\n" +
+                "#end\n" +
+
                 "#else\n" +
                 "import android.support.test.rule.ActivityTestRule;\n" +
                 "import android.support.test.runner.AndroidJUnit4;\n" +
                 "import android.support.test.filters.LargeTest;\n" +
+
+                "#if (${AddScreenshotImport})\n" +
+                "import android.support.test.runner.screenshot.ScreenCapture;\n" +
+                "import android.support.test.runner.screenshot.Screenshot;\n" +
                 "#end\n" +
+
+                "#end\n" +
+
+                "#if (${AddScreenshotImport})\n" +
+                "import android.graphics.Bitmap;\n" +
+                "import java.io.IOException;\n" +
+                "#end\n" +
+
                 "import android.os.SystemClock;\n" +
                 "import android.view.KeyEvent;\n" +
                 "import android.view.View;\n" +
@@ -141,6 +159,18 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "        }\n" +
                 "\n" +
                 "        return \"ERROR: when executing line number: unknown, perform number: \" + performNumber;\n" +
+                "    }\n" +
+                "    #end\n" +
+                "    #if (${AddScreenshotImport})\n" +
+                "private void getScreenshot(int performNumber) {\n" +
+                "      try {\n" +
+                "          ScreenCapture capture = Screenshot.capture();\n" +
+                "          capture.setName(String.format(\"${ClassName}_%d\", performNumber));\n" +
+                "          capture.setFormat(Bitmap.CompressFormat.PNG);\n" +
+                "          capture.process();\n" +
+                "      } catch (IOException e) {\n" +
+                "          e.printStackTrace();\n" +
+                "      }\n" +
                 "    }\n" +
                 "    #end\n" +
                 "    private static Matcher<View> withTextOrHint(final Matcher<String> stringMatcher) {\n" +

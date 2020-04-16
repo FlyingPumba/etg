@@ -111,6 +111,10 @@ public class EspressoTestCaseWriter {
         for (int i = 0; i < espressoTestCase.getWidgetActionsCount(); i++) {
             List<String> testCodeLinesForAction = new ArrayList<>(espressoTestCase.getTestCodeLinesForWidgetActionIndex(i));
 
+            if (options.contains(Option.PRODUCE_SCREENSHOTS)) {
+                addScreenshotCall(testCodeLinesForAction, i);
+            }
+
             if (options.contains(Option.SURROUND_WITH_TRY_CATCHS)) {
                 surroundLinesWithTryCatch(testCodeLinesForAction, i);
             }
@@ -129,7 +133,18 @@ public class EspressoTestCaseWriter {
             }
         }
 
+        if (options.contains(Option.PRODUCE_SCREENSHOTS)) {
+            List<String> finalScreenshotCall = new ArrayList<>();
+            addScreenshotCall(finalScreenshotCall, espressoTestCase.getWidgetActionsCount());
+            testCodeLines.addAll(finalScreenshotCall);
+        }
+
         return testCodeLines;
+    }
+
+    private void addScreenshotCall(List<String> actionTestCodeLines, int index) {
+        String screenshotCall = String.format("getScreenshot(%d)", index) + getStatementTerminator() + "\n";
+        actionTestCodeLines.add(0, screenshotCall);
     }
 
     private void surroundLinesWithTryCatch(List<String> actionTestCodeLines, int index) {
