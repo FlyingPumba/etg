@@ -1,15 +1,12 @@
 package org.etg.espresso;
 
-import org.apache.velocity.VelocityContext;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.TestCodeMapper;
 import org.etg.espresso.templates.VelocityTemplate;
-import org.etg.espresso.templates.VelocityTemplateConverter;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.WidgetTestCase;
 import org.etg.utils.ProcessRunner;
 
-import java.io.*;
 import java.util.*;
 
 public class EspressoTestCase {
@@ -60,7 +57,7 @@ public class EspressoTestCase {
         return testCaseName;
     }
 
-    public double getCoverage(ETGProperties properties, String resultsFolder) throws Exception {
+    public double getCoverage(ETGProperties properties) throws Exception {
         // get root permissions for adb
         ProcessRunner.runCommand("adb root");
 
@@ -69,10 +66,10 @@ public class EspressoTestCase {
         String rmCmdResult = ProcessRunner.runCommand(rmCmd);
 
         // run test case with coverage enabled to create coverage.ec file
-        EspressoTestRunner.runTestCase(properties, this, true);
+        EspressoTestRunner.runTestCase(this, true);
 
         // fetch and process the newly created file
-        return Coverage.getTestCoverage(properties, this, resultsFolder);
+        return Coverage.getTestCoverage( this, getTestCaseResultsPath());
     }
 
     public Set<Integer> getFailingWidgetActionIndexes() {
@@ -115,5 +112,9 @@ public class EspressoTestCase {
 
     public TestCodeMapper getCodeMapper() {
         return codeMapper;
+    }
+
+    public String getTestCaseResultsPath() {
+        return String.format("%s/%s", etgProperties.getETGResultsPath(), getTestName());
     }
 }

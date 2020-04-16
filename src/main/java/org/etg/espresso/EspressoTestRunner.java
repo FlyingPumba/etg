@@ -19,10 +19,10 @@ public class EspressoTestRunner {
         ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
     }
 
-    public static List<Integer> runTestCase(ETGProperties properties, EspressoTestCase espressoTestCase, boolean coverage) throws Exception {
-        String junitRunner = prepareForTestRun(properties);
+    public static List<Integer> runTestCase(EspressoTestCase espressoTestCase, boolean coverage) throws Exception {
+        String junitRunner = prepareForTestRun(espressoTestCase.getEtgProperties());
 
-        String testResult = fireTest(properties, espressoTestCase, junitRunner, coverage);
+        String testResult = fireTest(espressoTestCase, junitRunner, coverage);
 
         if (!testResult.contains("OK")) {
             System.out.println("There was an error running test case: " + espressoTestCase.getTestName());
@@ -54,20 +54,24 @@ public class EspressoTestRunner {
         return getJunitRunner(properties);
     }
 
-    private static String fireTest(ETGProperties properties, EspressoTestCase espressoTestCase, String junitRunner,
+    private static String fireTest(EspressoTestCase espressoTestCase, String junitRunner,
                                    boolean coverage) {
         String coverageFlags = "";
         if (coverage) {
             // Add coverage flags to command and make sure folder exists
             coverageFlags = String.format("-e coverage true -e coverageFile %s",
-                    Coverage.getRemoteCoverageEcPath(properties));
+                    Coverage.getRemoteCoverageEcPath(espressoTestCase.getEtgProperties()));
             ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
-                    Coverage.getRemoteCoverageEcFolderPath(properties)));
+                    Coverage.getRemoteCoverageEcFolderPath(espressoTestCase.getEtgProperties())));
         }
 
         String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +
-                        "%s.%s %s/%s", coverageFlags, properties.getTestPackageName(), espressoTestCase.getTestName(),
-                properties.getCompiledTestPackageName(), junitRunner);
+                        "%s.%s %s/%s",
+                coverageFlags,
+                espressoTestCase.getEtgProperties().getTestPackageName(),
+                espressoTestCase.getTestName(),
+                espressoTestCase.getEtgProperties().getCompiledTestPackageName(),
+                junitRunner);
         String output = ProcessRunner.runCommand(instrumentCmd);
 
         // Add some time sleep after executing test to avoid clogging the emulator

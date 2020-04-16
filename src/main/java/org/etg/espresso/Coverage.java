@@ -9,14 +9,15 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Coverage {
-    static double getTestCoverage(ETGProperties properties, EspressoTestCase espressoTestCase, String resultsFolder) throws Exception {
+    static double getTestCoverage(EspressoTestCase espressoTestCase, String testCaseResultsPath) throws Exception {
         String workingFolder = System.getProperty("user.dir");
 
-        String coverageSrcFolderPath = prepareForTestCoverage(properties, resultsFolder);
+        String coverageSrcFolderPath = prepareForTestCoverage(espressoTestCase, testCaseResultsPath);
         String coverageEcPath = String.format("%scoverage.ec", coverageSrcFolderPath);
 
         // pull coverage.ec file
-        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(properties), coverageSrcFolderPath);
+        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(espressoTestCase.getEtgProperties()),
+                coverageSrcFolderPath);
         String pullCmdResult = ProcessRunner.runCommand(pullCmd);
 
         if (pullCmdResult.contains("error")) {
@@ -61,14 +62,15 @@ public class Coverage {
 
     /**
      * This method takes care of preparing both sources and class files that will be used by Jacoco report generator
-     * @param properties
      * @throws Exception
      * @return
      */
-    private static String prepareForTestCoverage(ETGProperties properties, String resultsFolder) throws Exception {
+    private static String prepareForTestCoverage(EspressoTestCase espressoTestCase, String testCaseResultsPath) throws Exception {
+        ETGProperties properties = espressoTestCase.getEtgProperties();
+
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
 
-        String coverageSrcFolderPath = String.format("%s/coverage/", resultsFolder);
+        String coverageSrcFolderPath = String.format("%s/coverage/", testCaseResultsPath);
         ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
         ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
 

@@ -10,17 +10,19 @@ import java.util.Properties;
 public class ETGProperties {
 
     private Properties properties;
+    private Args args;
 
-    private ETGProperties(Properties properties) {
+    private ETGProperties(Properties properties, Args args) {
         this.properties = properties;
+        this.args = args;
     }
 
-    public static ETGProperties loadProperties(String arg) throws IOException {
+    public static ETGProperties loadProperties(String arg, Args args) throws IOException {
         Properties prop = new Properties();
         String configPath = arg;
         FileInputStream ip = new FileInputStream(configPath);
         prop.load(ip);
-        return new ETGProperties(prop);
+        return new ETGProperties(prop, args);
     }
 
     public String getJsonPath() {
@@ -231,5 +233,9 @@ public class ETGProperties {
         }
 
         return activity;
+    }
+
+    public String getETGResultsPath() {
+        return String.format("%s/etg", args.getResultsPath());
     }
 }

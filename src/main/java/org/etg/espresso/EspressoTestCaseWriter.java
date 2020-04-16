@@ -39,9 +39,19 @@ public class EspressoTestCaseWriter {
         return this;
     }
 
-    public void toProject() throws Exception {
+    public EspressoTestCaseWriter toProject() throws Exception {
         writeToFolder(espressoTestCase.getEtgProperties().getOutputPath());
         writeCustomUsedClasses(espressoTestCase.getEtgProperties().getOutputPath());
+        return this;
+    }
+
+    public EspressoTestCaseWriter toResultsFolder() throws Exception {
+        String testCaseResultFolderPath = String.format("%s/code/", espressoTestCase.getTestCaseResultsPath());
+        ProcessRunner.runCommand(String.format("mkdir -p %s", testCaseResultFolderPath));
+
+        writeToFolder(testCaseResultFolderPath);
+        writeCustomUsedClasses(testCaseResultFolderPath);
+        return this;
     }
 
     private void writeToFolder(String outputFolderPath) throws Exception {

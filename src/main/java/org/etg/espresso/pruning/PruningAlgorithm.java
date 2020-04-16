@@ -25,7 +25,7 @@ public abstract class PruningAlgorithm {
                     .withOption(EspressoTestCaseWriter.Option.SURROUND_WITH_TRY_CATCHS)
                     .toProject();
 
-            newFailingPerformLines = EspressoTestRunner.runTestCase(properties, espressoTestCase, false);
+            newFailingPerformLines = EspressoTestRunner.runTestCase(espressoTestCase, false);
 
             if (newFailingPerformLines.size() > 0) {
                 updateTestCase(espressoTestCase, newFailingPerformLines);
