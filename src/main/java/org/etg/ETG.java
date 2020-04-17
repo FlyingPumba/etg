@@ -38,7 +38,7 @@ public class ETG {
             System.out.println("JSON file MD5: " + properties.getJsonMD5());
 
             EspressoTestRunner.cleanOutputPath(properties);
-            cleanResultsPath(properties);
+            cleanETGResultsPath(properties);
             System.out.println("ETG Results folder: " + properties.getETGResultsPath());
 
             System.out.println("Parsing widget test cases");
@@ -83,9 +83,9 @@ public class ETG {
         }
     }
 
-    private static void cleanResultsPath(ETGProperties properties) {
+    private static void cleanETGResultsPath(ETGProperties properties) {
         String resultsPath = properties.getETGResultsPath();
-        String rmCmd = String.format("rm %s/*", resultsPath);
+        String rmCmd = String.format("rm -r %s/*", resultsPath);
         ProcessRunner.runCommand(rmCmd);
     }
 
