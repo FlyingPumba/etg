@@ -34,6 +34,12 @@ public class EspressoTestRunner {
         return parseFailingPerforms();
     }
 
+    public static void runAllTestCases(ETGProperties properties, boolean coverage) throws Exception {
+        String junitRunner = prepareForTestRun(properties);
+
+        String testResult = fireAllTests(properties, junitRunner, coverage);
+    }
+
     public static String prepareForTestRun(ETGProperties properties) throws Exception {
         if (!animationsDisabled) {
             disableAnimations();
@@ -71,6 +77,37 @@ public class EspressoTestRunner {
                 espressoTestCase.getEtgProperties().getTestPackageName(),
                 espressoTestCase.getTestName(),
                 espressoTestCase.getEtgProperties().getCompiledTestPackageName(),
+                junitRunner);
+        String output = ProcessRunner.runCommand(instrumentCmd);
+
+        // Add some time sleep after executing test to avoid clogging the emulator
+        try {
+            System.out.println("Waiting 5 seconds after test");
+            int seconds = 5;
+            Thread.sleep(seconds * 1000);
+        } catch (InterruptedException e) {
+            // do nothing
+        }
+
+        return output;
+    }
+
+    private static String fireAllTests(ETGProperties properties, String junitRunner,
+                                   boolean coverage) {
+        String coverageFlags = "";
+        if (coverage) {
+            // Add coverage flags to command and make sure folder exists
+            coverageFlags = String.format("-e coverage true -e coverageFile %s",
+                    Coverage.getRemoteCoverageEcPath(properties));
+            ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
+                    Coverage.getRemoteCoverageEcFolderPath(properties)));
+        }
+
+        String instrumentCmd = String.format("adb shell am instrument -w -r --no-window-animation %s -e debug false -e package " +
+                        "%s %s/%s",
+                coverageFlags,
+                properties.getPackageName(),
+                properties.getCompiledTestPackageName(),
                 junitRunner);
         String output = ProcessRunner.runCommand(instrumentCmd);
 

@@ -9,14 +9,50 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Coverage {
-    static double getTestCoverage(EspressoTestCase espressoTestCase, String testCaseResultsPath) throws Exception {
-        String workingFolder = System.getProperty("user.dir");
+    public static double getTestCoverage(EspressoTestCase espressoTestCase) throws Exception {
+        String coverageSrcFolderPath = String.format("%s/coverage/", espressoTestCase.getTestCaseResultsPath());
+        ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
 
-        String coverageSrcFolderPath = prepareForTestCoverage(espressoTestCase, testCaseResultsPath);
+        // get root permissions for adb
+        ProcessRunner.runCommand("adb root");
+
+        // delete coverage.ec file remotely
+        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(espressoTestCase.getEtgProperties()));
+        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
+
+        // run test case with coverage enabled to create coverage.ec file
+        EspressoTestRunner.runTestCase(espressoTestCase, true);
+
+        // fetch and process the newly created file
+        return Coverage.pullAndParseCoverage(espressoTestCase.getEtgProperties(), coverageSrcFolderPath);
+    }
+
+    public static double getAllTestsCoverage(ETGProperties properties, String testCaseResultsPath) throws Exception {
+        String coverageSrcFolderPath = String.format("%s/overall-coverage/", testCaseResultsPath);
+        ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
+
+        // get root permissions for adb
+        ProcessRunner.runCommand("adb root");
+
+        // delete coverage.ec file remotely
+        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(properties));
+        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
+
+        // run all test cases in project with coverage enabled to create coverage.ec file
+        EspressoTestRunner.runAllTestCases(properties, true);
+
+        // fetch and process the newly created file
+        return Coverage.pullAndParseCoverage(properties, coverageSrcFolderPath);
+    }
+
+    private static double pullAndParseCoverage(ETGProperties properties, String coverageSrcFolderPath) throws Exception {
+        prepareForTestCoverage(properties, coverageSrcFolderPath);
         String coverageEcPath = String.format("%scoverage.ec", coverageSrcFolderPath);
 
         // pull coverage.ec file
-        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(espressoTestCase.getEtgProperties()),
+        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(properties),
                 coverageSrcFolderPath);
         String pullCmdResult = ProcessRunner.runCommand(pullCmd);
 
@@ -24,7 +60,12 @@ public class Coverage {
             throw new Exception("Unable to fetch coverage.ec file: " + pullCmdResult);
         }
 
+        return parseCoverageFile(coverageSrcFolderPath, coverageEcPath);
+    }
+
+    private static double parseCoverageFile(String coverageSrcFolderPath, String coverageEcPath) {
         // TODO: this is a hack, there has to be a better way
+        String workingFolder = System.getProperty("user.dir");
         String jacocoBinPath = "bin/jacococli.jar";
         if (!workingFolder.endsWith("etg")) {
             jacocoBinPath = "etg/" + jacocoBinPath;
@@ -65,14 +106,8 @@ public class Coverage {
      * @throws Exception
      * @return
      */
-    private static String prepareForTestCoverage(EspressoTestCase espressoTestCase, String testCaseResultsPath) throws Exception {
-        ETGProperties properties = espressoTestCase.getEtgProperties();
-
+    private static void prepareForTestCoverage(ETGProperties properties, String coverageSrcFolderPath) throws Exception {
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
-
-        String coverageSrcFolderPath = String.format("%s/coverage/", testCaseResultsPath);
-        ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
-        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
 
         String[] classFiles = ProcessRunner.runCommand(
                 String.format("find %s -name \"*.class\" -type f",
@@ -217,8 +252,6 @@ public class Coverage {
         if (mainFiles != null && Arrays.asList(mainFiles).contains("kotlin")) {
             ProcessRunner.runCommand("cp -r  {source_root}/main/kotlin {mate_server_src_folder_path}");
         }
-
-        return coverageSrcFolderPath;
     }
 
     public static String getRemoteCoverageEcPath(ETGProperties properties) {

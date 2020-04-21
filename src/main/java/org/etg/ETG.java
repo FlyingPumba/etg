@@ -3,10 +3,7 @@ package org.etg;
 import com.beust.jcommander.JCommander;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.etg.espresso.EspressoTestCase;
-import org.etg.espresso.EspressoTestCaseWriter;
-import org.etg.espresso.EspressoTestRunner;
-import org.etg.espresso.ScreenshotsProducer;
+import org.etg.espresso.*;
 import org.etg.espresso.codegen.TestCodeGenerator;
 import org.etg.espresso.pruning.PruningAlgorithm;
 import org.etg.espresso.pruning.PruningAlgorithmFactory;
@@ -51,10 +48,15 @@ public class ETG {
             TestCodeGenerator codeGenerator = new TestCodeGenerator(properties);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
-            System.out.println("Pruning failing performs from Espresso tests");
-            for (EspressoTestCase espressoTestCase : espressoTestCases) {
+            // calculate base coverage of all tests in project
+            double baseOverallCoverage = Coverage.getAllTestsCoverage(properties,
+                    String.format("%s/%s", properties.getETGResultsPath(), "base-test-suite"));
+            System.out.println(String.format("BASE-OVERALL-COVERAGE: %.8f", baseOverallCoverage));
 
-                if (!args.isTranslateOnly()) {
+            if (!args.isTranslateOnly()) {
+                System.out.println("Pruning failing performs from Espresso tests");
+                for (EspressoTestCase espressoTestCase : espressoTestCases) {
+
                     ScreenshotsProducer screenshotsProducer = new ScreenshotsProducer(espressoTestCase);
                     screenshotsProducer.produce();
                     screenshotsProducer.dumpToResultsFolder();
@@ -64,13 +66,22 @@ public class ETG {
                     pruningAlgorithm.pruneFailingPerforms(espressoTestCase, properties);
 
                     // calculate and output coverage after pruning
-                    double coverage = espressoTestCase.getCoverage(properties);
+                    double testCoverage = Coverage.getTestCoverage(espressoTestCase);
                     System.out.println(String.format("TEST: %s COVERAGE: %.8f",
-                            espressoTestCase.getTestName(), coverage));
+                            espressoTestCase.getTestName(), testCoverage));
+
+                    double increasedOveralCoverage = Coverage.getAllTestsCoverage(properties,
+                            espressoTestCase.getTestCaseResultsPath());
+                    System.out.println(String.format("TEST: %s INCREASED-OVERALL-COVERAGE: %.8f",
+                            espressoTestCase.getTestName(), increasedOveralCoverage));
 
                     pruningAlgorithm.printSummary(espressoTestCase);
+                    EspressoTestRunner.cleanOutputPath(properties);
                 }
+            }
 
+            // write down all test cases once we have finished analysis of them
+            for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 EspressoTestCaseWriter.write(espressoTestCase)
                         .withOption(EspressoTestCaseWriter.Option.PRETTIFY)
                         .toProject()
