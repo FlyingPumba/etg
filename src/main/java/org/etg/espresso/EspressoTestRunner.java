@@ -65,7 +65,7 @@ public class EspressoTestRunner {
                     Coverage.getRemoteCoverageEcFolderPath(espressoTestCase.getEtgProperties())));
         }
 
-        String instrumentCmd = String.format("adb shell am instrument -w -r %s -e debug false -e class " +
+        String instrumentCmd = String.format("adb shell am instrument -w -r --no-window-animation %s -e debug false -e class " +
                         "%s.%s %s/%s",
                 coverageFlags,
                 espressoTestCase.getEtgProperties().getTestPackageName(),
