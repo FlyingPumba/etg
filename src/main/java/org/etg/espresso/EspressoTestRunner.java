@@ -23,7 +23,9 @@ public class EspressoTestRunner {
     }
 
     public static EspressoTestRunner forProject(ETGProperties properties) throws Exception {
-        return new EspressoTestRunner(properties);
+        EspressoTestRunner espressoTestRunner = new EspressoTestRunner(properties);
+        espressoTestRunner.addAllTestCasesInProject();
+        return espressoTestRunner;
     }
 
     public static EspressoTestRunner forTestCase(EspressoTestCase espressoTestCase) throws Exception {
