@@ -48,12 +48,12 @@ public class ETG {
             TestCodeGenerator codeGenerator = new TestCodeGenerator(properties);
             List<EspressoTestCase> espressoTestCases = codeGenerator.getEspressoTestCases(widgetTestCases);
 
-            // calculate base coverage of all tests in project
-            double baseOverallCoverage = Coverage.getAllTestsCoverage(properties,
-                    String.format("%s/%s", properties.getETGResultsPath(), "base-test-suite"));
-            System.out.println(String.format("BASE-OVERALL-COVERAGE: %.8f", baseOverallCoverage));
-
             if (!args.isTranslateOnly()) {
+                // calculate base coverage of all tests in project
+                double baseOverallCoverage = Coverage.getAllTestsCoverage(properties,
+                        String.format("%s/%s", properties.getETGResultsPath(), "base-test-suite"));
+                System.out.println(String.format("BASE-OVERALL-COVERAGE: %.8f", baseOverallCoverage));
+
                 System.out.println("Pruning failing performs from Espresso tests");
                 for (EspressoTestCase espressoTestCase : espressoTestCases) {
 
