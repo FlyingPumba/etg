@@ -145,8 +145,7 @@ public class EspressoTestRunner {
             String remoteCoverageFilePath = CoverageFetcher.getRemoteCoverageFilePathForTestName(properties, testCaseName);
             testResult.setCoverageFilePath(remoteCoverageFilePath);
 
-            coverageFlags = String.format("-e coverage true -e coverageFile %s%s%s",
-                    remoteCoverageFilePath);
+            coverageFlags = String.format("-e coverage true -e coverageFile %s", remoteCoverageFilePath);
         }
 
         return coverageFlags;
