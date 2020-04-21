@@ -1,69 +1,94 @@
 package org.etg.espresso;
 
 import org.etg.ETGProperties;
+import org.etg.espresso.EspressoTestRunner.TestResult;
 import org.etg.utils.ProcessRunner;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class Coverage {
-    public static double getTestCoverage(EspressoTestCase espressoTestCase) throws Exception {
-        String coverageSrcFolderPath = String.format("%s/coverage/", espressoTestCase.getTestCaseResultsPath());
-        ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
-        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
+public class CoverageFetcher {
 
-        // get root permissions for adb
-        ProcessRunner.runCommand("adb root");
+    private ETGProperties properties;
+    private String testCaseResultsPath;
+
+    private EspressoTestCase espressoTestCase;
+    private boolean singleTestCoverage;
+
+    private CoverageFetcher(ETGProperties properties, String testCaseResultsPath) {
+        this.properties = properties;
+        this.testCaseResultsPath = testCaseResultsPath;
+    }
+
+    public static CoverageFetcher forProject(ETGProperties properties, String testCaseResultsPath) {
+        return new CoverageFetcher(properties, testCaseResultsPath);
+    }
+
+    public static CoverageFetcher forTestCase(EspressoTestCase espressoTestCase) {
+        CoverageFetcher coverageFetcher = new CoverageFetcher(espressoTestCase.getEtgProperties(),
+                espressoTestCase.getTestCaseResultsPath());
+        coverageFetcher.singleTestCoverage = true;
+        coverageFetcher.espressoTestCase = espressoTestCase;
+        return coverageFetcher;
+    }
+
+    public double fetch() throws Exception {
+        if (singleTestCoverage) {
+            return fetchForTestCase();
+        } else {
+            return fetchForProject();
+        }
+    }
+
+    private double fetchForTestCase() throws Exception {
+        String coverageOutputFolderPath = String.format("%s/coverage/", testCaseResultsPath);
+        ProcessRunner.runCommand(String.format("rm -rf %s", coverageOutputFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageOutputFolderPath));
+
+        prepareForTestCoverage(coverageOutputFolderPath);
 
         // delete coverage.ec file remotely
-        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(espressoTestCase.getEtgProperties()));
-        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
+        deleteRemoteCoverageFiles();
 
         // run test case with coverage enabled to create coverage.ec file
-        EspressoTestRunner.runTestCase(espressoTestCase, true);
+        TestResult testResult = EspressoTestRunner.forTestCase(espressoTestCase)
+                .withLocalCoverage(coverageOutputFolderPath)
+                .run();
 
         // fetch and process the newly created file
-        return Coverage.pullAndParseCoverage(espressoTestCase.getEtgProperties(), coverageSrcFolderPath);
+        return parseCoverageFiles(coverageOutputFolderPath, testResult);
     }
 
-    public static double getAllTestsCoverage(ETGProperties properties, String testCaseResultsPath) throws Exception {
-        String coverageSrcFolderPath = String.format("%s/overall-coverage/", testCaseResultsPath);
-        ProcessRunner.runCommand(String.format("rm -rf %s", coverageSrcFolderPath));
-        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageSrcFolderPath));
+    private double fetchForProject() throws Exception {
+        String coverageOutputFolderPath = String.format("%s/overall-coverage/", testCaseResultsPath);
+        ProcessRunner.runCommand(String.format("rm -rf %s", coverageOutputFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageOutputFolderPath));
 
-        // get root permissions for adb
-        ProcessRunner.runCommand("adb root");
+        prepareForTestCoverage(coverageOutputFolderPath);
 
         // delete coverage.ec file remotely
-        String rmCmd = String.format("adb shell rm %s", Coverage.getRemoteCoverageEcPath(properties));
-        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
+        deleteRemoteCoverageFiles();
 
         // run all test cases in project with coverage enabled to create coverage.ec file
-        EspressoTestRunner.runAllTestCases(properties, true);
+        List<TestResult> testResults = EspressoTestRunner.forProject(properties)
+                .withLocalCoverage(coverageOutputFolderPath)
+                .runSeparately();
 
-        // fetch and process the newly created file
-        return Coverage.pullAndParseCoverage(properties, coverageSrcFolderPath);
+        // fetch and process the newly created files
+        return parseCoverageFiles(coverageOutputFolderPath, testResults.toArray(new TestResult[0]));
     }
 
-    private static double pullAndParseCoverage(ETGProperties properties, String coverageSrcFolderPath) throws Exception {
-        prepareForTestCoverage(properties, coverageSrcFolderPath);
-        String coverageEcPath = String.format("%scoverage.ec", coverageSrcFolderPath);
-
-        // pull coverage.ec file
-        String pullCmd = String.format("adb pull %s %s", getRemoteCoverageEcPath(properties),
-                coverageSrcFolderPath);
-        String pullCmdResult = ProcessRunner.runCommand(pullCmd);
-
-        if (pullCmdResult.contains("error")) {
-            throw new Exception("Unable to fetch coverage.ec file: " + pullCmdResult);
-        }
-
-        return parseCoverageFile(coverageSrcFolderPath, coverageEcPath);
+    private void deleteRemoteCoverageFiles() {
+        String rmCmd = String.format("adb shell rm %s/*%s",
+                CoverageFetcher.getRemoteCoverageEcFolderPath(properties),
+                CoverageFetcher.getRemoteCoverageFileExtension());
+        String rmCmdResult = ProcessRunner.runCommand(rmCmd);
     }
 
-    private static double parseCoverageFile(String coverageSrcFolderPath, String coverageEcPath) {
+    private double parseCoverageFiles(String coverageOutputFolderPath, TestResult... results) {
         // TODO: this is a hack, there has to be a better way
         String workingFolder = System.getProperty("user.dir");
         String jacocoBinPath = "bin/jacococli.jar";
@@ -72,18 +97,22 @@ public class Coverage {
         }
 
         // Build the Jacoco report using the coverage.ec file just obtained and the classes and source files prepared before
+        String coverageFiles = Arrays.stream(results).map(TestResult::getCoverageFilePath).collect(Collectors.joining(" "));
         String jacocoCmd = String.format("java -jar %s report \"%s\" " +
                         "--classfiles %s/classes " +
                         "--sourcefiles %s/java " +
                         "--xml %s/jacoco_report.xml " +
                         "--html %s/jacoco_html_report",
                 jacocoBinPath,
-                coverageEcPath, coverageSrcFolderPath, coverageSrcFolderPath,
-                coverageSrcFolderPath, coverageSrcFolderPath);
+                coverageFiles,
+                coverageOutputFolderPath,
+                coverageOutputFolderPath,
+                coverageOutputFolderPath,
+                coverageOutputFolderPath);
         String jacocoCmdResult = ProcessRunner.runCommand(jacocoCmd);
 
         // Get the total percentage of statements covered using the html in the report
-        String indexHtmlPath = new File(String.format("%s/jacoco_html_report/index.html", coverageSrcFolderPath))
+        String indexHtmlPath = new File(String.format("%s/jacoco_html_report/index.html", coverageOutputFolderPath))
                 .getAbsolutePath();
         String xpathMissedLines = "html/body/table/tfoot/tr/td[8]/text()";
         String xpathMissedLinesCmd = String.format("xmllint --html -xpath \"%s\" %s", xpathMissedLines, indexHtmlPath);
@@ -106,7 +135,7 @@ public class Coverage {
      * @throws Exception
      * @return
      */
-    private static void prepareForTestCoverage(ETGProperties properties, String coverageSrcFolderPath) throws Exception {
+    private void prepareForTestCoverage(String coverageSrcFolderPath) throws Exception {
         String packageNamePath = String.join("/", properties.getPackageName().split("\\."));
 
         String[] classFiles = ProcessRunner.runCommand(
@@ -254,8 +283,20 @@ public class Coverage {
         }
     }
 
-    public static String getRemoteCoverageEcPath(ETGProperties properties) {
-        return String.format("/data/user/0/%s/files/coverage.ec", properties.getCompiledPackageName());
+    public static String getRemoteCoverageFilePrefix() {
+        return "coverage";
+    }
+
+    public static String getRemoteCoverageFileExtension() {
+        return ".ec";
+    }
+
+    public static String getRemoteCoverageFilePathForTestName(ETGProperties properties, String testName) {
+        return String.format("%s%s_%s%s",
+                getRemoteCoverageEcFolderPath(properties),
+                getRemoteCoverageFilePrefix(),
+                testName,
+                getRemoteCoverageFileExtension());
     }
 
     public static String getRemoteCoverageEcFolderPath(ETGProperties properties) {

@@ -17,7 +17,7 @@ public class ScreenshotsProducer {
                 .withOption(EspressoTestCaseWriter.Option.SURROUND_WITH_TRY_CATCHS)
                 .toProject();
 
-        EspressoTestRunner.runTestCase(espressoTestCase, false);
+        EspressoTestRunner.forTestCase(espressoTestCase).run();
     }
 
     public void dumpToResultsFolder() {
