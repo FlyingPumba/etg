@@ -47,7 +47,10 @@ public class EspressoTestRunner {
         return this;
     }
 
-    public EspressoTestRunner addAllTestCasesInProject() {
+    public EspressoTestRunner addAllTestCasesInProject() throws Exception {
+        // before running am instrument to find out which tests do we have, install the androidTest apk on device.
+        prepareDeviceBeforeAll();
+
         List<String> testCases = getAllTestCases(properties, junitRunner);
         testCaseNames.addAll(testCases);
         return this;
