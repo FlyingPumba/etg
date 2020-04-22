@@ -1,12 +1,15 @@
 package org.etg.espresso;
 
 import org.etg.ETGProperties;
+import org.etg.espresso.codegen.TestCodeGenerator;
 import org.etg.utils.ProcessRunner;
 
 import java.io.File;
 import java.util.*;
 
 public class EspressoTestRunner {
+
+    private static Map<String, TestResult> cachedResults = new HashMap<>();
 
     private List<String> testCaseNames = new ArrayList<>();
     private ETGProperties properties;
@@ -102,6 +105,12 @@ public class EspressoTestRunner {
 
         List<TestResult> results = new ArrayList<>();
         for (String testCaseName : testCaseNames) {
+            TestResult cachedResult = fetchCachedResult(testCaseName);
+            if (cachedResult != null) {
+                results.add(cachedResult);
+                continue;
+            }
+
             TestResult result = new TestResult();
 
             prepareDeviceBeforeEach();
@@ -125,6 +134,8 @@ public class EspressoTestRunner {
             result.setFailingPerforms(parseFailingPerforms());
 
             pullCoverageIfNeeded(result);
+
+            cacheResultIfNeeded(testCaseName, result);
 
             results.add(result);
         }
@@ -379,6 +390,21 @@ public class EspressoTestRunner {
         ProcessRunner.runCommand("adb shell settings put global window_animation_scale 0");
         ProcessRunner.runCommand("adb shell settings put global transition_animation_scale 0");
         ProcessRunner.runCommand("adb shell settings put global animator_duration_scale 0");
+    }
+
+    private void cacheResultIfNeeded(String testCaseName, TestResult result) {
+        // Only cache results of project tests, since we are not modifying them
+        if (!testCaseName.contains(TestCodeGenerator.getETGTestCaseNamePrefix()) &&
+                !cachedResults.containsKey(testCaseName)) {
+            cachedResults.put(testCaseName, result);
+        }
+    }
+
+    private TestResult fetchCachedResult(String testCaseName) {
+        if (cachedResults.containsKey(testCaseName)) {
+            return cachedResults.get(testCaseName);
+        }
+        return null;
     }
 
     public class TestResult {
