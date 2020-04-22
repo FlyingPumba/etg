@@ -80,7 +80,8 @@ public class EspressoTestRunner {
 
         prepareDeviceBeforeEach();
 
-        String coverageFlags = buildCoverageFlags("all", result);
+        String testCaseName = testCaseNames.size() == 1 ? testCaseNames.get(0) : "all";
+        String coverageFlags = buildCoverageFlags(testCaseName, result);
 
         String instrumentCmd = buildAmInstrumentCmd(coverageFlags, testCaseNames.toArray(new String[0]));
         String output = ProcessRunner.runCommand(instrumentCmd);
