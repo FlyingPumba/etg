@@ -106,36 +106,38 @@ public class EspressoTestRunner {
         List<TestResult> results = new ArrayList<>();
         for (String testCaseName : testCaseNames) {
             TestResult cachedResult = fetchCachedResult(testCaseName);
+            TestResult result;
             if (cachedResult != null) {
-                results.add(cachedResult);
-                continue;
+                result = cachedResult;
+                copyCoverageFromCachedResultIfNeeded(result);
+
+            } else {
+                result = new TestResult();
+
+                prepareDeviceBeforeEach();
+
+                String coverageFlags = buildCoverageFlags(testCaseName, result);
+
+                String instrumentCmd = buildAmInstrumentCmd(coverageFlags, testCaseName);
+                String output = ProcessRunner.runCommand(instrumentCmd);
+                result.setOutput(output);
+
+                if (raiseExceptionOnFailedTest && !output.contains("OK")) {
+                    System.out.println("There was an error running test case: " + testCaseName);
+                    System.out.println(output);
+                    throw new Exception("There was an error running test case: " + testCaseName + "\n"
+                            + output);
+                }
+
+                // Add some time sleep after executing test to avoid clogging the emulator
+                sleepAfterTest();
+
+                result.setFailingPerforms(parseFailingPerforms());
+
+                pullCoverageIfNeeded(result);
+
+                cacheResultIfNeeded(testCaseName, result);
             }
-
-            TestResult result = new TestResult();
-
-            prepareDeviceBeforeEach();
-
-            String coverageFlags = buildCoverageFlags(testCaseName, result);
-
-            String instrumentCmd = buildAmInstrumentCmd(coverageFlags, testCaseName);
-            String output = ProcessRunner.runCommand(instrumentCmd);
-            result.setOutput(output);
-
-            if (raiseExceptionOnFailedTest && !output.contains("OK")) {
-                System.out.println("There was an error running test case: " + testCaseName);
-                System.out.println(output);
-                throw new Exception("There was an error running test case: " + testCaseName + "\n"
-                        + output);
-            }
-
-            // Add some time sleep after executing test to avoid clogging the emulator
-            sleepAfterTest();
-
-            result.setFailingPerforms(parseFailingPerforms());
-
-            pullCoverageIfNeeded(result);
-
-            cacheResultIfNeeded(testCaseName, result);
 
             results.add(result);
         }
@@ -211,6 +213,27 @@ public class EspressoTestRunner {
                 throw new Exception("Unable to fetch " + result.getCoverageFilePath() + " file from device: " +
                         pullCmdResult);
             }
+
+            result.setCoverageFilePath(newLocation);
+        }
+    }
+
+    private void copyCoverageFromCachedResultIfNeeded(TestResult result) throws Exception {
+        if (coverageEnabled && pullCoverage) {
+            if (result.getOutput().contains("Failed to generate Emma/JaCoCo coverage")) {
+                // there is nothing to pull from device
+                throw new Exception("Coverage information was requested but test did not generate it: " +
+                        result.getOutput());
+            }
+
+            String coverageFileName = new File(result.getCoverageFilePath()).getName();
+            String newLocation = String.format("%s/%s", coverageFolder, coverageFileName);
+
+            // copy file from one location to the other
+            String cpCmd = String.format("cp %s %s",
+                    result.getCoverageFilePath(),
+                    newLocation);
+            String cpCmdResult = ProcessRunner.runCommand(cpCmd);
 
             result.setCoverageFilePath(newLocation);
         }
