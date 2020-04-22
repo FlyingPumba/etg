@@ -159,11 +159,6 @@ public class EspressoTestRunner {
         String apkTestPath = getAndroidTestApkPath(properties);
         uninstallPackage(properties.getCompiledTestPackageName());
         installApk(apkTestPath);
-
-        if (coverageEnabled) {
-            ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
-                    CoverageFetcher.getRemoteCoverageEcFolderPath(properties)));
-        }
     }
 
     private void prepareDeviceBeforeEach() throws Exception {
@@ -171,10 +166,21 @@ public class EspressoTestRunner {
         clearPackage(properties.getCompiledTestPackageName());
 
         grantAllPermissions(properties.getCompiledPackageName());
+
+        if (coverageEnabled) {
+            ProcessRunner.runCommand(String.format("adb shell mkdir -p %s",
+                    CoverageFetcher.getRemoteCoverageEcFolderPath(properties)));
+        }
     }
 
     private void pullCoverageIfNeeded(TestResult result) throws Exception {
         if (coverageEnabled && pullCoverage) {
+            if (result.getOutput().contains("Failed to generate Emma/JaCoCo coverage")) {
+                // there is nothing to pull from device
+                throw new Exception("Coverage information was requested but test did not generate it: " +
+                        result.getOutput());
+            }
+
             String coverageFileName = new File(result.getCoverageFilePath()).getName();
             String newLocation = String.format("%s/%s", coverageFolder, coverageFileName);
 
