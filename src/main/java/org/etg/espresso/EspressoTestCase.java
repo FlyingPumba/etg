@@ -102,4 +102,10 @@ public class EspressoTestCase {
     public String getTestCaseResultsPath() {
         return String.format("%s/%s", etgProperties.getETGResultsPath(), getTestName());
     }
+
+    public String getFullTestName() {
+        return String.format("%s.%s",
+                getEtgProperties().getTestPackageName(),
+                getTestName());
+    }
 }

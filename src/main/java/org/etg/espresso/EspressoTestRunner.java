@@ -38,10 +38,7 @@ public class EspressoTestRunner {
     }
 
     public EspressoTestRunner addTestCase(EspressoTestCase espressoTestCase) {
-        String fullTestCaseName = String.format("%s.%s",
-                espressoTestCase.getEtgProperties().getTestPackageName(),
-                espressoTestCase.getTestName());
-        addTestCase(fullTestCaseName);
+        addTestCase(espressoTestCase.getFullTestName());
         return this;
     }
 
