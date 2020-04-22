@@ -97,14 +97,21 @@ public class CoverageFetcher {
         }
 
         // Build the Jacoco report using the coverage.ec file just obtained and the classes and source files prepared before
-        String coverageFiles = Arrays.stream(results).map(TestResult::getCoverageFilePath).collect(Collectors.joining(" "));
-        String jacocoCmd = String.format("java -jar %s report \"%s\" " +
+        StringBuilder coverageFiles = new StringBuilder();
+        for (TestResult result: results) {
+            String coverageFilePath = result.getCoverageFilePath();
+            if (coverageFilePath != null && !coverageFilePath.isEmpty()) {
+                coverageFiles.append(coverageFilePath);
+                coverageFiles.append(" ");
+            }
+        }
+        String jacocoCmd = String.format("java -jar %s report %s " +
                         "--classfiles %s/classes " +
                         "--sourcefiles %s/java " +
                         "--xml %s/jacoco_report.xml " +
                         "--html %s/jacoco_html_report",
                 jacocoBinPath,
-                coverageFiles,
+                coverageFiles.toString(),
                 coverageOutputFolderPath,
                 coverageOutputFolderPath,
                 coverageOutputFolderPath,

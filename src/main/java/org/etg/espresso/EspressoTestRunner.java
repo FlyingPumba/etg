@@ -124,6 +124,8 @@ public class EspressoTestRunner {
             result.setFailingPerforms(parseFailingPerforms());
 
             pullCoverageIfNeeded(result);
+
+            results.add(result);
         }
 
 
