@@ -37,6 +37,14 @@ public class EspressoTestRunner {
         return espressoTestRunner;
     }
 
+    public static EspressoTestRunner forTestCases(EspressoTestCase... espressoTestCases) throws Exception {
+        EspressoTestRunner espressoTestRunner = new EspressoTestRunner(espressoTestCases[0].getEtgProperties());
+        for (EspressoTestCase espressoTestCase: espressoTestCases) {
+            espressoTestRunner.addTestCase(espressoTestCase);
+        }
+        return espressoTestRunner;
+    }
+
     public EspressoTestRunner addTestCase(EspressoTestCase espressoTestCase) {
         addTestCase(espressoTestCase.getFullTestName());
         return this;

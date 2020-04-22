@@ -1,5 +1,6 @@
 package org.etg.espresso;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.etg.ETGProperties;
 import org.etg.espresso.EspressoTestRunner.TestResult;
 import org.etg.utils.ProcessRunner;
@@ -12,35 +13,62 @@ import java.util.stream.Collectors;
 
 public class CoverageFetcher {
 
+    private enum Mode {
+        SINGLE_TEST_CASE,
+        MULTIPLE_TEST_CASES,
+        WHOLE_PROJECT,
+    }
+
     private ETGProperties properties;
     private String testCaseResultsPath;
 
-    private EspressoTestCase espressoTestCase;
-    private boolean singleTestCoverage;
+    private EspressoTestCase[] espressoTestCases;
+    private Mode mode = null;
 
-    private CoverageFetcher(ETGProperties properties, String testCaseResultsPath) {
+    private CoverageFetcher(ETGProperties properties, String testCaseResultsPath, Mode mode) {
         this.properties = properties;
         this.testCaseResultsPath = testCaseResultsPath;
+        this.mode = mode;
     }
 
     public static CoverageFetcher forProject(ETGProperties properties, String testCaseResultsPath) {
-        return new CoverageFetcher(properties, testCaseResultsPath);
+        return new CoverageFetcher(properties, testCaseResultsPath, Mode.WHOLE_PROJECT);
     }
 
     public static CoverageFetcher forTestCase(EspressoTestCase espressoTestCase) {
-        CoverageFetcher coverageFetcher = new CoverageFetcher(espressoTestCase.getEtgProperties(),
-                espressoTestCase.getTestCaseResultsPath());
-        coverageFetcher.singleTestCoverage = true;
-        coverageFetcher.espressoTestCase = espressoTestCase;
+        CoverageFetcher coverageFetcher = new CoverageFetcher(
+                espressoTestCase.getEtgProperties(),
+                espressoTestCase.getTestCaseResultsPath(),
+                Mode.SINGLE_TEST_CASE);
+
+        coverageFetcher.espressoTestCases = new EspressoTestCase[]{ espressoTestCase };
+
+        return coverageFetcher;
+    }
+
+    public static CoverageFetcher forTestCases(ETGProperties properties, String testCaseResultsPath,
+                                               EspressoTestCase... espressoTestCases) {
+
+        CoverageFetcher coverageFetcher = new CoverageFetcher(
+                properties,
+                testCaseResultsPath,
+                Mode.MULTIPLE_TEST_CASES);
+
+        coverageFetcher.espressoTestCases = espressoTestCases;
         return coverageFetcher;
     }
 
     public double fetch() throws Exception {
-        if (singleTestCoverage) {
-            return fetchForTestCase();
-        } else {
-            return fetchForProject();
+        switch (mode) {
+            case SINGLE_TEST_CASE:
+                return fetchForTestCase();
+            case MULTIPLE_TEST_CASES:
+                return fetchForMultipleTestCases();
+            case WHOLE_PROJECT:
+                return fetchForProject();
         }
+
+        throw new Exception("Invalid mode: " + mode.toString());
     }
 
     private double fetchForTestCase() throws Exception {
@@ -54,12 +82,31 @@ public class CoverageFetcher {
         deleteRemoteCoverageFiles();
 
         // run test case with coverage enabled to create coverage.ec file
-        TestResult testResult = EspressoTestRunner.forTestCase(espressoTestCase)
+        TestResult testResult = EspressoTestRunner.forTestCase(espressoTestCases[0])
                 .withLocalCoverage(coverageOutputFolderPath)
                 .run();
 
         // fetch and process the newly created file
         return parseCoverageFiles(coverageOutputFolderPath, testResult);
+    }
+
+    private double fetchForMultipleTestCases() throws Exception {
+        String coverageOutputFolderPath = String.format("%s/overall-coverage/", testCaseResultsPath);
+        ProcessRunner.runCommand(String.format("rm -rf %s", coverageOutputFolderPath));
+        ProcessRunner.runCommand(String.format("mkdir -p %s", coverageOutputFolderPath));
+
+        prepareForTestCoverage(coverageOutputFolderPath);
+
+        // delete coverage.ec file remotely
+        deleteRemoteCoverageFiles();
+
+        // run all test cases selected with coverage enabled to create coverage.ec file
+        List<TestResult> testResults = EspressoTestRunner.forTestCases(espressoTestCases)
+                .withLocalCoverage(coverageOutputFolderPath)
+                .runSeparately();
+
+        // fetch and process the newly created files
+        return parseCoverageFiles(coverageOutputFolderPath, testResults.toArray(new TestResult[0]));
     }
 
     private double fetchForProject() throws Exception {

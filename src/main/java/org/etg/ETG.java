@@ -85,6 +85,14 @@ public class ETG {
                 }
             }
 
+            // calculate combined coverage of all Espresso tests generated
+            double etgOnlyOverallCoverage = CoverageFetcher.forTestCases(
+                    properties,
+                    String.format("%s/%s", properties.getETGResultsPath(), "etg-only-test-suite"),
+                    espressoTestCases.toArray(new  EspressoTestCase[0]))
+                    .fetch();
+            System.out.println(String.format("ETG-ONLY-OVERALL-COVERAGE: %.8f", etgOnlyOverallCoverage));
+
             // write down all test cases once we have finished analysis of them
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 EspressoTestCaseWriter.write(espressoTestCase)
