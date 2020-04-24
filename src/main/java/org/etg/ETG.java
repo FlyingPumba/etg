@@ -53,27 +53,31 @@ public class ETG {
 
             if (!args.isTranslateOnly()) {
                 // calculate base coverage of all tests in project
+                System.out.println("Calculating base test suite overall coverage");
                 double baseOverallCoverage = CoverageFetcher.forProject(properties,
                         String.format("%s/%s", properties.getETGResultsPath(), "base-test-suite"))
                         .fetch();
                 System.out.println(String.format("BASE-OVERALL-COVERAGE: %.8f", baseOverallCoverage));
 
-                System.out.println("Pruning failing performs from Espresso tests");
                 for (EspressoTestCase espressoTestCase : espressoTestCases) {
 
+                    System.out.println("Producing screenshots for Espresso test" + espressoTestCase.getTestName());
                     ScreenshotsProducer screenshotsProducer = new ScreenshotsProducer(espressoTestCase);
                     screenshotsProducer.produce();
                     screenshotsProducer.dumpToResultsFolder();
                     screenshotsProducer.removeFromDevice();
 
+                    System.out.println("Pruning failing performs from Espresso test" + espressoTestCase.getTestName());
                     PruningAlgorithm pruningAlgorithm = PruningAlgorithmFactory.getPruningAlgorithm(args.getPruningAlgorithm());
                     pruningAlgorithm.pruneFailingPerforms(espressoTestCase, properties);
 
                     // calculate and output coverage after pruning
+                    System.out.println("Fetching coverage for Espresso test" + espressoTestCase.getTestName());
                     double testCoverage = CoverageFetcher.forTestCase(espressoTestCase).fetch();
                     System.out.println(String.format("TEST: %s COVERAGE: %.8f",
                             espressoTestCase.getTestName(), testCoverage));
 
+                    System.out.println("Fetching increased overall coverage for Espresso test" + espressoTestCase.getTestName());
                     double increasedOveralCoverage = CoverageFetcher.forProject(properties,
                             espressoTestCase.getTestCaseResultsPath())
                             .fetch();
@@ -83,21 +87,26 @@ public class ETG {
                     pruningAlgorithm.printSummary(espressoTestCase);
                     cleanOutputPath(properties);
                 }
-            }
 
-            // calculate combined coverage of all Espresso tests generated
-            double etgOnlyOverallCoverage = CoverageFetcher.forTestCases(
-                    properties,
-                    String.format("%s/%s", properties.getETGResultsPath(), "etg-only-test-suite"),
-                    espressoTestCases.toArray(new  EspressoTestCase[0]))
-                    .fetch();
-            System.out.println(String.format("ETG-ONLY-OVERALL-COVERAGE: %.8f", etgOnlyOverallCoverage));
+                // calculate combined coverage of all Espresso tests generated
+                System.out.println("Calculating ETG-only test suite overall coverage");
+                for (EspressoTestCase espressoTestCase : espressoTestCases) {
+                    EspressoTestCaseWriter.write(espressoTestCase)
+                            .withOption(EspressoTestCaseWriter.Option.SURROUND_WITH_TRY_CATCHS)
+                            .toProject();
+                }
+                double etgOnlyOverallCoverage = CoverageFetcher.forTestCases(
+                        properties,
+                        String.format("%s/%s", properties.getETGResultsPath(), "etg-only-test-suite"),
+                        espressoTestCases.toArray(new EspressoTestCase[0]))
+                        .fetch();
+                System.out.println(String.format("ETG-ONLY-OVERALL-COVERAGE: %.8f", etgOnlyOverallCoverage));
+            }
 
             // write down all test cases once we have finished analysis of them
             for (EspressoTestCase espressoTestCase : espressoTestCases) {
                 EspressoTestCaseWriter.write(espressoTestCase)
                         .withOption(EspressoTestCaseWriter.Option.PRETTIFY)
-                        .withOption(EspressoTestCaseWriter.Option.SURROUND_WITH_TRY_CATCHS)
                         .toProject()
                         .toResultsFolder();
             }
