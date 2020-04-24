@@ -81,7 +81,7 @@ public class ETG {
                     double increasedOveralCoverage = CoverageFetcher.forProject(properties,
                             espressoTestCase.getTestCaseResultsPath())
                             .fetch();
-                    System.out.println(String.format("TEST: %s INCREASED-OVERALL-COVERAGE: %.8f",
+                    System.out.println(String.format("TEST: %s OVERALL-COVERAGE-INCLUDING-TEST: %.8f",
                             espressoTestCase.getTestName(), increasedOveralCoverage));
 
                     pruningAlgorithm.printSummary(espressoTestCase);
