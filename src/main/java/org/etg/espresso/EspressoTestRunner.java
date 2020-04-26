@@ -266,8 +266,8 @@ public class EspressoTestRunner {
 
         Set<String> tests = new HashSet<>();
         for (int i = 0; i < lines.length; i = i + 2) {
-            String clazz = lines[i].split("=")[1];
-            String test = lines[i+1].split("=")[1];
+            String clazz = lines[i].split("INSTRUMENTATION_STATUS: class=")[1];
+            String test = lines[i+1].split("INSTRUMENTATION_STATUS: test=")[1];
             String fullTestName = String.format("%s#%s", clazz, test);
             tests.add(fullTestName);
         }
