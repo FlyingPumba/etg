@@ -268,8 +268,16 @@ public class EspressoTestRunner {
         for (int i = 0; i < lines.length; i = i + 2) {
             String clazz = lines[i].split("INSTRUMENTATION_STATUS: class=")[1];
             String test = lines[i+1].split("INSTRUMENTATION_STATUS: test=")[1];
-            String fullTestName = String.format("%s#%s", clazz, test);
-            tests.add(fullTestName);
+            if ("null".equals(test)) {
+                // This class has tests but was marked as @Ignore: skip it
+            } else if (test.contains(" Parameter(")) {
+                // This is a parameterized test, it suffices to use the class name to run them all together,
+                // since there is no way to run them one by one.
+                tests.add(clazz);
+            } else {
+                String fullTestName = String.format("%s#%s", clazz, test);
+                tests.add(fullTestName);
+            }
         }
 
         return new ArrayList<>(tests);
