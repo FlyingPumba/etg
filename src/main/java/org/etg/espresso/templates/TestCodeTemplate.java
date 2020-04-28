@@ -29,6 +29,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import androidx.test.rule.ActivityTestRule;\n" +
                 "import androidx.test.runner.AndroidJUnit4;\n" +
                 "import androidx.test.filters.LargeTest;\n" +
+                "import java.util.Locale;\n" +
 
                 "#if (${AddScreenshotImport})\n" +
                 "import androidx.test.runner.screenshot.ScreenCapture;\n" +
@@ -165,7 +166,8 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "private void getScreenshot(int performNumber) {\n" +
                 "      try {\n" +
                 "          ScreenCapture capture = Screenshot.capture();\n" +
-                "          capture.setName(String.format(\"${ClassName}_%d\", performNumber));\n" +
+                "          String filename = String.format(Locale.US, \"${ClassName}_%d\", performNumber);\n" +
+                "          capture.setName(filename);\n" +
                 "          capture.setFormat(Bitmap.CompressFormat.PNG);\n" +
                 "          capture.process();\n" +
                 "      } catch (IOException e) {\n" +
