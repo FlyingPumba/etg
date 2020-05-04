@@ -29,11 +29,11 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "import androidx.test.rule.ActivityTestRule;\n" +
                 "import androidx.test.runner.AndroidJUnit4;\n" +
                 "import androidx.test.filters.LargeTest;\n" +
-                "import java.util.Locale;\n" +
 
                 "#if (${AddScreenshotImport})\n" +
                 "import androidx.test.runner.screenshot.ScreenCapture;\n" +
                 "import androidx.test.runner.screenshot.Screenshot;\n" +
+                "import java.util.Locale;\n" +
                 "#end\n" +
 
                 "#else\n" +
@@ -44,6 +44,7 @@ public class TestCodeTemplate implements VelocityTemplate {
                 "#if (${AddScreenshotImport})\n" +
                 "import android.support.test.runner.screenshot.ScreenCapture;\n" +
                 "import android.support.test.runner.screenshot.Screenshot;\n" +
+                "import java.util.Locale;\n" +
                 "#end\n" +
 
                 "#end\n" +
