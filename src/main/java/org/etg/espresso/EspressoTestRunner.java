@@ -263,6 +263,7 @@ public class EspressoTestRunner {
                 junitRunner);
         String output = ProcessRunner.runCommand(dryRunCmd);
         String[] lines = output.split("\n");
+        lines = Arrays.stream(lines).filter(x -> !x.isEmpty()).toArray(String[]::new);
 
         if (lines.length == 0) {
             return new ArrayList<>();
