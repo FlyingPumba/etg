@@ -264,6 +264,10 @@ public class EspressoTestRunner {
         String output = ProcessRunner.runCommand(dryRunCmd);
         String[] lines = output.split("\n");
 
+        if (lines.length == 0) {
+            return new ArrayList<>();
+        }
+
         Set<String> tests = new HashSet<>();
         for (int i = 0; i < lines.length; i = i + 2) {
             String clazz = lines[i].split("INSTRUMENTATION_STATUS: class=")[1];
