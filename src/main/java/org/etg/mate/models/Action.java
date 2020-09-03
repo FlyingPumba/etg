@@ -1,5 +1,6 @@
 package org.etg.mate.models;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
 
@@ -15,6 +16,7 @@ public class Action {
     private float pheromone;
     private float proportionalPheromone;
     private Swipe swipe;
+    private List<String> networkingInfo;
 
     private Vector<Action> adjActions;
 
@@ -116,5 +118,13 @@ public class Action {
     @Override
     public int hashCode() {
         return Objects.hash(widget.getIdByActivity(), actionType);
+    }
+
+    public List<String> getNetworkingInfo() {
+        return networkingInfo;
+    }
+
+    public void setNetworkingInfo(List<String> networkingInfo) {
+        this.networkingInfo = networkingInfo;
     }
 }

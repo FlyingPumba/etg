@@ -40,6 +40,17 @@ public class ActionParser {
             action.setExtraInfo(extraInfo.asText());
         }
 
+        final JsonNode networkingInfoArray = node.get("networkingInfo");
+        List<String> networkingInfo = new ArrayList<>();
+        if (networkingInfoArray != null){
+            for (Iterator<JsonNode> it = networkingInfoArray.elements(); it.hasNext(); ) {
+                JsonNode element = it.next();
+                networkingInfo.add(element.asText());
+            }
+        }
+        action.setNetworkingInfo(networkingInfo);
+
+
         return action;
     }
 }
