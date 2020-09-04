@@ -33,6 +33,7 @@ public class TestCodeMapper {
     public boolean swipeActionAdded = false;
     public boolean longClickActionAdded = false;
     public boolean clickActionAdded = false;
+    public boolean waitActionAdded = false;
 
     /**
      * Needed templates, every extra templata that we need must be listed here

@@ -20,13 +20,14 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.GeneralSwipeAction\n" +
                 "import ${EspressoPackageName}.espresso.action.Press\n" +
                 "import ${EspressoPackageName}.espresso.action.Swipe\n" +
+                "import ${EspressoPackageName}.espresso.UiController\n" +
                 "import ${EspressoPackageName}.espresso.action.ViewActions\n" +
                 "import ${EspressoPackageName}.espresso.action.Tap\n" +
                 "import ${EspressoPackageName}.espresso.action.GeneralLocation\n" +
                 "import ${EspressoPackageName}.espresso.ViewAction\n" +
                 "#if ($EspressoPackageName.toString().contains(\"androidx\"))\n" +
                 "import androidx.test.rule.ActivityTestRule\n" +
-                "import androidx.test.runner.AndroidJUnit4\n" +
+                "import androidx.test.ext.junit.runners.AndroidJUnit4\n" +
                 "import androidx.test.filters.LargeTest\n" +
 
                 "#if (${AddScreenshotImport})\n" +
@@ -121,11 +122,13 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "    @Rule\n" +
                 "    @JvmField\n" +
-                "    var mActivityTestRule: ActivityTestRule<${TestActivityName}> = ActivityTestRule(${TestActivityName}::class.java)\n" +
+                "    var activityTestRule: ActivityTestRule<${TestActivityName}> = ActivityTestRule(${TestActivityName}::class.java, true, false)\n" +
                 "\n" +
                 "    @Test\n" +
                 "    fun ${TestMethodName}() {\n" +
                 "    System.out.println(\"Starting run of ${ClassName}\")\n" +
+                "    activityTestRule.launchActivity(null)\n" +
+                "\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +
                 "    #end\n" +
@@ -226,6 +229,23 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "                Press.FINGER,\n" +
                 "                InputDevice.SOURCE_UNKNOWN,\n" +
                 "                MotionEvent.BUTTON_PRIMARY)\n" +
+                "    }\n"+
+                "#end\n" +
+                "#if (${waitForAdded})\n" +
+                "    fun waitFor(millis: Long): ViewAction? {\n" +
+                "        return object : ViewAction {\n" +
+                "            override fun getConstraints(): Matcher<View> {\n" +
+                "                return isRoot()\n" +
+                "            }\n" +
+                "\n" +
+                "            override fun getDescription(): String {\n" +
+                "                return \"Wait for $millis milliseconds.\"\n" +
+                "            }\n" +
+                "\n" +
+                "            override fun perform(uiController: UiController, view: View?) {\n" +
+                "                uiController.loopMainThreadForAtLeast(millis)\n" +
+                "            }\n" +
+                "        }\n" +
                 "    }\n"+
                 "#end\n" +
                 "}"

@@ -18,7 +18,13 @@ public class Args {
     private String pruningAlgorithm;
 
     @Parameter(names = {"-kotlin", "-k"}, description = "Output test cases in Kotlin format")
-    private boolean useKotlin;
+    private boolean useKotlin = false;
+
+    @Parameter(names = {"-sleep-after-actions"}, description = "Time (in ms.) to sleep after each action.")
+    private int sleepAfterActions = -1;
+
+    @Parameter(names = {"-sleep-after-launch"}, description = "Time (in ms.) to sleep after Activity launch.")
+    private int sleepAfterLaunch = -1;
 
     public boolean isDebug() {
         return debug;
@@ -47,5 +53,13 @@ public class Args {
             String workingFolder = System.getProperty("user.dir");
             return workingFolder + "/results";
         }
+    }
+
+    public int getSleepAfterActions() {
+        return sleepAfterActions;
+    }
+
+    public int getSleepAfterLaunch() {
+        return sleepAfterLaunch;
     }
 }

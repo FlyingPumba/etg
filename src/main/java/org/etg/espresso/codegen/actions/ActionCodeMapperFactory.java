@@ -25,6 +25,7 @@ public class ActionCodeMapperFactory {
             case ENTER:
                 return new EnterActionCodeMapper(etgProperties, action);
             case WAIT:
+                return new WaitActionCodeMapper(etgProperties, action, action.getTimeToWait());
             case RESTART:
             case REINSTALL:
             case CLEAR_WIDGET:

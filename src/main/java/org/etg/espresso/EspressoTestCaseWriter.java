@@ -113,6 +113,7 @@ public class EspressoTestCaseWriter {
         velocityContext.put("longClickActionAdded", espressoTestCase.getCodeMapper().longClickActionAdded);
         velocityContext.put("clickActionAdded", espressoTestCase.getCodeMapper().clickActionAdded);
         velocityContext.put("swipeActionAdded", espressoTestCase.getCodeMapper().swipeActionAdded);
+        velocityContext.put("waitForAdded", espressoTestCase.getCodeMapper().waitActionAdded);
 
 
         return velocityContext;

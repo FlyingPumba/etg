@@ -246,4 +246,12 @@ public class ETGProperties {
     public String getOutputExtension() {
         return useKotlinFormat()? "kt" : "java";
     }
+
+    public int getSleepAfterActions() {
+        return args.getSleepAfterActions();
+    }
+
+    public int getSleepAfterLaunch() {
+        return args.getSleepAfterLaunch();
+    }
 }

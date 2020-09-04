@@ -4,6 +4,7 @@ import org.etg.ETGProperties;
 import org.etg.espresso.codegen.TestCodeMapper;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.mate.models.Action;
+import org.etg.mate.models.ActionType;
 import org.etg.mate.models.WidgetTestCase;
 import org.etg.utils.ProcessRunner;
 
@@ -47,7 +48,19 @@ public class EspressoTestCase {
             Action action = widgetActions.get(i);
             List<String> testCodeLinesForAction = new ArrayList<>();
 
+            if (i == 0 && etgProperties.getSleepAfterLaunch() != -1) {
+                Action waitAfterLaunch = new Action(ActionType.WAIT);
+                waitAfterLaunch.setTimeToWait(etgProperties.getSleepAfterLaunch());
+                codeMapper.addTestCodeLinesForAction(waitAfterLaunch, testCodeLinesForAction, i , widgetActions.size());
+            }
+
             codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction, i , widgetActions.size());
+
+            if (etgProperties.getSleepAfterActions() != -1) {
+                Action waitAfterAction = new Action(ActionType.WAIT);
+                waitAfterAction.setTimeToWait(etgProperties.getSleepAfterActions());
+                codeMapper.addTestCodeLinesForAction(waitAfterAction, testCodeLinesForAction, i , widgetActions.size());
+            }
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
         }
