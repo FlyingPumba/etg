@@ -64,7 +64,11 @@ public class MockServerResponseActionCodeMapper extends ActionCodeMapper {
 
     private int getResponseBodySize(List<String> response) {
         String lastLine = response.get(response.size()-1);
-        String count = lastLine.split("\\(")[1].split("-byte")[0];
+        String[] aux = lastLine.split("\\(");
+        if (aux.length == 1) {
+            return 0;
+        }
+        String count = aux[1].split("-byte")[0];
         return Integer.valueOf(count);
     }
 
