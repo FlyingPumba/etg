@@ -9,6 +9,8 @@ import org.etg.mate.models.Action;
 import org.etg.mate.models.Widget;
 import org.etg.utils.Tuple;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.etg.espresso.codegen.viewPicking.ImproverWithChildrenInfo.improveStatementWithChildrensOf;
@@ -66,6 +68,18 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         //update last statement with improved statement
         testCodeLines.remove(testCodeLines.size() - 1);
         String improvedStatementString = parsedStatement.toString();
+
+        if(etgProperties.useKotlinFormat()) {
+            // convert Java statement into Kotlin format
+            List<String> words = new ArrayList<>(Arrays.asList(improvedStatementString.split(" ")));
+            // remove type
+            words.remove(0);
+            // add "val" declaration
+            words.add(0, "val");
+            // join all together again
+            improvedStatementString = String.join(" ", words);
+        }
+
         testCodeLines.add(improvedStatementString);
 
         return variableName;
@@ -158,7 +172,11 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
     private String getRootPickingStatement(Action action, List<String> testCodeLines, TestCodeMapper testCodeMapper) {
         String variableName = generateVariableNameFromElementClassName("root", VIEW_VARIABLE_CLASS_NAME, testCodeMapper);
-        testCodeLines.add("ViewInteraction " + variableName + " = onView(" + getIsRootMatcher() + ")" + testCodeMapper.getStatementTerminator());
+        if (etgProperties.useKotlinFormat()) {
+            testCodeLines.add("val " + variableName + " = onView(" + getIsRootMatcher() + ")");
+        } else {
+            testCodeLines.add("ViewInteraction " + variableName + " = onView(" + getIsRootMatcher() + ")" + testCodeMapper.getStatementTerminator());
+        }
         return variableName;
     }
 

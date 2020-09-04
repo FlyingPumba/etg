@@ -1,7 +1,7 @@
 package org.etg.espresso.templates;
 
 
-public class TestCodeTemplate implements VelocityTemplate {
+public class JavaTestCodeTemplate implements VelocityTemplate {
 
     @Override
     public String getName() {
@@ -231,7 +231,7 @@ public class TestCodeTemplate implements VelocityTemplate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof TestCodeTemplate;
+        return o instanceof JavaTestCodeTemplate;
     }
 
     @Override

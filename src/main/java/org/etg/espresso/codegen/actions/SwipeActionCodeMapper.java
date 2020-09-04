@@ -31,13 +31,19 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
     }
 
     private String getSwipeAction(Swipe swipe) {
-        String methdCall = "getSwipeAction($fromX, $fromY, $toX, $toY)";
-        methdCall =
-                methdCall
-                        .replace("$fromX", String.valueOf(swipe.getInitialPosition().x))
-                        .replace("$fromY", String.valueOf(swipe.getInitialPosition().y))
-                        .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
-                        .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
+        String methdCall;
+
+        if (etgProperties.useKotlinFormat()) {
+            methdCall = "getSwipeAction($fromXf, $fromYf, $toXf, $toYf)";
+        } else {
+            methdCall = "getSwipeAction($fromX, $fromY, $toX, $toY)";
+        }
+
+        methdCall = methdCall
+                    .replace("$fromX", String.valueOf(swipe.getInitialPosition().x))
+                    .replace("$fromY", String.valueOf(swipe.getInitialPosition().y))
+                    .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
+                    .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
         return methdCall;
     }
 

@@ -57,7 +57,9 @@ public class EspressoTestCaseWriter {
     private void writeToFolder(String outputFolderPath) throws Exception {
         VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         String testContent = templateConverter.applyContextToTemplate(espressoTestCase.getTestCaseTemplate());
-        String outputFilePath = outputFolderPath + espressoTestCase.getTestName() + ".java";
+
+        String outputFilePath = String.format("%s%s.%s", outputFolderPath, espressoTestCase.getTestName(),
+                espressoTestCase.getEtgProperties().getOutputExtension());;
 
         PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
         out.print(testContent);

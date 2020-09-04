@@ -238,4 +238,12 @@ public class ETGProperties {
     public String getETGResultsPath() {
         return String.format("%s/etg", args.getResultsPath());
     }
+
+    public boolean useKotlinFormat() {
+        return args.useKotlinFormat();
+    }
+
+    public String getOutputExtension() {
+        return useKotlinFormat()? "kt" : "java";
+    }
 }

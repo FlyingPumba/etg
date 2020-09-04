@@ -125,8 +125,8 @@ public class ETG {
 
     private static void cleanOutputPath(ETGProperties properties) {
         // delete existing ETG test cases
-        String rmCmd = String.format("rm %s/%s*.java", properties.getOutputPath(),
-                TestCodeGenerator.getETGTestCaseNamePrefix());
+        String rmCmd = String.format("rm %s/%s*.%s", properties.getOutputPath(),
+                TestCodeGenerator.getETGTestCaseNamePrefix(), properties.getOutputExtension());
         ProcessRunner.runCommand(rmCmd);
     }
 

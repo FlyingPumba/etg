@@ -17,8 +17,15 @@ public class Args {
     @Parameter(names = {"-pruning-algorithm", "-p"}, description = "Algorithm for pruning failing actions")
     private String pruningAlgorithm;
 
+    @Parameter(names = {"-kotlin", "-k"}, description = "Output test cases in Kotlin format")
+    private boolean useKotlin;
+
     public boolean isDebug() {
         return debug;
+    }
+
+    public boolean useKotlinFormat() {
+        return useKotlin;
     }
 
     public boolean isTranslateOnly() {
