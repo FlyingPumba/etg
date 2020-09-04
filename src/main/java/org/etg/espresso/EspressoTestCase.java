@@ -62,7 +62,7 @@ public class EspressoTestCase {
 
             codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction, i , widgetActions.size());
 
-            if (etgProperties.getSleepAfterActions() != -1) {
+            if (i != widgetActions.size()-1 && etgProperties.getSleepAfterActions() != -1) {
                 Action waitAfterAction = new Action(ActionType.WAIT);
                 waitAfterAction.setTimeToWait(etgProperties.getSleepAfterActions());
                 codeMapper.addTestCodeLinesForAction(waitAfterAction, testCodeLinesForAction, i , widgetActions.size());
