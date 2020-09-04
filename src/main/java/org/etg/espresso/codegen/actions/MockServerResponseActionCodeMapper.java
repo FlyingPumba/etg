@@ -3,9 +3,12 @@ package org.etg.espresso.codegen.actions;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.TestCodeMapper;
 import org.etg.mate.models.Action;
+import org.etg.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.etg.espresso.util.StringHelper.boxString;
 
 public class MockServerResponseActionCodeMapper extends ActionCodeMapper {
 
@@ -40,20 +43,35 @@ public class MockServerResponseActionCodeMapper extends ActionCodeMapper {
         if (bodySize > 0) {
             List<String> bodyLines = new ArrayList<>();
             int accumSize = 0;
+            int openedBrackets = 0;
             for (int i = response.size() - 2; i >= 0; i--) {
                 String line = response.get(i);
-                bodyLines.add(line);
-                accumSize += line.length();
+                int lineBytes = line.getBytes().length;
 
-                if (accumSize >= bodySize) {
+                if (accumSize + lineBytes <= bodySize) {
+                    bodyLines.add(0, line);
+                    accumSize += lineBytes;
+                } else {
+                    break;
+                }
+
+                openedBrackets += line.length() - line.replace("}", "").length();
+                openedBrackets -= line.length() - line.replace("{", "").length();
+                if (openedBrackets == 0) {
                     break;
                 }
             }
-            String bodyResponse = String.join("\n", bodyLines);
+            String bodyResponse = buildBodyResponse(bodyLines);
             mockResponse += String.format(".setBody(%s)", bodyResponse);
         }
 
         return mockResponse;
+    }
+
+    private String buildBodyResponse(List<String> bodyLines) {
+        String unsafeString = String.join("\n", bodyLines);
+        String safeString = boxString(unsafeString);
+        return safeString;
     }
 
     private int getResponseStatus(List<String> response) {
