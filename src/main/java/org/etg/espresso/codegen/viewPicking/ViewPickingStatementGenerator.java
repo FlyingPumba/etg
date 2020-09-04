@@ -13,8 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.etg.espresso.codegen.viewPicking.ImproverWithChildrenInfo.improveStatementWithChildrensOf;
-import static org.etg.espresso.codegen.viewPicking.ImproverWithParentInfo.improveStatementWithParentsOf;
 import static org.etg.espresso.codegen.viewPicking.MatcherBuilder.Kind.*;
 import static org.etg.espresso.util.StringHelper.isNullOrEmpty;
 import static org.etg.espresso.util.StringHelper.parseId;
@@ -60,10 +58,10 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         Statement parsedStatement = StaticJavaParser.parseStatement(statement);
 
         //2- check children to be more specific
-        improveStatementWithChildrensOf(action.getWidget(), parsedStatement);
+        (new ImproverWithChildrenInfo(etgProperties)).improveStatementWithChildrensOf(action.getWidget(), parsedStatement);
 
         //3- check parent to be more specific
-        improveStatementWithParentsOf(action.getWidget(), parsedStatement);
+        (new ImproverWithParentInfo(etgProperties)).improveStatementWithParentsOf(action.getWidget(), parsedStatement);
 
         //update last statement with improved statement
         testCodeLines.remove(testCodeLines.size() - 1);
@@ -131,7 +129,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     private String generateBasicPickingStatement(Widget widget, TestCodeMapper testCodeMapper) {
-        MatcherBuilder matcherBuilder = new MatcherBuilder();
+        MatcherBuilder matcherBuilder = new MatcherBuilder(etgProperties);
 
         if (isEmpty(widget)) {
             matcherBuilder.addMatcher(ClassName, widget.getClazz(), true, false);

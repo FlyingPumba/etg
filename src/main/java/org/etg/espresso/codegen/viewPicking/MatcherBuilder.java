@@ -15,23 +15,31 @@
  */
 package org.etg.espresso.codegen.viewPicking;
 
+import org.etg.ETGProperties;
+
 import static org.etg.espresso.util.StringHelper.boxString;
 import static org.etg.espresso.util.StringHelper.isNullOrEmpty;
 
 public class MatcherBuilder {
+
     public enum Kind {Id, Text, ContentDescription, ClassName}
 
-
+    private ETGProperties etgProperties;
     private int matcherCount = 0;
     private final StringBuilder matchers = new StringBuilder();
 
-    public MatcherBuilder() {
+    public MatcherBuilder(ETGProperties etgProperties) {
+        this.etgProperties = etgProperties;
     }
 
     public void addMatcher(Kind kind, String matchedString, boolean shouldBox, boolean isAssertionMatcher) {
         if (!isNullOrEmpty(matchedString)) {
             if (kind == Kind.ClassName && !isAssertionMatcher) {
                 matchedString = getInternalName(matchedString);
+            }
+
+            if (kind == Kind.Text && etgProperties.disableTextMatchers()) {
+                return;
             }
 
             if (matcherCount > 0) {

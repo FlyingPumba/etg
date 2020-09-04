@@ -254,4 +254,8 @@ public class ETGProperties {
     public int getSleepAfterLaunch() {
         return args.getSleepAfterLaunch();
     }
+
+    public boolean disableTextMatchers() {
+        return args.disableTextMatchers();
+    }
 }

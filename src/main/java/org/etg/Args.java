@@ -20,6 +20,9 @@ public class Args {
     @Parameter(names = {"-kotlin", "-k"}, description = "Output test cases in Kotlin format")
     private boolean useKotlin = false;
 
+    @Parameter(names = {"-disable-text-matchers"}, description = "Disable text matchers")
+    private boolean disableTextMatchers = false;
+
     @Parameter(names = {"-sleep-after-actions"}, description = "Time (in ms.) to sleep after each action.")
     private int sleepAfterActions = -1;
 
@@ -61,5 +64,9 @@ public class Args {
 
     public int getSleepAfterLaunch() {
         return sleepAfterLaunch;
+    }
+
+    public boolean disableTextMatchers() {
+        return disableTextMatchers;
     }
 }

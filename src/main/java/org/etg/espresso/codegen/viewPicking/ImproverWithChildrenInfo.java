@@ -4,6 +4,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.stmt.Statement;
+import org.etg.ETGProperties;
 import org.etg.mate.models.Widget;
 
 import java.util.ArrayList;
@@ -11,7 +12,11 @@ import java.util.List;
 
 public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
 
-    public static final String HAS_DESCENDANT = "hasDescendant";
+    protected final String HAS_DESCENDANT = "hasDescendant";
+
+    public ImproverWithChildrenInfo(ETGProperties etgProperties) {
+        super(etgProperties);
+    }
 
     /**
      * Search for a childs with any of the following
@@ -21,7 +26,7 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
      * <p>
      * For every child found, add it to picking statement
      **/
-    public static void improveStatementWithChildrensOf(Widget widget, Statement statement) {
+    public void improveStatementWithChildrensOf(Widget widget, Statement statement) {
         for (Widget child : widget.getChildren()) {
             Expression hasDescendantExpr = getHasDescendantExpression(child);
 
@@ -36,7 +41,7 @@ public class ImproverWithChildrenInfo extends ViewPickingStatementImprover {
      * Generates hasDescendant expression with "arguments" as arguments
      *
      * @param widget*/
-    public static Expression getHasDescendantExpression(Widget widget) {
+    public Expression getHasDescendantExpression(Widget widget) {
         List<Expression> arguments = new ArrayList<>();
 
         addWithIdExpressionIfPossible(widget, arguments);

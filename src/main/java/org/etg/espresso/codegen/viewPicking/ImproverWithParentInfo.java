@@ -1,29 +1,29 @@
 package org.etg.espresso.codegen.viewPicking;
 
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
-import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
+import org.etg.ETGProperties;
 import org.etg.mate.models.Widget;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator.convertIdToTestCodeFormat;
 
 public class ImproverWithParentInfo extends ViewPickingStatementImprover {
 
-    public static final String IS_DESCENDANT_OF = "isDescendantOfA";
+    protected final String IS_DESCENDANT_OF = "isDescendantOfA";
+
+    public ImproverWithParentInfo(ETGProperties etgProperties) {
+        super(etgProperties);
+    }
 
     /**
      * Search for parents
      * -
      **/
-    public static void improveStatementWithParentsOf(Widget widget, Statement statement) {
+    public void improveStatementWithParentsOf(Widget widget, Statement statement) {
         Widget parent = widget.getParent();
         if (parent != null) {
             Expression isDescendanExpr = getIsDescendantOfExpression(parent);
@@ -40,7 +40,7 @@ public class ImproverWithParentInfo extends ViewPickingStatementImprover {
     /**
      * Generates isDescendantOfA(@param widget) expression.
      **/
-    public static @Nullable
+    public @Nullable
     Expression getIsDescendantOfExpression(Widget widget) {
         List<Expression> arguments = new ArrayList<>();
 

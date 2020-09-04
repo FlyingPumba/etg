@@ -6,6 +6,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
 import com.github.javaparser.ast.stmt.Statement;
+import org.etg.ETGProperties;
 import org.etg.mate.models.Widget;
 
 import java.util.List;
@@ -16,14 +17,19 @@ import static org.etg.espresso.util.StringHelper.escapeStringCharacters;
 
 public class ViewPickingStatementImprover {
 
-    public static final String ALL_OF = "allOf";
-    public static final String WITH_TEXT_OR_HINT = "withTextOrHint";
-    public static final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
-    public static final String WITH_ID = "withId";
-    public static final String EQUAL_TO_IGNORING_CASE = "equalToTrimmingAndIgnoringCase";
+    protected final String ALL_OF = "allOf";
+    protected final String WITH_TEXT_OR_HINT = "withTextOrHint";
+    protected final String WITH_CONTENT_DESCRIPTION = "withContentDescription";
+    protected final String WITH_ID = "withId";
+    protected final String EQUAL_TO_IGNORING_CASE = "equalToTrimmingAndIgnoringCase";
 
+    private ETGProperties etgProperties;
 
-    public static MethodCallExpr findRootAllOfExpression(Statement statement) {
+    public ViewPickingStatementImprover(ETGProperties etgProperties) {
+        this.etgProperties = etgProperties;
+    }
+
+    public MethodCallExpr findRootAllOfExpression(Statement statement) {
         //Finds first "allOf" method call expression on statemente. Walks ast in pre-order
         return statement.findFirst(
                 MethodCallExpr.class,
@@ -31,7 +37,11 @@ public class ViewPickingStatementImprover {
         ).orElse(null);
     }
 
-    public static void addWithTextOrHintExpressionIfPossible(Widget widget, List<Expression> arguments) {
+    public void addWithTextOrHintExpressionIfPossible(Widget widget, List<Expression> arguments) {
+        if (etgProperties.disableTextMatchers()) {
+            return;
+        }
+
         if ("android.widget.Switch".equals(widget.getClazz())) {
             return;
         }
@@ -43,7 +53,7 @@ public class ViewPickingStatementImprover {
         }
     }
 
-    public static void addWithContentDescriptionExpressionIfPossible(Widget widget, List<Expression> arguments) {
+    public void addWithContentDescriptionExpressionIfPossible(Widget widget, List<Expression> arguments) {
         String contentDesc = widget.getContentDesc();
         if (contentDesc != null && !contentDesc.isEmpty()) {
             MethodCallExpr equalToIgnoringCaseMethod = new MethodCallExpr(EQUAL_TO_IGNORING_CASE, new StringLiteralExpr(contentDesc));
@@ -51,7 +61,7 @@ public class ViewPickingStatementImprover {
         }
     }
 
-    public static boolean addWithIdExpressionIfPossible(Widget widget, List<Expression> arguments) {
+    public boolean addWithIdExpressionIfPossible(Widget widget, List<Expression> arguments) {
         String id = widget.getResourceID();
         if (id != null && !id.startsWith("android:id")) {//if widget is from android and not from app view we don't want it
             String strLiteral = convertIdToTestCodeFormat(id);
@@ -66,7 +76,7 @@ public class ViewPickingStatementImprover {
     /**
      * adds allOf to first method call of statement if there is no "allOf" call on the statement
      **/
-    public static void addAllOfToFirstMethodCallIfAbsent(Statement statement) {
+    public void addAllOfToFirstMethodCallIfAbsent(Statement statement) {
         if (!firstMethodCallIsOnViewWithArgumentAllOf(statement)) {//statement does not have onView(allOf(..))
             statement.findFirst(MethodCallExpr.class).ifPresent(onViewMethodCallExpr -> {
                 NodeList<Expression> onViewArgument = onViewMethodCallExpr.getArguments();
@@ -80,7 +90,7 @@ public class ViewPickingStatementImprover {
      * Answers if the first method call is "onView" with argumente "allOf"}
      * ie: true if first method call looks like onView(allOf(...))
      **/
-    public static boolean firstMethodCallIsOnViewWithArgumentAllOf(Statement statement) {
+    public boolean firstMethodCallIsOnViewWithArgumentAllOf(Statement statement) {
         Optional<MethodCallExpr> firstMethodCall = statement.findFirst(MethodCallExpr.class);
         return firstMethodCall.isPresent() &&
                 firstMethodCall.get().getName().toString().equals("onView") &&
