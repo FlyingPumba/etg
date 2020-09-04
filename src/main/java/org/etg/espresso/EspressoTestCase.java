@@ -54,6 +54,12 @@ public class EspressoTestCase {
                 codeMapper.addTestCodeLinesForAction(waitAfterLaunch, testCodeLinesForAction, i , widgetActions.size());
             }
 
+            if (action.getNetworkingInfo().size() > 0) {
+                Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
+                mockServerResponse.setNetworkingInfo(action.getNetworkingInfo());
+                codeMapper.addTestCodeLinesForAction(mockServerResponse, testCodeLinesForAction, i , widgetActions.size());
+            }
+
             codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction, i , widgetActions.size());
 
             if (etgProperties.getSleepAfterActions() != -1) {

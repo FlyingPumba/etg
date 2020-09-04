@@ -14,5 +14,6 @@ public enum  ActionType {
     RESTART,
     REINSTALL,
     CLEAR_WIDGET,
+    MOCK_SERVER_RESPONSE,
     ENTER
 }

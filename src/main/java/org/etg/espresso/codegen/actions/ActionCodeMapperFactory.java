@@ -26,6 +26,8 @@ public class ActionCodeMapperFactory {
                 return new EnterActionCodeMapper(etgProperties, action);
             case WAIT:
                 return new WaitActionCodeMapper(etgProperties, action, action.getTimeToWait());
+            case MOCK_SERVER_RESPONSE:
+                return new MockServerResponseActionCodeMapper(etgProperties, action);
             case RESTART:
             case REINSTALL:
             case CLEAR_WIDGET:
