@@ -110,6 +110,9 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "        declare(named(\"base_url\")) {\n" +
                 "            webServer.url(\"/\").toString()\n" +
                 "        }\n" +
+                "        declare(named(\"static_url\")) {\n" +
+                "            webServer.url(\"/\").toString()\n" +
+                "        }\n" +
                 "    }\n" +
                 "\n" +
                 "    @After\n" +
