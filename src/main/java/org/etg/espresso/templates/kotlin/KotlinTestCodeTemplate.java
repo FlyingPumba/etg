@@ -1,5 +1,7 @@
-package org.etg.espresso.templates;
+package org.etg.espresso.templates.kotlin;
 
+
+import org.etg.espresso.templates.VelocityTemplate;
 
 public class KotlinTestCodeTemplate implements VelocityTemplate {
 

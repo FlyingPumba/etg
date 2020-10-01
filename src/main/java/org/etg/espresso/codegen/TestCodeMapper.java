@@ -18,10 +18,10 @@ package org.etg.espresso.codegen;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapperFactory;
-import org.etg.espresso.templates.IsEqualTrimmingAndIgnoringCaseTemplate;
+import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.espresso.templates.VelocityTemplate;
-import org.etg.espresso.templates.VisibleViewMatcherTemplate;
+import org.etg.espresso.templates.java.VisibleViewMatcherTemplate;
 import org.etg.mate.models.Action;
 
 import java.util.*;

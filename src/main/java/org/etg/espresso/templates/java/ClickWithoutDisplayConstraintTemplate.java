@@ -1,4 +1,6 @@
-package org.etg.espresso.templates;
+package org.etg.espresso.templates.java;
+
+import org.etg.espresso.templates.VelocityTemplate;
 
 public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
 

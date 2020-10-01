@@ -1,6 +1,8 @@
 package org.etg.espresso.templates;
 
 
+import org.etg.espresso.templates.java.ClickWithoutDisplayConstraintTemplate;
+
 /**
  * In charge of create the needed templates to perform specific operation
  * **/

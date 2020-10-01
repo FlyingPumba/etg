@@ -2,8 +2,8 @@ package org.etg.espresso.codegen;
 
 import org.etg.ETGProperties;
 import org.etg.espresso.EspressoTestCase;
-import org.etg.espresso.templates.JavaTestCodeTemplate;
-import org.etg.espresso.templates.KotlinTestCodeTemplate;
+import org.etg.espresso.templates.java.JavaTestCodeTemplate;
+import org.etg.espresso.templates.kotlin.KotlinTestCodeTemplate;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.mate.models.WidgetTestCase;
 
