@@ -84,6 +84,21 @@ public class ScreenRobotTemplate implements VelocityTemplate {
         }
     }
 
+    public static boolean supportsAction(Action action) {
+        switch (action.getActionType()) {
+            case SWIPE_UP:
+            case SWIPE_DOWN:
+            case SWIPE_LEFT:
+            case SWIPE_RIGHT:
+            case BACK:
+            case MENU:
+            case ENTER:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private String getMethodsString() {
         Set<String> methodNames = methods.keySet();
         StringBuilder code = new StringBuilder();

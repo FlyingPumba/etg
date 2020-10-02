@@ -51,10 +51,9 @@ public class EspressoTestCase {
         testCodeLinesPerWidgetActionIndex.clear();
 
         for (int i = 0; i < widgetActions.size(); i++) {
-            Action action = widgetActions.get(i);
             List<String> testCodeLinesForAction = new ArrayList<>();
 
-            codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction, i , widgetActions.size());
+            codeMapper.addTestCodeLinesForAction(i, widgetActions, testCodeLinesForAction);
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
         }

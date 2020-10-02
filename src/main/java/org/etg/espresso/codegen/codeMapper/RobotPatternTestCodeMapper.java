@@ -47,64 +47,63 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
     }
 
     @Override
-    public void addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
+    public void addTestCodeLinesForAction(int index, List<Action> actions, List<String> testCodeLines) {
+        Action action = actions.get(index);
         List<String> actionTestCodeLines = new ArrayList<>();
 
-        if (actionIndex == 0 && etgProperties.getSleepAfterLaunch() != -1) {
+        if (index == 0 && etgProperties.getSleepAfterLaunch() != -1) {
             Action waitAfterLaunch = new Action(ActionType.WAIT);
             waitAfterLaunch.setTimeToWait(etgProperties.getSleepAfterLaunch());
-            actionTestCodeLines.addAll(mapActionToTestCodeLines(waitAfterLaunch, actionIndex , actionsCount));
+            actionTestCodeLines.addAll(standardCodeMapping(waitAfterLaunch, index , actions.size()));
+            extraImports.add(String.format("%s.utils.EspressoUtils.Companion.waitFor",
+                    etgProperties.getTestPackageName()));
         }
 
         if (action.getNetworkingInfo().size() > 0) {
             Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
             mockServerResponse.setNetworkingInfo(action.getNetworkingInfo());
-            actionTestCodeLines.addAll(mapActionToTestCodeLines(mockServerResponse, actionIndex , actionsCount));
+            actionTestCodeLines.addAll(standardCodeMapping(mockServerResponse, index , actions.size()));
         }
 
-        actionTestCodeLines.addAll(mapActionToTestCodeLines(action, actionIndex , actionsCount));
+        actionTestCodeLines.addAll(mapActionToRobotCalls(index , actions));
 
         testCodeLines.addAll(actionTestCodeLines);
     }
 
-    private List<String> mapActionToTestCodeLines(Action action, int actionIndex, int actionsCount) {
-        // get standard code mapping for action
+    private List<String> standardCodeMapping(Action action, int actionIndex, int actionsCount) {
         ActionCodeMapper actionCodeMapper = ActionCodeMapperFactory.get(etgProperties, action);
         List<String> espressoLinesForAction = new ArrayList<>();
         actionCodeMapper.addTestCodeLines(espressoLinesForAction, standardTestCodeMapper, actionIndex, actionsCount);
-        if (action.getActionType() == ActionType.WAIT || action.getActionType() == ActionType.MOCK_SERVER_RESPONSE) {
-            extraImports.add(String.format("%s.utils.EspressoUtils.Companion.waitFor",
-                    etgProperties.getTestPackageName()));
-            return espressoLinesForAction;
+        return espressoLinesForAction;
+    }
+
+    private List<String> mapActionToRobotCalls(int index, List<Action> actions) {
+        // get standard code mapping (Espresso code) for this action
+        Action action = actions.get(index);
+        List<String> espressoLinesForAction = standardCodeMapping(action, index, actions.size());
+
+        // Figure out which robot are we using for this action and following ones
+        List<String> actionTestCodeLines = new ArrayList<>();
+        String nextRobotName = getNextRobotName(index, actions);
+        if (currentRobotName == null) {
+            // we are starting a new screen
+            actionTestCodeLines.add(String.format("\n%s {", RobotTemplate.buildRobotScreenName(nextRobotName)));
+            currentRobotName = nextRobotName;
+        } else if (!currentRobotName.equals(nextRobotName)) {
+            // we are changing from one screen robot to another
+            actionTestCodeLines.add(String.format("}\n\n%s {", RobotTemplate.buildRobotScreenName(nextRobotName)));
+            currentRobotName = nextRobotName;
         }
 
         // send standard code mapping to the proper screen robot
-        String idByActivity = action.getWidget().getIdByActivity();
         String methodName;
-        RobotTemplate robotTemplate = null;
-        if (idByActivity.isEmpty()) {
+        if (nextRobotName == null || ScreenRobotTemplate.supportsAction(action)) {
             // this action do not belongs to any particular screen, send it to the Screen Robot
             methodName = screenRobotTemplate.addMethod(action, espressoLinesForAction);
             // FIX: this breaks if a method from screen robot is called while outside a robot call chain
         } else {
-            String robotName = buildScreenRobotName(idByActivity);
-            robotTemplate = addRobotTemplate(robotName);
+            RobotTemplate robotTemplate = addRobotTemplate(nextRobotName);
             methodName = robotTemplate.addMethod(action, espressoLinesForAction);
-        }
-
-        // Now, build robot calls for actual test
-        List<String> actionTestCodeLines = new ArrayList<>();
-        if (currentRobotName != null && robotTemplate != null &&
-                !currentRobotName.equals(robotTemplate.getRobotName())) {
-            // we are changing from one screen robot to another
-            actionTestCodeLines.add("}");
-            currentRobotName = null;
-        }
-
-        if (currentRobotName == null && robotTemplate != null) {
-            // we are starting a new screen
-            actionTestCodeLines.add(String.format("\n%s {", robotTemplate.getScreenName()));
-            currentRobotName = robotTemplate.getRobotName();
         }
 
         // append method call to robot
@@ -114,13 +113,50 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
             actionTestCodeLines.add((String.format("%s()", methodName)));
         }
 
-        if (actionIndex == actionsCount - 1) {
+        if (index == actions.size() - 1) {
             // close chain of calls to robot
             actionTestCodeLines.add("}");
             currentRobotName = null;
         }
 
         return actionTestCodeLines;
+    }
+
+    private String getNextRobotName(int index, List<Action> actions) {
+        Action currentAction = actions.get(index);
+        String robotNameForCurrentAction = getRobotNameForAction(currentAction);
+
+        if (robotNameForCurrentAction != null) {
+            // This action has a specific robot associated
+            return robotNameForCurrentAction;
+        }
+
+        // is this action a part of generic actions before a change of robot name?
+        // In that case, we count it as part of the next robot screen.
+        for (int i = index; i < actions.size(); i++) {
+            Action action = actions.get(i);
+            String robotName = getRobotNameForAction(action);
+            boolean genericAction = robotName == null;
+
+            if (!genericAction) {
+                boolean robotNameChanged = currentRobotName != null && !currentRobotName.equals(robotName);
+                if (robotNameChanged) {
+                    if (currentAction.getActionType() == ActionType.BACK) {
+                        // if name changes but we are deciding on a Back action, assume it is from the currrent robot
+                        return currentRobotName;
+                    } else {
+                        // otherwise, the action belongs to a new robot
+                        return robotName;
+                    }
+                } else {
+                    // the action after scroll(s) has the same robot name as the current one.
+                    return currentRobotName;
+                }
+            }
+        }
+
+        // this action does not have a specific robot name, return the current one.
+        return currentRobotName;
     }
 
     private RobotTemplate addRobotTemplate(String robotName) {
@@ -130,13 +166,18 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
 
             neededTemplates.add(newTemplate);
             extraImports.add(String.format("%s.robot.%s",
-                    etgProperties.getTestPackageName(), newTemplate.getScreenName()));
+                    etgProperties.getTestPackageName(), newTemplate.getRobotScreenName()));
         }
 
         return robotTemplates.get(robotName);
     }
 
-    private String buildScreenRobotName(String idByActivity) {
+    private String getRobotNameForAction(Action action) {
+        String idByActivity = action.getWidget().getIdByActivity();
+        if (idByActivity == null || idByActivity.isEmpty()) {
+            return null;
+        }
+
         String activityFullQualifiedName = idByActivity.split("_")[0].split("/")[1];
         String[] parts = activityFullQualifiedName.split("\\.");
         String simpleName = parts[parts.length - 1];

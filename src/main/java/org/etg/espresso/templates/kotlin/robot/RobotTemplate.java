@@ -39,9 +39,13 @@ public class RobotTemplate implements VelocityTemplate {
         return "robot/";
     }
 
-    public String getRobotName() { return String.format("%sRobot", robotName); }
+    public String getRobotName() { return buildRobotName(robotName); }
 
-    public String getScreenName() { return String.format("%sScreen", lowerCaseFirstCharacter(robotName)); }
+    public String getRobotScreenName() { return buildRobotScreenName(robotName); }
+
+    public static String buildRobotName(String robotName) { return String.format("%sRobot", robotName); }
+
+    public static String buildRobotScreenName(String robotName) { return String.format("%sScreen", lowerCaseFirstCharacter(robotName)); }
 
     public String getAsRawString() {
         return "package ${PackageName}.robot\n" +
@@ -55,7 +59,7 @@ public class RobotTemplate implements VelocityTemplate {
                 "import org.hamcrest.Matchers.*\n" +
                 "\n" +
                 String.format("fun %s(func: %s.() -> Unit) = %s().apply { func() }\n",
-                        getScreenName(), getRobotName(), getRobotName()) +
+                        getRobotScreenName(), getRobotName(), getRobotName()) +
                 "\n" +
                 String.format("class %s : ScreenRobot() {\n", getRobotName()) +
                 this.getMethodsString() +

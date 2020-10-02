@@ -55,7 +55,7 @@ public abstract class TestCodeMapper {
         return neededTemplates;
     }
 
-    abstract public void addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount);
+    abstract public void addTestCodeLinesForAction(int index, List<Action> actions, List<String> testCodeLines);
 
     public static String getStatementTerminator(ETGProperties etgProperties) {
         // The following breaks the Java parsing in ViewPickingStatementGenerator#addTestCodeLines
