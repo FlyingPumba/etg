@@ -10,6 +10,11 @@ public class JavaTestCodeTemplate implements VelocityTemplate {
         return "TestCase.java";
     }
 
+    @Override
+    public String getRelativePath() {
+        return "";
+    }
+
     public String getAsRawString() {
         return "#if (${PackageName} && ${PackageName} != \"\")\n" +
                 "package ${PackageName};\n" +

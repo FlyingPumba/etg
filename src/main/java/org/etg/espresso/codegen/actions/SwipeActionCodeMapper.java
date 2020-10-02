@@ -24,7 +24,6 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
         String methdCall = getSwipeAction(swipe);
 
         testCodeLines.add(createActionStatement(variableName, methdCall, testCodeMapper));
-        testCodeLines.add(getWaitToScrollEndStatement() + testCodeMapper.getStatementTerminator() + "\n");
         testCodeMapper.swipeActionAdded = true;
 
         return null;
@@ -45,9 +44,5 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
                     .replace("$toX", String.valueOf(swipe.getFinalPosition().x))
                     .replace("$toY", String.valueOf(swipe.getFinalPosition().y));
         return methdCall;
-    }
-
-    private String getWaitToScrollEndStatement() {
-        return "waitToScrollEnd()";
     }
 }

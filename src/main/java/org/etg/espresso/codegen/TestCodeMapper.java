@@ -18,10 +18,14 @@ package org.etg.espresso.codegen;
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapperFactory;
-import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseTemplate;
+import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseJavaTemplate;
 import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.espresso.templates.VelocityTemplate;
-import org.etg.espresso.templates.java.VisibleViewMatcherTemplate;
+import org.etg.espresso.templates.java.VisibleViewMatcherJavaTemplate;
+import org.etg.espresso.templates.kotlin.EspressoUtils;
+import org.etg.espresso.templates.kotlin.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
+import org.etg.espresso.templates.kotlin.MockedServerTest;
+import org.etg.espresso.templates.kotlin.VisibleViewMatcherKotlinTemplate;
 import org.etg.mate.models.Action;
 
 import java.util.*;
@@ -36,7 +40,7 @@ public class TestCodeMapper {
     public boolean waitActionAdded = false;
 
     /**
-     * Needed templates, every extra templata that we need must be listed here
+     * Needed templates, every extra template that we need must be listed here
      * **/
     private Set<VelocityTemplate> neededTemplates = new HashSet<>();
     private TemplatesFactory templatesFactory = new TemplatesFactory();
@@ -49,12 +53,19 @@ public class TestCodeMapper {
 
     public TestCodeMapper(ETGProperties properties) {
         etgProperties = properties;
-        neededTemplates.add(new VisibleViewMatcherTemplate());
-        neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseTemplate());
+        if (etgProperties.useKotlinFormat()) {
+            neededTemplates.add(new VisibleViewMatcherKotlinTemplate());
+            neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseKotlinTemplate());
+            neededTemplates.add(new MockedServerTest());
+            neededTemplates.add(new EspressoUtils());
+        } else {
+            neededTemplates.add(new VisibleViewMatcherJavaTemplate());
+            neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseJavaTemplate());
+        }
     }
 
     public void addTemplateFor(TemplatesFactory.Template action) {
-        neededTemplates.add(templatesFactory.createFor(action));
+        neededTemplates.add(templatesFactory.createFor(action, etgProperties));
     }
 
     public Set<VelocityTemplate> getNeededTemplates() {

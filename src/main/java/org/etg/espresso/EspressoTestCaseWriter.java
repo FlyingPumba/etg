@@ -82,11 +82,16 @@ public class EspressoTestCaseWriter {
     private void writeCustomUsedClasses(String outputFolderPath) throws Exception {
         VelocityTemplateConverter templateConverter = new VelocityTemplateConverter(createVelocityContext());
         for (VelocityTemplate vTemplate : espressoTestCase.getCodeMapper().getNeededTemplates()) {
-            String classContent = templateConverter.applyContextToTemplate(vTemplate);
-            String outputFilePath = outputFolderPath + vTemplate.getName();
+            String fileContent = templateConverter.applyContextToTemplate(vTemplate);
+
+            // create inner folders inside output folder if needed
+            String fullPath = outputFolderPath + vTemplate.getRelativePath();
+            ProcessRunner.runCommand(String.format("mkdir -p %s", fullPath));
+
+            String outputFilePath = fullPath + vTemplate.getName();
 
             PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
-            out.print(classContent);
+            out.print(fileContent);
             out.close();
         }
     }
@@ -94,7 +99,13 @@ public class EspressoTestCaseWriter {
     private VelocityContext createVelocityContext() throws Exception {
         VelocityContext velocityContext = new VelocityContext();
 
-        velocityContext.put("TestActivityName", espressoTestCase.getEtgProperties().getMainActivity());
+        String mainActivity = espressoTestCase.getEtgProperties().getMainActivity();
+        velocityContext.put("TestActivityName", mainActivity);
+
+        String[] packages = mainActivity.split("\\.");
+        String simpleName = packages[packages.length - 1];
+        velocityContext.put("TestActivitySimpleName", simpleName);
+
         velocityContext.put("PackageName", espressoTestCase.getEtgProperties().getTestPackageName());
         velocityContext.put("ResourcePackageName", espressoTestCase.getEtgProperties().getPackageName());
 

@@ -2,11 +2,16 @@ package org.etg.espresso.templates.java;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
-public class VisibleViewMatcherTemplate implements VelocityTemplate {
+public class VisibleViewMatcherJavaTemplate implements VelocityTemplate {
 
     @Override
     public String getName() {
         return "VisibleViewMatcher.java";
+    }
+
+    @Override
+    public String getRelativePath() {
+        return "";
     }
 
     public String getAsRawString() {
@@ -50,7 +55,7 @@ public class VisibleViewMatcherTemplate implements VelocityTemplate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof VisibleViewMatcherTemplate;
+        return o instanceof VisibleViewMatcherJavaTemplate;
     }
 
     @Override

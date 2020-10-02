@@ -2,11 +2,16 @@ package org.etg.espresso.templates.java;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
-public class IsEqualTrimmingAndIgnoringCaseTemplate implements VelocityTemplate {
+public class IsEqualTrimmingAndIgnoringCaseJavaTemplate implements VelocityTemplate {
 
     @Override
     public String getName() {
         return "IsEqualTrimmingAndIgnoringCase.java";
+    }
+
+    @Override
+    public String getRelativePath() {
+        return "";
     }
 
     public String getAsRawString() {
@@ -67,7 +72,7 @@ public class IsEqualTrimmingAndIgnoringCaseTemplate implements VelocityTemplate 
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof IsEqualTrimmingAndIgnoringCaseTemplate;
+        return o instanceof IsEqualTrimmingAndIgnoringCaseJavaTemplate;
     }
 
     @Override

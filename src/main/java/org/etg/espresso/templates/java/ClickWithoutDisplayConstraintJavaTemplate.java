@@ -2,11 +2,16 @@ package org.etg.espresso.templates.java;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
-public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
+public class ClickWithoutDisplayConstraintJavaTemplate implements VelocityTemplate {
 
     @Override
     public String getName() {
         return "ClickWithoutDisplayConstraint.java";
+    }
+
+    @Override
+    public String getRelativePath() {
+        return "";
     }
 
     public String getAsRawString() {
@@ -212,7 +217,7 @@ public class ClickWithoutDisplayConstraintTemplate implements VelocityTemplate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof ClickWithoutDisplayConstraintTemplate;
+        return o instanceof ClickWithoutDisplayConstraintJavaTemplate;
     }
 
     @Override

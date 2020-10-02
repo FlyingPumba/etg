@@ -10,6 +10,11 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
         return "TestCase.kt";
     }
 
+    @Override
+    public String getRelativePath() {
+        return "";
+    }
+
     public String getAsRawString() {
         return "#if (${PackageName} && ${PackageName} != \"\")\n" +
                 "package ${PackageName}\n" +
@@ -70,8 +75,8 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.ViewActions.*\n" +
                 "import ${EspressoPackageName}.espresso.assertion.ViewAssertions.*\n" +
                 "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
-                "import ${PackageName}.IsEqualTrimmingAndIgnoringCase.equalToTrimmingAndIgnoringCase\n" +
-                "import ${PackageName}.VisibleViewMatcher.isVisible\n" +
+                "import ${PackageName}.utils.MockedServerTest\n" +
+                "import ${TestActivityName}\n" +
                 "\n" +
                 "import ${ResourcePackageName}.R\n" +
                 "\n" +
@@ -96,44 +101,30 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "@LargeTest\n" +
                 "@RunWith(AndroidJUnit4::class)\n" +
-                "class ${ClassName} : KoinTest {\n" +
+                "class ${ClassName} : MockedServerTest() {\n" +
                 "\n" +
-                "private val webServer = MockWebServer()\n" +
-                "    #if (${AddTryCatchImport})\n" +
+                "#if (${AddTryCatchImport})" +
                 "private int errorCount\n" +
-                "    #end\n" +
                 "\n" +
                 "@Before\n" +
                 "    fun setUp() {\n" +
-                "    #if (${AddTryCatchImport})\n" +
                 "        errorCount = 0\n" +
-                "    #end\n" +
-                "        webServer.start()\n" +
-                "        declare(named(\"base_url\")) {\n" +
-                "            webServer.url(\"/\").toString()\n" +
-                "        }\n" +
-                "        declare(named(\"static_url\")) {\n" +
-                "            webServer.url(\"/\").toString()\n" +
-                "        }\n" +
                 "    }\n" +
                 "\n" +
                 "    @After\n" +
                 "    fun tearDown() {\n" +
-                "    #if (${AddTryCatchImport})\n" +
                 "        System.out.println(\"Error count: \" + errorCount)\n" +
-                "    #end\n" +
-                "        webServer.shutdown()\n" +
                 "    }\n" +
+                "#end" +
                 "\n" +
                 "    @Rule\n" +
                 "    @JvmField\n" +
-                "    var activityTestRule: ActivityTestRule<${TestActivityName}> = ActivityTestRule(${TestActivityName}::class.java, true, false)\n" +
+                "    val activityTestRule: ActivityTestRule<${TestActivitySimpleName}> = ActivityTestRule(\n" +
+                "            ${TestActivitySimpleName}::class.java, true, false)" +
                 "\n" +
                 "    @Test\n" +
                 "    fun ${TestMethodName}() {\n" +
-                "    System.out.println(\"Starting run of ${ClassName}\")\n" +
                 "    activityTestRule.launchActivity(null)\n" +
-                "\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +
                 "    #end\n" +
@@ -201,60 +192,7 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "      }\n" +
                 "    }\n" +
                 "    #end\n" +
-                "    fun withTextOrHint(stringMatcher: Matcher<String>): Matcher<View> {\n" +
-                "        return anyOf(withText(stringMatcher), withHint(stringMatcher))\n" +
-                "    }\n" +
-                "#if (${swipeActionAdded})\n" +
-                "    fun getSwipeAction(fromX: Float, fromY: Float, toX: Float, toY: Float): ViewAction {\n" +
-                "        return ViewActions.actionWithAssertions(\n" +
-                "                GeneralSwipeAction(Swipe.SLOW,\n" +
-                "                CoordinatesProvider { view -> floatArrayOf(fromX, fromY) },\n" +
-                "                CoordinatesProvider { view -> floatArrayOf(toX, toY) },\n" +
-                "                Press.FINGER))\n" +
-                "    }\n" +
-                "   fun waitToScrollEnd() {\n" +
-                "        SystemClock.sleep(500)\n" +
-                "    } \n"+
-                "#end\n" +
-                "#if (${clickActionAdded})\n" +
-                "    fun getClickAction(): ClickWithoutDisplayConstraint {\n" +
-                "        return ClickWithoutDisplayConstraint(\n" +
-                "                Tap.SINGLE,\n" +
-                "                GeneralLocation.VISIBLE_CENTER,\n" +
-                "                Press.FINGER,\n" +
-                "                InputDevice.SOURCE_UNKNOWN,\n" +
-                "                MotionEvent.BUTTON_PRIMARY)\n" +
-                "    }\n" +
-                "#end\n" +
-                "#if (${longClickActionAdded})\n" +
-                "    fun getLongClickAction(): ClickWithoutDisplayConstraint {\n" +
-                "        return ClickWithoutDisplayConstraint(\n" +
-                "                Tap.LONG,\n" +
-                "                GeneralLocation.CENTER,\n" +
-                "                Press.FINGER,\n" +
-                "                InputDevice.SOURCE_UNKNOWN,\n" +
-                "                MotionEvent.BUTTON_PRIMARY)\n" +
-                "    }\n"+
-                "#end\n" +
-                "#if (${waitForAdded})\n" +
-                "    fun waitFor(millis: Long): ViewAction? {\n" +
-                "        return object : ViewAction {\n" +
-                "            override fun getConstraints(): Matcher<View> {\n" +
-                "                return isRoot()\n" +
-                "            }\n" +
-                "\n" +
-                "            override fun getDescription(): String {\n" +
-                "                return \"Wait for $millis milliseconds.\"\n" +
-                "            }\n" +
-                "\n" +
-                "            override fun perform(uiController: UiController, view: View?) {\n" +
-                "                uiController.loopMainThreadForAtLeast(millis)\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n"+
-                "#end\n" +
-                "}"
-                ;
+                "}";
     }
 
 
