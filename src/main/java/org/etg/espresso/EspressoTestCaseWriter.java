@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.etg.espresso.codegen.TestCodeMapper.getStatementTerminator;
+import static org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper.getStatementTerminator;
 
 public class EspressoTestCaseWriter {
 
@@ -167,7 +167,7 @@ public class EspressoTestCaseWriter {
     }
 
     private void addScreenshotCall(List<String> actionTestCodeLines, int index) {
-        String screenshotCall = String.format("getScreenshot(%d)", index) + getStatementTerminator() + "\n";
+        String screenshotCall = String.format("getScreenshot(%d)", index) + getStatementTerminator(espressoTestCase.getEtgProperties()) + "\n";
         actionTestCodeLines.add(0, screenshotCall);
     }
 
@@ -175,7 +175,7 @@ public class EspressoTestCaseWriter {
         String tryStr = "\ntry {\n";
         String catchStr = "\n" +
                 "} catch (Exception e) {\n" +
-                "System.out.println(buildPerformExceptionMessage(e, " + index + "))" + getStatementTerminator() + "\n" +
+                "System.out.println(buildPerformExceptionMessage(e, " + index + "))" + getStatementTerminator(espressoTestCase.getEtgProperties()) + "\n" +
                 "}";
 
         actionTestCodeLines.add(0, tryStr);

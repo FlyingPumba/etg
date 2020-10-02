@@ -1,12 +1,10 @@
 package org.etg.espresso;
 
 import org.etg.ETGProperties;
-import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.mate.models.Action;
-import org.etg.mate.models.ActionType;
 import org.etg.mate.models.WidgetTestCase;
-import org.etg.utils.ProcessRunner;
 
 import java.util.*;
 
@@ -16,7 +14,7 @@ public class EspressoTestCase {
     private WidgetTestCase widgetTestCase;
     private String testCaseName;
 
-    private TestCodeMapper codeMapper;
+    private StandardTestCodeMapper codeMapper;
     private VelocityTemplate testCaseTemplate;
 
     private HashMap<Integer, List<String>> testCodeLinesPerWidgetActionIndex;
@@ -41,7 +39,7 @@ public class EspressoTestCase {
     }
 
     private void generateTestCodeLines() throws Exception {
-        this.codeMapper = new TestCodeMapper(this.etgProperties);
+        this.codeMapper = new StandardTestCodeMapper(this.etgProperties);
         testCodeLinesPerWidgetActionIndex.clear();
 
         for (int i = 0; i < widgetActions.size(); i++) {
@@ -96,7 +94,7 @@ public class EspressoTestCase {
         return testCaseTemplate;
     }
 
-    public TestCodeMapper getCodeMapper() {
+    public StandardTestCodeMapper getCodeMapper() {
         return codeMapper;
     }
 

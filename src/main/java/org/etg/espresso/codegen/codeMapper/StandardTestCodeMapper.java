@@ -13,66 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.etg.espresso.codegen;
+package org.etg.espresso.codegen.codeMapper;
 
 import org.etg.ETGProperties;
 import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapperFactory;
-import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseJavaTemplate;
-import org.etg.espresso.templates.TemplatesFactory;
-import org.etg.espresso.templates.VelocityTemplate;
-import org.etg.espresso.templates.java.VisibleViewMatcherJavaTemplate;
-import org.etg.espresso.templates.kotlin.EspressoUtils;
-import org.etg.espresso.templates.kotlin.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
-import org.etg.espresso.templates.kotlin.MockedServerTest;
-import org.etg.espresso.templates.kotlin.VisibleViewMatcherKotlinTemplate;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-public class TestCodeMapper {
-
-    public boolean mIsclassOrSuperClassesNameAdded = false;
-    public boolean mUseTextForElementMatching = true;
-    public boolean swipeActionAdded = false;
-    public boolean longClickActionAdded = false;
-    public boolean clickActionAdded = false;
-    public boolean waitActionAdded = false;
-
-    /**
-     * Needed templates, every extra template that we need must be listed here
-     * **/
-    private Set<VelocityTemplate> neededTemplates = new HashSet<>();
-    private TemplatesFactory templatesFactory = new TemplatesFactory();
+public class StandardTestCodeMapper extends TestCodeMapper {
 
     /**
      * Map of variable_name -> first_unused_index. This map is used to ensure that variable names are unique.
      */
     public Map<String, Integer> mVariableNameIndexes = new HashMap<>();
-    private ETGProperties etgProperties;
 
-    public TestCodeMapper(ETGProperties properties) {
-        etgProperties = properties;
-        if (etgProperties.useKotlinFormat()) {
-            neededTemplates.add(new VisibleViewMatcherKotlinTemplate());
-            neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseKotlinTemplate());
-            neededTemplates.add(new MockedServerTest());
-            neededTemplates.add(new EspressoUtils());
-        } else {
-            neededTemplates.add(new VisibleViewMatcherJavaTemplate());
-            neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseJavaTemplate());
-        }
+    public StandardTestCodeMapper(ETGProperties properties) {
+        super(properties);
     }
 
-    public void addTemplateFor(TemplatesFactory.Template action) {
-        neededTemplates.add(templatesFactory.createFor(action, etgProperties));
-    }
-
-    public Set<VelocityTemplate> getNeededTemplates() {
-        return neededTemplates;
-    }
-
+    @Override
     public void addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
         List<String> actionTestCodeLines = new ArrayList<>();
 
@@ -106,9 +71,5 @@ public class TestCodeMapper {
         actionCodeMapper.addTestCodeLines(actionTestCodeLines, this, actionIndex, actionsCount);
 
         return actionTestCodeLines;
-    }
-
-    public static String getStatementTerminator() {
-        return ";";
     }
 }

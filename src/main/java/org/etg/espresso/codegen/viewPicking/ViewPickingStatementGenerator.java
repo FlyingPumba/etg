@@ -3,7 +3,7 @@ package org.etg.espresso.codegen.viewPicking;
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.stmt.Statement;
 import org.etg.ETGProperties;
-import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.espresso.codegen.actions.ActionCodeMapper;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.Widget;
@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.etg.espresso.codegen.codeMapper.TestCodeMapper.getStatementTerminator;
 import static org.etg.espresso.codegen.viewPicking.MatcherBuilder.Kind.*;
 import static org.etg.espresso.util.StringHelper.isNullOrEmpty;
 import static org.etg.espresso.util.StringHelper.parseId;
@@ -45,7 +46,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
+    public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         if (isSwipeAction(action)) {
             return getRootPickingStatement(action, testCodeLines, testCodeMapper);
         }
@@ -87,7 +88,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return action.getSwipe() != null;
     }
 
-    private String createViewPickingStatement(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    private String createViewPickingStatement(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper) {
         String variableClassName = this.action.getWidget().getClazz();
 
         String variableName = generateVariableNameFromElementClassName(variableClassName, VIEW_VARIABLE_CLASS_NAME, testCodeMapper);
@@ -99,19 +100,19 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         }
 
         testCodeLines.add(getVariableTypeDeclaration(testCodeMapper) + " " + variableName + " = onView(" +
-                viewMatchers + ")" + testCodeMapper.getStatementTerminator());
+                viewMatchers + ")" + getStatementTerminator(etgProperties));
 
         return variableName;
     }
 
-    private String generateVariableNameFromElementClassName(String elementClassName, String defaultClassName, TestCodeMapper testCodeMapper) {
+    private String generateVariableNameFromElementClassName(String elementClassName, String defaultClassName, StandardTestCodeMapper testCodeMapper) {
         if (isNullOrEmpty(elementClassName)) {
             return generateVariableNameFromTemplate(defaultClassName, testCodeMapper);
         }
         return generateVariableNameFromTemplate(elementClassName, testCodeMapper);
     }
 
-    private String generateVariableNameFromTemplate(String template, TestCodeMapper testCodeMapper) {
+    private String generateVariableNameFromTemplate(String template, StandardTestCodeMapper testCodeMapper) {
         template = template.replace(".", "_");
         String variableName = Character.toLowerCase(template.charAt(0)) + template.substring(1);
 //        if (JavaLexer.isKeyword(variableName, LanguageLevel.HIGHEST)) {
@@ -128,7 +129,7 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return variableName + unusedIndex;
     }
 
-    private String generateBasicPickingStatement(Widget widget, TestCodeMapper testCodeMapper) {
+    private String generateBasicPickingStatement(Widget widget, StandardTestCodeMapper testCodeMapper) {
         MatcherBuilder matcherBuilder = new MatcherBuilder(etgProperties);
 
         if (isEmpty(widget)) {
@@ -168,17 +169,18 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
         return parsedId != null && "android".equals(parsedId.getX());
     }
 
-    private String getRootPickingStatement(Action action, List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    private String getRootPickingStatement(Action action, List<String> testCodeLines, StandardTestCodeMapper testCodeMapper) {
         String variableName = generateVariableNameFromElementClassName("root", VIEW_VARIABLE_CLASS_NAME, testCodeMapper);
         if (etgProperties.useKotlinFormat()) {
             testCodeLines.add("val " + variableName + " = onView(" + getIsRootMatcher() + ")");
         } else {
-            testCodeLines.add("ViewInteraction " + variableName + " = onView(" + getIsRootMatcher() + ")" + testCodeMapper.getStatementTerminator());
+            testCodeLines.add("ViewInteraction " + variableName + " = onView(" + getIsRootMatcher() + ")" +
+                    getStatementTerminator(etgProperties));
         }
         return variableName;
     }
 
-    private String getVariableTypeDeclaration(TestCodeMapper testCodeMapper) {
+    private String getVariableTypeDeclaration(StandardTestCodeMapper testCodeMapper) {
         return VIEW_VARIABLE_CLASS_NAME;
     }
 

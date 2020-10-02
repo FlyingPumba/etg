@@ -1,11 +1,12 @@
 package org.etg.espresso.codegen.actions;
 
 import org.etg.ETGProperties;
-import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.mate.models.Action;
 
 import java.util.List;
 
+import static org.etg.espresso.codegen.codeMapper.TestCodeMapper.getStatementTerminator;
 import static org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator.getIsRootMatcher;
 
 public abstract class ActionCodeMapper {
@@ -18,31 +19,31 @@ public abstract class ActionCodeMapper {
         this.action = action;
     }
 
-    public abstract String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount);
+    public abstract String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount);
 
-    protected String createActionStatement(String variableName, String statement, TestCodeMapper testCodeMapper) {
+    protected String createActionStatement(String variableName, String statement, StandardTestCodeMapper testCodeMapper) {
         // Although tecnically correct, the following causes a lot of problems.
         // The scrollTo() action tends to fail quite often.
         // if(action.getWidget().isSonOfScrollable()) {
         //     completeAction = getScrollToAction() + ", " + completeAction;
         // }
 
-        String performStatement = variableName + ".perform(" + statement + ")" + testCodeMapper.getStatementTerminator();
+        String performStatement = variableName + ".perform(" + statement + ")" + getStatementTerminator(etgProperties);
 
         performStatement += "\n";
 
         return performStatement;
     }
 
-    protected String createActionStatementOnRoot(String statement, TestCodeMapper testCodeMapper) {
-        String performStatement = "onView(" + getIsRootMatcher() + ").perform(" + statement + ")" + testCodeMapper.getStatementTerminator();
+    protected String createActionStatementOnRoot(String statement, StandardTestCodeMapper testCodeMapper) {
+        String performStatement = "onView(" + getIsRootMatcher() + ").perform(" + statement + ")" + getStatementTerminator(etgProperties);
 
         performStatement += "\n";
 
         return performStatement;
     }
 
-    protected void addCloseSoftKeyboardAction(List<String> testCodeLines, TestCodeMapper testCodeMapper) {
+    protected void addCloseSoftKeyboardAction(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper) {
         // The following does more harm than good, so we will keep it commented out.
         // testCodeLines.add(getCloseSoftKeyboardAction() + testCodeMapper.getStatementTerminator());
     }

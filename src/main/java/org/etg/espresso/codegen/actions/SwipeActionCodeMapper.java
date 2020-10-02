@@ -1,7 +1,7 @@
 package org.etg.espresso.codegen.actions;
 
 import org.etg.ETGProperties;
-import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.Swipe;
@@ -15,7 +15,7 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
+    public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
         String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 

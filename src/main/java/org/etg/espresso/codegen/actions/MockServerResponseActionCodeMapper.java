@@ -1,9 +1,8 @@
 package org.etg.espresso.codegen.actions;
 
 import org.etg.ETGProperties;
-import org.etg.espresso.codegen.TestCodeMapper;
+import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.mate.models.Action;
-import org.etg.utils.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +16,7 @@ public class MockServerResponseActionCodeMapper extends ActionCodeMapper {
     }
 
     @Override
-    public String addTestCodeLines(List<String> testCodeLines, TestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
+    public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         List<List<String>> responses = filterResponses(action.getNetworkingInfo());
         for (List<String> response: responses) {
             addMockResponseStatement(testCodeLines, response);
