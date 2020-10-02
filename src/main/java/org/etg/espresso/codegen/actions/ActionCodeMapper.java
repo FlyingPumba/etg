@@ -13,8 +13,6 @@ public abstract class ActionCodeMapper {
     protected ETGProperties etgProperties;
     protected Action action;
 
-
-
     public ActionCodeMapper(ETGProperties etgProperties, Action action) {
         this.etgProperties = etgProperties;
         this.action = action;

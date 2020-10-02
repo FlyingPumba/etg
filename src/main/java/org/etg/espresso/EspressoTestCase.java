@@ -48,25 +48,7 @@ public class EspressoTestCase {
             Action action = widgetActions.get(i);
             List<String> testCodeLinesForAction = new ArrayList<>();
 
-            if (i == 0 && etgProperties.getSleepAfterLaunch() != -1) {
-                Action waitAfterLaunch = new Action(ActionType.WAIT);
-                waitAfterLaunch.setTimeToWait(etgProperties.getSleepAfterLaunch());
-                codeMapper.addTestCodeLinesForAction(waitAfterLaunch, testCodeLinesForAction, i , widgetActions.size());
-            }
-
-            if (action.getNetworkingInfo().size() > 0) {
-                Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
-                mockServerResponse.setNetworkingInfo(action.getNetworkingInfo());
-                codeMapper.addTestCodeLinesForAction(mockServerResponse, testCodeLinesForAction, i , widgetActions.size());
-            }
-
             codeMapper.addTestCodeLinesForAction(action, testCodeLinesForAction, i , widgetActions.size());
-
-            if (i != widgetActions.size()-1 && etgProperties.getSleepAfterActions() != -1) {
-                Action waitAfterAction = new Action(ActionType.WAIT);
-                waitAfterAction.setTimeToWait(etgProperties.getSleepAfterActions());
-                codeMapper.addTestCodeLinesForAction(waitAfterAction, testCodeLinesForAction, i , widgetActions.size());
-            }
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
         }

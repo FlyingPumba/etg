@@ -27,6 +27,7 @@ import org.etg.espresso.templates.kotlin.IsEqualTrimmingAndIgnoringCaseKotlinTem
 import org.etg.espresso.templates.kotlin.MockedServerTest;
 import org.etg.espresso.templates.kotlin.VisibleViewMatcherKotlinTemplate;
 import org.etg.mate.models.Action;
+import org.etg.mate.models.ActionType;
 
 import java.util.*;
 
@@ -73,12 +74,38 @@ public class TestCodeMapper {
     }
 
     public void addTestCodeLinesForAction(Action action, List<String> testCodeLines, int actionIndex, int actionsCount) {
+        List<String> actionTestCodeLines = new ArrayList<>();
+
+        if (actionIndex == 0 && etgProperties.getSleepAfterLaunch() != -1) {
+            Action waitAfterLaunch = new Action(ActionType.WAIT);
+            waitAfterLaunch.setTimeToWait(etgProperties.getSleepAfterLaunch());
+            actionTestCodeLines.addAll(mapActionToTestCodeLiens(waitAfterLaunch, actionIndex , actionsCount));
+        }
+
+        if (action.getNetworkingInfo().size() > 0) {
+            Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
+            mockServerResponse.setNetworkingInfo(action.getNetworkingInfo());
+            actionTestCodeLines.addAll(mapActionToTestCodeLiens(mockServerResponse, actionIndex , actionsCount));
+        }
+
+        actionTestCodeLines.addAll(mapActionToTestCodeLiens(action, actionIndex , actionsCount));
+
+        if (actionIndex != actionsCount && etgProperties.getSleepAfterActions() != -1) {
+            Action waitAfterAction = new Action(ActionType.WAIT);
+            waitAfterAction.setTimeToWait(etgProperties.getSleepAfterActions());
+            actionTestCodeLines.addAll(mapActionToTestCodeLiens(waitAfterAction, actionIndex , actionsCount));
+        }
+
+        testCodeLines.addAll(actionTestCodeLines);
+    }
+
+    private List<String> mapActionToTestCodeLiens(Action action, int actionIndex, int actionsCount) {
         ActionCodeMapper actionCodeMapper = ActionCodeMapperFactory.get(etgProperties, action);
 
         List<String> actionTestCodeLines = new ArrayList<>();
         actionCodeMapper.addTestCodeLines(actionTestCodeLines, this, actionIndex, actionsCount);
 
-        testCodeLines.addAll(actionTestCodeLines);
+        return actionTestCodeLines;
     }
 
     public static String getStatementTerminator() {
