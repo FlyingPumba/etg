@@ -16,14 +16,7 @@ public class SwipeActionCodeMapper extends ActionCodeMapper {
 
     @Override
     public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
-        ViewPickingStatementGenerator pickingStatementGenerator = new ViewPickingStatementGenerator(etgProperties, action);
-        String variableName = pickingStatementGenerator.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
-
-        Swipe swipe = action.getSwipe();
-
-        String methdCall = getSwipeAction(swipe);
-
-        testCodeLines.add(createActionStatement(variableName, methdCall, testCodeMapper));
+        testCodeLines.add(createActionStatementOnRoot(getSwipeAction(action.getSwipe()), testCodeMapper));
         testCodeMapper.swipeActionAdded = true;
 
         return null;

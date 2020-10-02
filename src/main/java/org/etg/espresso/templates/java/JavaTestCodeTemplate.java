@@ -6,7 +6,7 @@ import org.etg.espresso.templates.VelocityTemplate;
 public class JavaTestCodeTemplate implements VelocityTemplate {
 
     @Override
-    public String getName() {
+    public String getFileName() {
         return "TestCase.java";
     }
 

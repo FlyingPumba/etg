@@ -52,6 +52,13 @@ public class StringHelper {
         return originalString.substring(0, 1).toLowerCase() + (originalString.length() > 1 ? originalString.substring(1) : "");
     }
 
+    public static String upperCaseFirstCharacter(String originalString) {
+        if (originalString.isEmpty()) {
+            return originalString;
+        }
+        return originalString.substring(0, 1).toUpperCase() + (originalString.length() > 1 ? originalString.substring(1) : "");
+    }
+
     public static String getClassName(String qualifiedClassName) {
         return qualifiedClassName.substring(qualifiedClassName.lastIndexOf(".") + 1);
     }
@@ -135,4 +142,13 @@ public class StringHelper {
         return s == null || s.isEmpty();
     }
 
+    public static String upperCaseParts(String s, String delimiter) {
+        String[] parts = s.split(delimiter);
+        StringBuilder builder = new StringBuilder();
+        for (String part: parts) {
+            builder.append(upperCaseFirstCharacter(part));
+        }
+
+        return builder.toString();
+    }
 }

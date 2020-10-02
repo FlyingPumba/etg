@@ -5,7 +5,7 @@ import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseJavaTemplate;
 import org.etg.espresso.templates.java.VisibleViewMatcherJavaTemplate;
-import org.etg.espresso.templates.kotlin.EspressoUtils;
+import org.etg.espresso.templates.kotlin.EspressoUtilsTemplate;
 import org.etg.espresso.templates.kotlin.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
 import org.etg.espresso.templates.kotlin.MockedServerTest;
 import org.etg.espresso.templates.kotlin.VisibleViewMatcherKotlinTemplate;
@@ -27,8 +27,10 @@ public abstract class TestCodeMapper {
     /**
      * Needed templates, every extra template that we need must be listed here
      * **/
-    private final Set<VelocityTemplate> neededTemplates = new HashSet<>();
+    protected static final Set<VelocityTemplate> neededTemplates = new HashSet<>();
     private final TemplatesFactory templatesFactory = new TemplatesFactory();
+
+    protected static Set<String> extraImports = new HashSet<>();
 
     protected ETGProperties etgProperties;
 
@@ -38,7 +40,7 @@ public abstract class TestCodeMapper {
             neededTemplates.add(new VisibleViewMatcherKotlinTemplate());
             neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseKotlinTemplate());
             neededTemplates.add(new MockedServerTest());
-            neededTemplates.add(new EspressoUtils());
+            neededTemplates.add(new EspressoUtilsTemplate());
         } else {
             neededTemplates.add(new VisibleViewMatcherJavaTemplate());
             neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseJavaTemplate());
@@ -62,5 +64,21 @@ public abstract class TestCodeMapper {
         // }
 
         return ";";
+    }
+
+    public String getExtraImports() {
+        StringBuilder lines = new StringBuilder();
+
+        for (String imp: extraImports) {
+            String importStatement;
+            if (etgProperties.useKotlinFormat()) {
+                importStatement = String.format("import %s\n", imp);
+            } else {
+                importStatement = String.format("import %s;\n", imp);
+            }
+            lines.append(importStatement);
+        }
+
+        return lines.toString();
     }
 }

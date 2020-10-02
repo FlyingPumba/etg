@@ -88,7 +88,7 @@ public class EspressoTestCaseWriter {
             String fullPath = outputFolderPath + vTemplate.getRelativePath();
             ProcessRunner.runCommand(String.format("mkdir -p %s", fullPath));
 
-            String outputFilePath = fullPath + vTemplate.getName();
+            String outputFilePath = fullPath + vTemplate.getFileName();
 
             PrintWriter out = new PrintWriter(new FileOutputStream(outputFilePath), true);
             out.print(fileContent);
@@ -126,6 +126,7 @@ public class EspressoTestCaseWriter {
         velocityContext.put("swipeActionAdded", espressoTestCase.getCodeMapper().swipeActionAdded);
         velocityContext.put("waitForAdded", espressoTestCase.getCodeMapper().waitActionAdded);
 
+        velocityContext.put("TestCodeMapperExtraImports", espressoTestCase.getCodeMapper().getExtraImports());
 
         return velocityContext;
     }

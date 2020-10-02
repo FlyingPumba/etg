@@ -5,7 +5,7 @@ import org.etg.espresso.templates.VelocityTemplate;
 public class VisibleViewMatcherKotlinTemplate implements VelocityTemplate {
 
     @Override
-    public String getName() {
+    public String getFileName() {
         return "VisibleViewMatcher.kt";
     }
 

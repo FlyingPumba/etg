@@ -5,7 +5,7 @@ import org.etg.espresso.templates.VelocityTemplate;
 public class VisibleViewMatcherJavaTemplate implements VelocityTemplate {
 
     @Override
-    public String getName() {
+    public String getFileName() {
         return "VisibleViewMatcher.java";
     }
 

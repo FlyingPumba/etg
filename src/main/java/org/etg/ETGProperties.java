@@ -1,5 +1,6 @@
 package org.etg;
 
+import org.etg.espresso.codegen.codeMapper.CodeMapperType;
 import org.etg.utils.ProcessRunner;
 
 import java.io.File;
@@ -257,5 +258,20 @@ public class ETGProperties {
 
     public boolean disableTextMatchers() {
         return args.disableTextMatchers();
+    }
+
+    public CodeMapperType getCodeMapper() {
+        String codeMapper = args.getCodeMapper();
+        if (codeMapper == null) {
+            return CodeMapperType.Standard;
+        }
+
+        if (codeMapper.equals(CodeMapperType.Standard.name())) {
+            return CodeMapperType.Standard;
+        } else if (codeMapper.equals(CodeMapperType.RobotPattern.name())) {
+            return CodeMapperType.RobotPattern;
+        } else {
+            throw new IllegalArgumentException(String.format("The code mapper %s is not valid", codeMapper));
+        }
     }
 }

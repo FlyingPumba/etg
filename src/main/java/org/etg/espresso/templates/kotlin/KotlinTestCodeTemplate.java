@@ -6,7 +6,7 @@ import org.etg.espresso.templates.VelocityTemplate;
 public class KotlinTestCodeTemplate implements VelocityTemplate {
 
     @Override
-    public String getName() {
+    public String getFileName() {
         return "TestCase.kt";
     }
 
@@ -69,16 +69,11 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "import android.view.InputDevice\n" +
                 "import android.view.MotionEvent\n" +
                 "\n" +
-                "import ${EspressoPackageName}.InstrumentationRegistry.getInstrumentation\n" +
-                "import ${EspressoPackageName}.espresso.Espresso.onView\n" +
-                "import ${EspressoPackageName}.espresso.Espresso.openActionBarOverflowOrOptionsMenu\n" +
-                "import ${EspressoPackageName}.espresso.action.ViewActions.*\n" +
-                "import ${EspressoPackageName}.espresso.assertion.ViewAssertions.*\n" +
-                "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
                 "import ${PackageName}.utils.MockedServerTest\n" +
                 "import ${TestActivityName}\n" +
                 "\n" +
                 "import ${ResourcePackageName}.R\n" +
+                "${TestCodeMapperExtraImports}" +
                 "\n" +
                 "import org.hamcrest.Description\n" +
                 "import org.hamcrest.Matcher\n" +

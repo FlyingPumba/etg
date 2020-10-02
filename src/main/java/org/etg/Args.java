@@ -17,6 +17,9 @@ public class Args {
     @Parameter(names = {"-pruning-algorithm", "-p"}, description = "Algorithm for pruning failing actions")
     private String pruningAlgorithm;
 
+    @Parameter(names = {"-code-mapper", "-c"}, description = "Code mapper")
+    private String codeMapper;
+
     @Parameter(names = {"-kotlin", "-k"}, description = "Output test cases in Kotlin format")
     private boolean useKotlin = false;
 
@@ -68,5 +71,9 @@ public class Args {
 
     public boolean disableTextMatchers() {
         return disableTextMatchers;
+    }
+
+    public String getCodeMapper() {
+        return codeMapper;
     }
 }

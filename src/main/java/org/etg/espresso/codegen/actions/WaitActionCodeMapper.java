@@ -1,6 +1,7 @@
 package org.etg.espresso.codegen.actions;
 
 import org.etg.ETGProperties;
+import org.etg.espresso.codegen.codeMapper.CodeMapperType;
 import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.mate.models.Action;
 
@@ -21,12 +22,16 @@ public class WaitActionCodeMapper extends ActionCodeMapper {
 
     @Override
     public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
-        testCodeLines.add(createActionStatementOnRoot(getPressEnterKeyAction(), testCodeMapper));
+        if (etgProperties.getCodeMapper() == CodeMapperType.Standard) {
+            testCodeLines.add(createActionStatementOnRoot(getWaitForAction(), testCodeMapper));
+        } else {
+            testCodeLines.add(getWaitForAction());
+        }
         testCodeMapper.waitActionAdded = true;
         return null;
     }
 
-    private String getPressEnterKeyAction() {
+    private String getWaitForAction() {
         return String.format("waitFor(%d)", sleepTime);
     }
 }

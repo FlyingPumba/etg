@@ -2,10 +2,10 @@ package org.etg.espresso.templates.kotlin;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
-public class EspressoUtils implements VelocityTemplate {
+public class EspressoUtilsTemplate implements VelocityTemplate {
 
     @Override
-    public String getName() {
+    public String getFileName() {
         return "EspressoUtils.kt";
     }
 
@@ -87,7 +87,7 @@ public class EspressoUtils implements VelocityTemplate {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof EspressoUtils;
+        return o instanceof EspressoUtilsTemplate;
     }
 
     @Override
