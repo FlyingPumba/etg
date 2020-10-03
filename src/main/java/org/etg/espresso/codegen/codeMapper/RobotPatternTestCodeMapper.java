@@ -35,6 +35,8 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
     private static Map<String, RobotTemplate> robotTemplates = new HashMap<>();
     private static ScreenRobotTemplate screenRobotTemplate = new ScreenRobotTemplate();
 
+    private List<List<String>> pendingNetworkingInfo = new ArrayList<>();
+
     StandardTestCodeMapper standardTestCodeMapper;
 
     String currentRobotName = null;
@@ -59,12 +61,6 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
                     etgProperties.getTestPackageName()));
         }
 
-        if (action.getNetworkingInfo().size() > 0) {
-            Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
-            mockServerResponse.setNetworkingInfo(action.getNetworkingInfo());
-            actionTestCodeLines.addAll(standardCodeMapping(mockServerResponse, index , actions.size()));
-        }
-
         actionTestCodeLines.addAll(mapActionToRobotCalls(index , actions));
 
         testCodeLines.addAll(actionTestCodeLines);
@@ -84,14 +80,17 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
 
         // Figure out which robot are we using for this action and following ones
         List<String> actionTestCodeLines = new ArrayList<>();
-        String nextRobotName = getNextRobotName(index, actions);
+        String nextRobotName = getNextRobotName(index, actions, currentRobotName);
         if (currentRobotName == null) {
             // we are starting a new screen
+            dumpMockResponsesForRobotScreen(index, actions, nextRobotName, actionTestCodeLines);
             actionTestCodeLines.add(String.format("\n%s {", RobotTemplate.buildRobotScreenName(nextRobotName)));
             currentRobotName = nextRobotName;
         } else if (!currentRobotName.equals(nextRobotName)) {
             // we are changing from one screen robot to another
-            actionTestCodeLines.add(String.format("}\n\n%s {", RobotTemplate.buildRobotScreenName(nextRobotName)));
+            actionTestCodeLines.add("}\n");
+            dumpMockResponsesForRobotScreen(index, actions, nextRobotName, actionTestCodeLines);
+            actionTestCodeLines.add(String.format("\n%s {", RobotTemplate.buildRobotScreenName(nextRobotName)));
             currentRobotName = nextRobotName;
         }
 
@@ -122,7 +121,24 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         return actionTestCodeLines;
     }
 
-    private String getNextRobotName(int index, List<Action> actions) {
+    private void dumpMockResponsesForRobotScreen(int index, List<Action> actions, String currentRobotName, List<String> actionTestCodeLines) {
+        for (int i = index; i < actions.size(); i++) {
+            Action action = actions.get(i);
+            String nextRobotName = getNextRobotName(i, actions, currentRobotName);
+            if (!currentRobotName.equals(nextRobotName)) {
+                return;
+            }
+
+            List<String> networkingInfo = action.getNetworkingInfo();
+            if (!networkingInfo.isEmpty()) {
+                Action mockServerResponse = new Action(ActionType.MOCK_SERVER_RESPONSE);
+                mockServerResponse.setNetworkingInfo(networkingInfo);
+                actionTestCodeLines.addAll(standardCodeMapping(mockServerResponse, 0, 0));
+            }
+        }
+    }
+
+    private String getNextRobotName(int index, List<Action> actions, String currentRobotName) {
         Action currentAction = actions.get(index);
         String robotNameForCurrentAction = getRobotNameForAction(currentAction);
 

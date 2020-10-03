@@ -23,9 +23,9 @@ public class WaitActionCodeMapper extends ActionCodeMapper {
     @Override
     public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
         if (etgProperties.getCodeMapper() == CodeMapperType.Standard) {
-            testCodeLines.add(createActionStatementOnRoot(getWaitForAction(), testCodeMapper));
+            testCodeLines.add(createActionStatementOnRoot(getWaitForAction(), testCodeMapper) + "\n");
         } else {
-            testCodeLines.add(getWaitForAction());
+            testCodeLines.add(getWaitForAction() + "\n");
         }
         testCodeMapper.waitActionAdded = true;
         return null;
