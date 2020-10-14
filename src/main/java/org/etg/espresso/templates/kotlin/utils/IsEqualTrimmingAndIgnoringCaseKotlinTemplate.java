@@ -1,4 +1,4 @@
-package org.etg.espresso.templates.kotlin;
+package org.etg.espresso.templates.kotlin.utils;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
@@ -11,11 +11,11 @@ public class IsEqualTrimmingAndIgnoringCaseKotlinTemplate implements VelocityTem
 
     @Override
     public String getRelativePath() {
-        return "";
+        return "utils/";
     }
 
     public String getAsRawString() {
-        return "package ${PackageName}\n" +
+        return "package ${PackageName}.utils\n" +
                 "\n" +
                 "import org.hamcrest.BaseMatcher\n" +
                 "import org.hamcrest.Description\n" +

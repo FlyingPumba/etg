@@ -3,7 +3,7 @@ package org.etg.espresso.templates;
 
 import org.etg.ETGProperties;
 import org.etg.espresso.templates.java.ClickWithoutDisplayConstraintJavaTemplate;
-import org.etg.espresso.templates.kotlin.ClickWithoutDisplayConstraintKotlinTemplate;
+import org.etg.espresso.templates.kotlin.utils.ClickWithoutDisplayConstraintKotlinTemplate;
 
 /**
  * In charge of create the needed templates to perform specific operation

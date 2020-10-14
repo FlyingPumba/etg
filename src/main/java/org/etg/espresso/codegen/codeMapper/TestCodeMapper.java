@@ -5,10 +5,10 @@ import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseJavaTemplate;
 import org.etg.espresso.templates.java.VisibleViewMatcherJavaTemplate;
-import org.etg.espresso.templates.kotlin.EspressoUtilsTemplate;
-import org.etg.espresso.templates.kotlin.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
-import org.etg.espresso.templates.kotlin.MockedServerTest;
-import org.etg.espresso.templates.kotlin.VisibleViewMatcherKotlinTemplate;
+import org.etg.espresso.templates.kotlin.utils.EspressoUtilsTemplate;
+import org.etg.espresso.templates.kotlin.utils.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
+import org.etg.espresso.templates.kotlin.utils.MockedServerTest;
+import org.etg.espresso.templates.kotlin.utils.VisibleViewMatcherKotlinTemplate;
 import org.etg.mate.models.Action;
 
 import java.util.HashSet;

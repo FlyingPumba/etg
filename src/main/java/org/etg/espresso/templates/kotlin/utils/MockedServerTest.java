@@ -1,4 +1,4 @@
-package org.etg.espresso.templates.kotlin;
+package org.etg.espresso.templates.kotlin.utils;
 
 import org.etg.espresso.templates.VelocityTemplate;
 

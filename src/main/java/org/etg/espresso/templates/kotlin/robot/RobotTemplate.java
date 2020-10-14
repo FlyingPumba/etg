@@ -55,8 +55,8 @@ public class RobotTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.ViewActions.*\n" +
                 "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
                 "import ${PackageName}.R\n" +
-                "import ${PackageName}.IsEqualTrimmingAndIgnoringCase.Companion.equalToTrimmingAndIgnoringCase\n" +
-                "import ${PackageName}.VisibleViewMatcher.Companion.isVisible\n" +
+                "import ${PackageName}.utils.IsEqualTrimmingAndIgnoringCase.Companion.equalToTrimmingAndIgnoringCase\n" +
+                "import ${PackageName}.utils.VisibleViewMatcher.Companion.isVisible\n" +
                 "import ${PackageName}.utils.EspressoUtils.Companion.getClickAction\n" +
                 "import org.hamcrest.Matchers.*\n" +
                 "\n" +

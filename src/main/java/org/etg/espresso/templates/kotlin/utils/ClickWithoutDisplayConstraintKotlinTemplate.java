@@ -1,4 +1,4 @@
-package org.etg.espresso.templates.kotlin;
+package org.etg.espresso.templates.kotlin.utils;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
@@ -11,11 +11,11 @@ public class ClickWithoutDisplayConstraintKotlinTemplate implements VelocityTemp
     
     @Override
     public String getRelativePath() {
-        return "";
+        return "utils/";
     }
 
     public String getAsRawString() {
-        return "package ${PackageName}\n" +
+        return "package ${PackageName}.utils\n" +
                 "\n" +
                 "import org.hamcrest.Matchers.allOf\n" +
                 "\n" +
@@ -31,7 +31,7 @@ public class ClickWithoutDisplayConstraintKotlinTemplate implements VelocityTemp
                 "import ${EspressoPackageName}.espresso.action.Tap\n" +
                 "import ${EspressoPackageName}.espresso.action.Tapper\n" +
                 "import ${EspressoPackageName}.espresso.util.HumanReadables\n" +
-                "import ${PackageName}.VisibleViewMatcher.Companion.isVisible\n" +
+                "import ${PackageName}.utils.VisibleViewMatcher.Companion.isVisible\n" +
                 "import java.util.Locale\n" +
                 "import java.util.Optional\n" +
                 "\n" +

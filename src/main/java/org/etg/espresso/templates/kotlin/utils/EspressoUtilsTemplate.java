@@ -1,4 +1,4 @@
-package org.etg.espresso.templates.kotlin;
+package org.etg.espresso.templates.kotlin.utils;
 
 import org.etg.espresso.templates.VelocityTemplate;
 
@@ -25,7 +25,6 @@ public class EspressoUtilsTemplate implements VelocityTemplate {
                 "import androidx.test.espresso.ViewAction\n" +
                 "import androidx.test.espresso.action.*\n" +
                 "import androidx.test.espresso.matcher.ViewMatchers.*\n" +
-                "import ar.gob.coronavirus.ClickWithoutDisplayConstraint\n" +
                 "import org.hamcrest.Matcher\n" +
                 "import org.hamcrest.Matchers.anyOf\n" +
                 "\n" +
