@@ -17,8 +17,8 @@ import static org.etg.espresso.util.StringHelper.boxString;
 
 public class RobotPatternTestCodeMapper extends TestCodeMapper {
 
-    private static Map<String, RobotTemplate> robotTemplates = new HashMap<>();
-    private static ScreenRobotTemplate screenRobotTemplate = new ScreenRobotTemplate();
+    private static final Map<String, RobotTemplate> robotTemplates = new HashMap<>();
+    private static final ScreenRobotTemplate screenRobotTemplate = new ScreenRobotTemplate();
 
     StandardTestCodeMapper standardTestCodeMapper;
 
