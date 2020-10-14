@@ -22,6 +22,7 @@ public class RobotTemplate implements VelocityTemplate {
         }
     }
 
+    private static int unknownActionNumber = 0;
     private final String robotName;
     private final Map<String, RobotTemplateMethod> methods = new HashMap<>();
 
@@ -54,6 +55,7 @@ public class RobotTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.ViewActions.*\n" +
                 "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
                 "import ${PackageName}.R\n" +
+                "import ${PackageName}.IsEqualTrimmingAndIgnoringCase.Companion.equalToTrimmingAndIgnoringCase\n" +
                 "import ${PackageName}.VisibleViewMatcher.Companion.isVisible\n" +
                 "import ${PackageName}.utils.EspressoUtils.Companion.getClickAction\n" +
                 "import org.hamcrest.Matchers.*\n" +
@@ -90,8 +92,9 @@ public class RobotTemplate implements VelocityTemplate {
     private String getMethodNameForAction(Action action) {
         String resourceID = action.getWidget().getResourceID();
         if (resourceID == null || resourceID.isEmpty()) {
-            // TODO: pick a wiser choice here
-            return String.valueOf(new Random().nextInt(100));
+            String name = "unkownAction" + unknownActionNumber;
+            unknownActionNumber++;
+            return name;
         }
 
         String actualWidgetName = resourceID.split("/")[1];

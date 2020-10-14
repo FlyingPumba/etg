@@ -6,7 +6,9 @@ import org.etg.espresso.codegen.codeMapper.RobotPatternTestCodeMapper;
 import org.etg.espresso.codegen.codeMapper.StandardTestCodeMapper;
 import org.etg.espresso.codegen.codeMapper.TestCodeMapper;
 import org.etg.espresso.templates.VelocityTemplate;
+import org.etg.espresso.templates.kotlin.CuidarSetupCodeTemplate;
 import org.etg.mate.models.Action;
+import org.etg.mate.models.ActionType;
 import org.etg.mate.models.WidgetTestCase;
 
 import java.util.*;
@@ -21,8 +23,10 @@ public class EspressoTestCase {
     private VelocityTemplate testCaseTemplate;
 
     private HashMap<Integer, List<String>> testCodeLinesPerWidgetActionIndex;
-    private List<Action> widgetActions;
     private Set<Integer> failingWidgetActionIndexes;
+
+    private List<Action> testCodeWidgetActions;
+    private List<Action> setupCodeWidgetActions;
 
     public EspressoTestCase(ETGProperties properties,
                             WidgetTestCase widgetTestCase,
@@ -31,14 +35,35 @@ public class EspressoTestCase {
         this.etgProperties = properties;
         this.widgetTestCase = widgetTestCase;
         this.testCaseName = testCaseName;
-
         this.testCaseTemplate = testCaseTemplate;
 
         this.testCodeLinesPerWidgetActionIndex = new HashMap<Integer, List<String>>();
-        this.widgetActions = widgetTestCase.getEventSequence();
         this.failingWidgetActionIndexes = new HashSet<>();
 
+        parseWidgetActions();
         generateTestCodeLines();
+    }
+
+    private void parseWidgetActions() {
+        Vector<Action> actions = widgetTestCase.getEventSequence();
+
+        int restartActionIndex = -1;
+        for (int i = 0, actionsSize = actions.size(); i < actionsSize; i++) {
+            Action action = actions.get(i);
+            if (action.getActionType() == ActionType.RESTART) {
+                restartActionIndex = i;
+            }
+        }
+
+        if (restartActionIndex == -1) {
+            // there is not setup actions
+            this.testCodeWidgetActions = actions;
+            this.setupCodeWidgetActions = new ArrayList<>();
+        } else {
+            // the actions before and including the RESTART action are setup code
+            this.testCodeWidgetActions = actions.subList(restartActionIndex + 1, actions.size());
+            this.setupCodeWidgetActions = actions.subList(0, restartActionIndex + 1);
+        }
     }
 
     private void generateTestCodeLines() throws Exception {
@@ -50,10 +75,10 @@ public class EspressoTestCase {
 
         testCodeLinesPerWidgetActionIndex.clear();
 
-        for (int i = 0; i < widgetActions.size(); i++) {
+        for (int i = 0; i < testCodeWidgetActions.size(); i++) {
             List<String> testCodeLinesForAction = new ArrayList<>();
 
-            codeMapper.addTestCodeLinesForAction(i, widgetActions, testCodeLinesForAction);
+            codeMapper.addTestCodeLinesForAction(i, testCodeWidgetActions, testCodeLinesForAction);
 
             testCodeLinesPerWidgetActionIndex.put(i, testCodeLinesForAction);
         }
@@ -72,15 +97,15 @@ public class EspressoTestCase {
     }
 
     public int getWidgetActionsCount(){
-        return widgetActions.size();
+        return testCodeWidgetActions.size();
     }
 
-    public List<Action> getWidgetActions(){
-        return widgetActions;
+    public List<Action> getTestCodeWidgetActions(){
+        return testCodeWidgetActions;
     }
 
     public int getLowestFailingWidgetActionIndex() {
-        int min = widgetActions.size();
+        int min = testCodeWidgetActions.size();
         for (int index: failingWidgetActionIndexes) {
             if (index < min) {
                 min = index;
@@ -113,5 +138,11 @@ public class EspressoTestCase {
         return String.format("%s.%s",
                 getEtgProperties().getTestPackageName(),
                 getTestName());
+    }
+
+    public String getSetupCodeLines() throws Exception {
+        CuidarSetupCodeTemplate setupCodeTemplate = new CuidarSetupCodeTemplate(setupCodeWidgetActions, etgProperties);
+        codeMapper.addExtraImports(setupCodeTemplate.getExtraImports());
+        return setupCodeTemplate.getAsString();
     }
 }

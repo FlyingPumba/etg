@@ -119,6 +119,7 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "    @Test\n" +
                 "    fun ${TestMethodName}() {\n" +
+                "    ${SetupCode}\n" +
                 "    activityTestRule.launchActivity(null)\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +

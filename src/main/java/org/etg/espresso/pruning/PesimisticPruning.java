@@ -31,10 +31,10 @@ public class PesimisticPruning extends PruningAlgorithm {
         Action highestSuccessfulAction = null;
 
         if (lowestFailingWidgetActionIndex < widgetActionsCount) {
-            lowestFailingAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex);
+            lowestFailingAction = espressoTestCase.getTestCodeWidgetActions().get(lowestFailingWidgetActionIndex);
 
             if (lowestFailingWidgetActionIndex > 0) {
-                highestSuccessfulAction = espressoTestCase.getWidgetActions().get(lowestFailingWidgetActionIndex - 1);
+                highestSuccessfulAction = espressoTestCase.getTestCodeWidgetActions().get(lowestFailingWidgetActionIndex - 1);
             }
         }
 

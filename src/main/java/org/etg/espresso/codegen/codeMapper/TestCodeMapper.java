@@ -81,4 +81,8 @@ public abstract class TestCodeMapper {
 
         return lines.toString();
     }
+
+    public void addExtraImports(List<String> imports) {
+        extraImports.addAll(imports);
+    }
 }
