@@ -16,6 +16,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ETG {
@@ -31,18 +32,18 @@ public class ETG {
 
         try {
             ETGProperties properties = ETGProperties.loadProperties(args.getETGConfigPath(), args);
-            System.out.println("Working on file with path: " + properties.getJsonPath() + " and package name: " + properties.getPackageName());
-            System.out.println("JSON file MD5: " + properties.getJsonMD5());
+            System.out.println("Working on files: " + String.join(",", properties.getJsonPaths()) + " and package name: " + properties.getPackageName());
+            System.out.println("JSON files MD5: " + String.join(",", properties.getJsonsMD5()));
 
             cleanOutputPath(properties);
             cleanETGResultsPath(properties);
             System.out.println("ETG Results folder: " + properties.getETGResultsPath());
 
             System.out.println("Parsing widget test cases");
-            List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPath());
+            List<WidgetTestCase> widgetTestCases = parseWidgetTestCases(properties.getJsonPaths());
 
             if (widgetTestCases.isEmpty()) {
-                throw new Exception(properties.getJsonPath() + " JSON file is empty");
+                throw new Exception(String.join(",", properties.getJsonPaths()) + ": JSON files are empty");
             }
 
             // get root permissions for adb
@@ -130,13 +131,19 @@ public class ETG {
         ProcessRunner.runCommand(rmCmd);
     }
 
-    private static List<WidgetTestCase> parseWidgetTestCases(String filePath) throws Exception {
-        String content = readFile(filePath, StandardCharsets.UTF_8);
+    private static List<WidgetTestCase> parseWidgetTestCases(List<String> filePaths) throws Exception {
+        List<WidgetTestCase> widgetTestCases = new ArrayList<>();
 
-        ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonNode = mapper.readTree(content);
+        for (String filePath : filePaths) {
+            String content = readFile(filePath, StandardCharsets.UTF_8);
 
-        return TestCaseParser.parseList(mapper, jsonNode);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(content);
+
+            widgetTestCases.addAll(TestCaseParser.parseList(mapper, jsonNode));
+        }
+
+        return widgetTestCases;
     }
 
     private static String readFile(String path, Charset encoding) throws IOException {

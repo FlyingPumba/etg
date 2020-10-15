@@ -6,6 +6,9 @@ import org.etg.utils.ProcessRunner;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 
 public class ETGProperties {
@@ -26,8 +29,12 @@ public class ETGProperties {
         return new ETGProperties(prop, args);
     }
 
-    public String getJsonPath() {
-        return properties.getProperty("jsonPath");
+    public List<String> getJsonPaths() {
+        HashSet<String> jsonPaths = new HashSet<>();
+        jsonPaths.add(properties.getProperty("jsonPath"));
+        jsonPaths.addAll(args.getJSONPaths());
+
+        return new ArrayList<>(jsonPaths);
     }
 
     public String getPackageName() {
@@ -192,11 +199,16 @@ public class ETGProperties {
         return version;
     }
 
-    public String getJsonMD5() {
-        String jsonPath = this.getJsonPath();
-        String md5Cmd = String.format("md5sum %s ", jsonPath);
-        String md5Result = ProcessRunner.runCommand(md5Cmd);
-        return md5Result.split(" ")[0];
+    public List<String> getJsonsMD5() {
+        List<String> md5s = new ArrayList<>();
+
+        for (String jsonPath : getJsonPaths()) {
+            String md5Cmd = String.format("md5sum %s ", jsonPath);
+            String md5Result = ProcessRunner.runCommand(md5Cmd);
+            md5s.add(md5Result.split(" ")[0]);
+        }
+
+        return md5s;
     }
 
     public String getMainActivity() throws Exception {

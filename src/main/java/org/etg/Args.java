@@ -52,6 +52,10 @@ public class Args {
         return positionalParameters.get(0);
     }
 
+    public List<String> getJSONPaths() {
+        return positionalParameters.subList(1, positionalParameters.size());
+    }
+
     public String getResultsPath() {
         if (positionalParameters.size() > 1) {
             return positionalParameters.get(1);
