@@ -92,15 +92,19 @@ public class RobotTemplate implements VelocityTemplate {
 
     private String getMethodNameForAction(Action action) {
         String resourceID = action.getWidget().getResourceID();
-        if (resourceID == null || resourceID.isEmpty()) {
-            String name = "unkownAction" + unknownActionNumber;
-            unknownActionNumber++;
-            return name;
+        if (resourceID != null && !resourceID.isEmpty()) {
+            String actualWidgetName = resourceID.split("/")[1];
+            return lowerCaseFirstCharacter(upperCaseParts(actualWidgetName, "_"));
         }
 
-        String actualWidgetName = resourceID.split("/")[1];
+        String contentDesc = action.getWidget().getContentDesc();
+        if (contentDesc != null && !contentDesc.isEmpty()) {
+            return lowerCaseFirstCharacter(upperCaseParts(contentDesc, " "));
+        }
 
-        return lowerCaseFirstCharacter(upperCaseParts(actualWidgetName, "_"));
+        String name = "unkownAction" + unknownActionNumber;
+        unknownActionNumber++;
+        return name;
     }
 
     private String getMethodsString() {
