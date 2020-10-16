@@ -164,7 +164,7 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         if (currentRobotName != null) {
              return currentRobotName;
         } else {
-            return "genericScreen";
+            return "generic";
         }
     }
 
