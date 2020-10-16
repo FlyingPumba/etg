@@ -120,12 +120,14 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "    @Test\n" +
                 "    fun ${TestMethodName}() {\n" +
-                "    ${SetupCode}" +
+                "    ${SetupCodeCall}" +
                 "    activityTestRule.launchActivity(null)\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +
                 "    #end\n" +
                 "    }\n" +
+                "\n" +
+                "${SetupCodeFunction}" +
                 "\n" +
                 "    #if (${AddClassOrSuperClassesNameMethod})\n" +
                 "private Matcher<View> classOrSuperClassesName(final Matcher<String> classNameMatcher) {\n" +

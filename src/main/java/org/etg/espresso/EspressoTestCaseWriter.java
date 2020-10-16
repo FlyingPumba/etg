@@ -119,7 +119,9 @@ public class EspressoTestCaseWriter {
         velocityContext.put("AddTryCatchImport", options.contains(Option.SURROUND_WITH_TRY_CATCHS));
         velocityContext.put("AddScreenshotImport", options.contains(Option.PRODUCE_SCREENSHOTS));
 
-        velocityContext.put("SetupCode", espressoTestCase.getSetupCodeLines());
+        String setupLoggedUserCode = espressoTestCase.getSetupLoggedUserCode();
+        velocityContext.put("SetupCodeCall", setupLoggedUserCode.isEmpty() ? "" : "setupLoggedUser()\n\n");
+        velocityContext.put("SetupCodeFunction", setupLoggedUserCode);
         velocityContext.put("TestCode", getTestCodeLines());
 
         velocityContext.put("longClickActionAdded", espressoTestCase.getCodeMapper().longClickActionAdded);

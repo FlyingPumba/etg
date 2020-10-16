@@ -41,26 +41,28 @@ public class CuidarSetupCodeTemplate implements VelocityTemplate {
     }
 
     public String getAsRawString() {
-        return "UserAuthorization(\"${dni}\", \"${gender}\", \"${identificacion}\")\n" +
-                "AppAuthenticator.setAccessToken(\"${accessToken}\")\n" +
-                "PreferencesManager.saveRefreshToken(\"${refreshToken}\")\n" +
-                "PreferencesManager.savePassword(\"${password}\")\n" +
+        return "private fun setupLoggedUser() {\n" +
+                "    UserAuthorization(\"${dni}\", \"${gender}\", \"${identificacion}\")\n" +
+                "    AppAuthenticator.setAccessToken(\"${accessToken}\")\n" +
+                "    PreferencesManager.saveRefreshToken(\"${refreshToken}\")\n" +
+                "    PreferencesManager.savePassword(\"${password}\")\n" +
                 "\n" +
-                "val localAddress = LocalAddress(\"${province}\", \"${locality}\",\n" +
-                "        \"${apartment}\", \"${street}\", \"${number}\", ${floor}, ${door},\n" +
-                "        \"${postalCode}\", ${others})\n" +
-                "val localLocation = LocalLocation(\"${latitude}\", \"${longitude}\")\n" +
-                "val localCoep = LocalCoep(\"${coepName}\", \"${contactInformation}\")\n" +
+                "    val localAddress = LocalAddress(\"${province}\", \"${locality}\",\n" +
+                "            \"${apartment}\", \"${street}\", \"${number}\", ${floor}, ${door},\n" +
+                "            \"${postalCode}\", ${others})\n" +
+                "    val localLocation = LocalLocation(\"${latitude}\", \"${longitude}\")\n" +
+                "    val localCoep = LocalCoep(\"${coepName}\", \"${contactInformation}\")\n" +
                 "\n" +
-                "val localState = LocalState(${userStatus}, \"${expirationDate}\", ${coep},\n" +
-                "        ${pims})\n" +
+                "    val localState = LocalState(${userStatus}, \"${expirationDate}\", ${coep},\n" +
+                "            ${pims})\n" +
                 "\n" +
-                "val localUser = LocalUser(${dni}, \"${gender}\", \"${birthDate}\", \"${names}\",\n" +
-                "        \"${lastNames}\", \"${phone}\", ${address}, ${location},\n" +
-                "        ${currentState})\n" +
-                "EncryptedDataBase.instance.userDao.insert(localUser).blockingAwait()\n" +
-                "\n" +
-                "${mockServerResponses}\n";
+                "    val localUser = LocalUser(${dni}, \"${gender}\", \"${birthDate}\", \"${names}\",\n" +
+                "            \"${lastNames}\", \"${phone}\", ${address}, ${location},\n" +
+                "            ${currentState})\n" +
+                "    EncryptedDataBase.instance.userDao.insert(localUser).blockingAwait()\n" +
+                "    \n" +
+                "    ${mockServerResponses}\n" +
+                "}";
     }
 
 

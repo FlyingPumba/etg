@@ -140,7 +140,7 @@ public class EspressoTestCase {
                 getTestName());
     }
 
-    public String getSetupCodeLines() throws Exception {
+    public String getSetupLoggedUserCode() throws Exception {
         if (setupCodeWidgetActions.isEmpty()) {
             return "";
         }
