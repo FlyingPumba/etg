@@ -132,13 +132,18 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
 
         // is this action a part of generic actions before a change of robot name?
         // In that case, we count it as part of the next robot screen.
-        for (int i = index; i < actions.size(); i++) {
+        for (int i = index + 1; i < actions.size(); i++) {
             Action action = actions.get(i);
             String robotName = getRobotNameForAction(action);
             boolean genericAction = robotName == null;
 
             if (!genericAction) {
-                boolean robotNameChanged = currentRobotName != null && !currentRobotName.equals(robotName);
+                if (currentRobotName == null) {
+                    // currently, we are not in any robot screen. Take the robot name of the next robot screen.
+                    return robotName;
+                }
+
+                boolean robotNameChanged = !currentRobotName.equals(robotName);
                 if (robotNameChanged) {
                     if (currentAction.getActionType() == ActionType.BACK) {
                         // if name changes but we are deciding on a Back action, assume it is from the currrent robot
@@ -154,8 +159,13 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
             }
         }
 
-        // this action does not have a specific robot name, return the current one.
-        return currentRobotName;
+        // All actions are generic until the end of the test.
+        // Do we have a screen name right now? If not, use the generic screen robot
+        if (currentRobotName != null) {
+             return currentRobotName;
+        } else {
+            return "genericScreen";
+        }
     }
 
     private RobotTemplate addRobotTemplate(String robotName) {

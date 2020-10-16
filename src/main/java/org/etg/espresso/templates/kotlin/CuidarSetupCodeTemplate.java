@@ -23,6 +23,9 @@ public class CuidarSetupCodeTemplate implements VelocityTemplate {
     private final ETGProperties etgProperties;
 
     public CuidarSetupCodeTemplate(List<Action> setupCodeWidgetActions, ETGProperties etgProperties) {
+        if (setupCodeWidgetActions.isEmpty()) {
+            throw new Error("CuidarSetupCodeTemplate with empty setup code widget actions");
+        }
         this.setupCodeWidgetActions = setupCodeWidgetActions;
         this.etgProperties = etgProperties;
     }
@@ -81,13 +84,9 @@ public class CuidarSetupCodeTemplate implements VelocityTemplate {
     private VelocityContext buildVelocityContext() throws Exception {
         VelocityContext velocityContext = new VelocityContext();
 
-        List<String> mockServerResponseEspressoLinesForRestartAction =
-                buildMockServerResponseEspressoLinesForRestartAction();
-        JsonNode userInfoJSON = buildJSONFromEspresoLines(mockServerResponseEspressoLinesForRestartAction, "dni");
-
-        List<String> buildMockServerResponseEspressoLinesForLoginAction =
-                buildMockServerResponseEspressoLinesForLoginAction();
-        JsonNode authJSON = buildJSONFromEspresoLines(buildMockServerResponseEspressoLinesForLoginAction, "token");
+        List<String> mockServerResponseEspressoLines = buildMockServerResponseEspressoLines();
+        JsonNode userInfoJSON = buildJSONFromEspresoLines(mockServerResponseEspressoLines, "dni");
+        JsonNode authJSON = buildJSONFromEspresoLines(mockServerResponseEspressoLines, "token");
 
         // user stuff
         velocityContext.put("dni", userInfoJSON.get("dni").asText());
@@ -127,12 +126,14 @@ public class CuidarSetupCodeTemplate implements VelocityTemplate {
 
         // user state stuff
         velocityContext.put("userStatus", mapNombreEstadoToUserStatus(userInfoJSON.get("estado-actual").get("nombre-estado").asText()));
-        velocityContext.put("expirationDate", userInfoJSON.get("estado-actual").get("fecha-hora-vencimiento").asText());
+        JsonNode fechaVencimientoEstadoActual = userInfoJSON.get("estado-actual").get("fecha-hora-vencimiento");
+        velocityContext.put("expirationDate", fechaVencimientoEstadoActual == null ?
+                NULL : fechaVencimientoEstadoActual.asText());
         velocityContext.put("coep", "localCoep");
         velocityContext.put("pims", NULL);
 
         // mock server responses
-        velocityContext.put("mockServerResponses", String.join("\n", mockServerResponseEspressoLinesForRestartAction));
+        velocityContext.put("mockServerResponses", String.join("\n", mockServerResponseEspressoLines));
 
         return velocityContext;
     }
@@ -191,22 +192,13 @@ public class CuidarSetupCodeTemplate implements VelocityTemplate {
         }
     }
 
-    private List<String> buildMockServerResponseEspressoLinesForRestartAction() throws Exception {
-        Action restartAction = setupCodeWidgetActions.get(setupCodeWidgetActions.size() - 1);
-        if (restartAction.getActionType() != ActionType.RESTART) {
-            throw new Exception("Unable to find RESTART action in setup actions");
+    private List<String> buildMockServerResponseEspressoLines() throws Exception {
+        List<String> espressoLines = new ArrayList<>();
+        for (Action action : setupCodeWidgetActions) {
+            espressoLines.addAll(buildMockServerEspressoLinesForAction(action));
         }
 
-        return buildMockServerEspressoLinesForAction(restartAction);
-    }
-
-    private List<String> buildMockServerResponseEspressoLinesForLoginAction() throws Exception {
-        Action clickAction = setupCodeWidgetActions.get(setupCodeWidgetActions.size() - 2);
-        if (clickAction.getActionType() != ActionType.CLICK || !clickAction.getWidget().getId().contains("siguiente")) {
-            throw new Exception("Unable to find LOGIN action in setup actions");
-        }
-
-        return buildMockServerEspressoLinesForAction(clickAction);
+        return espressoLines;
     }
 
     private List<String> buildMockServerEspressoLinesForAction(Action action) {

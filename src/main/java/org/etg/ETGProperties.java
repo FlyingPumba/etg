@@ -31,7 +31,9 @@ public class ETGProperties {
 
     public List<String> getJsonPaths() {
         HashSet<String> jsonPaths = new HashSet<>();
-        jsonPaths.add(properties.getProperty("jsonPath"));
+        if (properties.getProperty("jsonPath") != null) {
+            jsonPaths.add(properties.getProperty("jsonPath"));
+        }
         jsonPaths.addAll(args.getJSONPaths());
 
         return new ArrayList<>(jsonPaths);

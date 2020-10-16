@@ -73,6 +73,7 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "import ${TestActivityName}\n" +
                 "\n" +
                 "import ${ResourcePackageName}.R\n" +
+                "import ${PackageName}.robot.genericScreen\n" +
                 "${TestCodeMapperExtraImports}" +
                 "\n" +
                 "import org.hamcrest.Description\n" +
@@ -119,7 +120,7 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "    @Test\n" +
                 "    fun ${TestMethodName}() {\n" +
-                "    ${SetupCode}\n" +
+                "    ${SetupCode}" +
                 "    activityTestRule.launchActivity(null)\n" +
                 "    #foreach (${line} in ${TestCode})\n" +
                 "    ${line}\n" +

@@ -33,6 +33,8 @@ public class ScreenRobotTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
                 "import ${PackageName}.utils.EspressoUtils.Companion.getSwipeAction\n" +
                 "\n" +
+                "fun genericScreen(func: ScreenRobot.() -> Unit) = ScreenRobot().apply { func() }\n" +
+                "\n" +
                 "open class ScreenRobot {\n" +
                 this.getMethodsString() +
                 "}";

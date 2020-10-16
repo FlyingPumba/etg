@@ -141,6 +141,10 @@ public class EspressoTestCase {
     }
 
     public String getSetupCodeLines() throws Exception {
+        if (setupCodeWidgetActions.isEmpty()) {
+            return "";
+        }
+
         CuidarSetupCodeTemplate setupCodeTemplate = new CuidarSetupCodeTemplate(setupCodeWidgetActions, etgProperties);
         codeMapper.addExtraImports(setupCodeTemplate.getExtraImports());
         return setupCodeTemplate.getAsString();

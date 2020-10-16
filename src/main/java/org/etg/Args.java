@@ -32,6 +32,9 @@ public class Args {
     @Parameter(names = {"-sleep-after-launch"}, description = "Time (in ms.) to sleep after Activity launch.")
     private int sleepAfterLaunch = -1;
 
+    @Parameter(names = {"-results-path"}, description = "Folder path to dump results")
+    private String resultsPath;
+
     public boolean isDebug() {
         return debug;
     }
@@ -57,8 +60,8 @@ public class Args {
     }
 
     public String getResultsPath() {
-        if (positionalParameters.size() > 1) {
-            return positionalParameters.get(1);
+        if (resultsPath != null) {
+            return resultsPath;
         } else {
             String workingFolder = System.getProperty("user.dir");
             return workingFolder + "/results";
