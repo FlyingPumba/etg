@@ -39,7 +39,7 @@ public abstract class TestCodeMapper {
         if (etgProperties.useKotlinFormat()) {
             neededTemplates.add(new VisibleViewMatcherKotlinTemplate());
             neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseKotlinTemplate());
-            neededTemplates.add(new MockedServerTest());
+            neededTemplates.add(new MockedServerTest(etgProperties));
             neededTemplates.add(new EspressoUtilsTemplate());
         } else {
             neededTemplates.add(new VisibleViewMatcherJavaTemplate());

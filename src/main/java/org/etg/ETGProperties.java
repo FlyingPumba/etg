@@ -250,6 +250,32 @@ public class ETGProperties {
         return activity;
     }
 
+    public List<String> getRuntimePermissionsUsingADB() {
+        String dumpsysCmd = String.format("adb shell dumpsys package %s", getCompiledPackageName());
+        String[] lines = ProcessRunner.runCommand(dumpsysCmd).split("\n");
+
+        List<String> runtimePermissions = new ArrayList<>();
+        boolean inRuntimePermissionsSection = false;
+        for (String line: lines) {
+            if (line.contains("runtime permissions")) {
+                // we are in the runtime permissions section
+                inRuntimePermissionsSection = true;
+                continue;
+            }
+
+            if (inRuntimePermissionsSection) {
+                if (line.contains("android.permission")) {
+                    String permission = line.split("android.permission.")[1].split(":")[0];
+                    runtimePermissions.add(permission);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return runtimePermissions;
+    }
+
     public String getETGResultsPath() {
         return String.format("%s/etg", args.getResultsPath());
     }

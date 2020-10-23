@@ -1,8 +1,18 @@
 package org.etg.espresso.templates.kotlin.utils;
 
+import org.etg.ETGProperties;
 import org.etg.espresso.templates.VelocityTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MockedServerTest implements VelocityTemplate {
+
+    private List<String> runtimePermissions = new ArrayList<>();
+
+    public MockedServerTest(ETGProperties etgProperties) {
+        runtimePermissions.addAll(etgProperties.getRuntimePermissionsUsingADB());
+    }
 
     @Override
     public String getFileName() {
@@ -17,8 +27,10 @@ public class MockedServerTest implements VelocityTemplate {
     public String getAsRawString() {
         return "package ${PackageName}.utils\n" +
                 "\n" +
+                "import android.Manifest\n" +
                 "import androidx.test.espresso.IdlingRegistry\n" +
                 "import androidx.test.espresso.IdlingResource\n" +
+                "import androidx.test.rule.GrantPermissionRule\n" +
                 "import ${PackageName}.di.buildOkHttpClient\n" +
                 "import com.jakewharton.espresso.OkHttp3IdlingResource\n" +
                 "import com.squareup.rx2.idler.Rx2Idler\n" +
@@ -28,6 +40,7 @@ public class MockedServerTest implements VelocityTemplate {
                 "import okhttp3.mockwebserver.MockWebServer\n" +
                 "import org.junit.After\n" +
                 "import org.junit.Before\n" +
+                "import org.junit.Rule\n" +
                 "import org.koin.core.qualifier.named\n" +
                 "import org.koin.test.KoinTest\n" +
                 "import org.koin.test.mock.declare\n" +
@@ -36,6 +49,7 @@ public class MockedServerTest implements VelocityTemplate {
                 "    protected val webServer = MockWebServer()\n" +
                 "    protected lateinit var baseOkHttpIdlingResource: IdlingResource\n" +
                 "    protected lateinit var staticOkHttpIdlingResource: IdlingResource\n" +
+                getGrantPermissionsRule() +
                 "\n" +
                 "    @Before\n" +
                 "    fun setUp() {\n" +
@@ -80,6 +94,30 @@ public class MockedServerTest implements VelocityTemplate {
                 "}";
     }
 
+    private String getGrantPermissionsRule() {
+        if (runtimePermissions.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder rule = new StringBuilder();
+        rule.append("\n");
+        rule.append("    @Rule\n");
+        rule.append("    @JvmField\n");
+        rule.append("    public val runtimePermissionsRule: GrantPermissionRule = GrantPermissionRule.grant(\n");
+
+        for (int i = 0; i < runtimePermissions.size(); i++) {
+            String permission = runtimePermissions.get(i);
+            rule.append(String.format("            Manifest.permission.%s", permission));
+
+            if (i != runtimePermissions.size() - 1) {
+                rule.append(",\n");
+            } else {
+                rule.append(")\n");
+            }
+        }
+
+        return rule.toString();
+    }
 
     @Override
     public boolean equals(Object o) {
