@@ -1,6 +1,7 @@
 package org.etg.mate.models;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
@@ -25,6 +26,8 @@ public class Widget {
     private boolean longClickable;
     private boolean password;
     private boolean selected;
+    private boolean displayed;
+    private boolean androidView;
     private String bounds;
     private String originalBounds;
     private int X;
@@ -43,6 +46,7 @@ public class Widget {
     private boolean usedAsStateDiff;
 
     private String hint;
+    private Vector<Integer> widgetPath = new Vector<>();
 
     public Widget(String id, String clazz, String idByActivity) {
         setId(id);
@@ -570,7 +574,27 @@ public class Widget {
         return (c1 <= c && c <= c2) || (c2 <= c && c <= c1);
     }
 
+    public Vector<Integer> getWidgetPath() {
+        return widgetPath;
+    }
 
+    public void setWidgetPath(Vector<Integer> widgetPath) {
+        this.widgetPath = widgetPath;
+    }
 
+    public boolean isDisplayed() {
+        return displayed;
+    }
 
+    public void setIsDisplayed(boolean displayed) {
+        this.displayed = displayed;
+    }
+
+    public boolean isAndroidView() {
+        return androidView;
+    }
+
+    public void setIsAndroidView(boolean androidView) {
+        this.androidView = androidView;
+    }
 }

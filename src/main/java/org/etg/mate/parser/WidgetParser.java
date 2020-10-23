@@ -4,14 +4,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.etg.mate.models.Widget;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 public class WidgetParser {
     public static Widget parse(ObjectMapper mapper, JsonNode node) {
         Widget widget = new Widget(mapper.convertValue(node.get("id"), String.class),
                 mapper.convertValue(node.get("clazz"), String.class),
                 mapper.convertValue(node.get("idByActivity"), String.class));
-
 
         // Boolean
         widget.setCheckable(mapper.convertValue(node.get("checkable"), Boolean.class));
@@ -23,6 +25,8 @@ public class WidgetParser {
         widget.setLongClickable(mapper.convertValue(node.get("longClickable"), Boolean.class));
         widget.setPassword(mapper.convertValue(node.get("password"), Boolean.class));
         widget.setSelected(mapper.convertValue(node.get("selected"), Boolean.class));
+        widget.setIsDisplayed(mapper.convertValue(node.get("displayed"), Boolean.class));
+        widget.setIsAndroidView(mapper.convertValue(node.get("androidView"), Boolean.class));
 
         // Integer
         widget.setIndex(mapper.convertValue(node.get("index"), Integer.class));
@@ -44,7 +48,6 @@ public class WidgetParser {
 
         // children
         JsonNode childrenNode = node.get("children");
-
         for (Iterator<JsonNode> it = childrenNode.elements(); it.hasNext(); ) {
             JsonNode element = it.next();
             widget.setHasChildren(true);
@@ -53,13 +56,23 @@ public class WidgetParser {
         }
 
 
-        //parent
+        // parent
         JsonNode parentNode = node.get("parent");
         if (parentNode != null && !parentNode.isNull()) {
             Widget parent = WidgetParser.parse(mapper, parentNode);
             widget.setParent(parent);
         }
 
+        // widget path
+        final JsonNode widgetPathArray = node.get("widgetPath");
+        Vector<Integer> widgetPath = new Vector<>();
+        if (widgetPathArray != null) {
+            for (Iterator<JsonNode> it = widgetPathArray.elements(); it.hasNext(); ) {
+                JsonNode element = it.next();
+                widgetPath.add(element.asInt());
+            }
+        }
+        widget.setWidgetPath(widgetPath);
 
         return widget;
     }

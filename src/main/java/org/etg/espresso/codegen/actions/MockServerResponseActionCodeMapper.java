@@ -86,28 +86,45 @@ public class MockServerResponseActionCodeMapper extends ActionCodeMapper {
             return 0;
         }
         String count = aux[1].split("-byte")[0];
-        return Integer.valueOf(count);
+        return Integer.parseInt(count);
     }
 
+    /**
+     * Parse and group networking info by responses.
+     * We use the "<--" string to determine when a response is beginning or ending.
+     * The end line of a response also contains the "END HTTP" response.
+     * It's important to take into account that responses may be interleaved. For example:
+     * <-- 200 https://route1.com
+     * <-- 200 https://route2.com
+     * <-- END HTTP (100-byte body)
+     * <-- END HTTP (200-byte body)
+     * The above has a full response dumped in the middle of a previous one.
+     * We will assume that when a HTTP response ends is found, it belongs to the response that was opened more recently.
+     *
+     * @param networkingInfo
+     * @return
+     */
     private List<List<String>> filterResponses(List<String> networkingInfo) {
         List<List<String>> responses = new ArrayList<>();
 
-        List<String> currentResponse = new ArrayList<>();
-        boolean inResponse = false;
+        List<List<String>> currentResponses = new ArrayList<>();
         for (String line: networkingInfo) {
             if (line.startsWith("<--")) {
-                if (inResponse) {
+                if (line.contains("END HTTP")) {
                     // we are closing a response
-                    currentResponse.add(line);
-                    responses.add(currentResponse);
+                    currentResponses.get(0).add(line);
+                    responses.add(currentResponses.get(0));
+                    currentResponses.remove(0);
+                } else {
+                    // we are starting a response
+                    currentResponses.add(0, new ArrayList<>());
+                    currentResponses.get(0).add(line);
                 }
-
-                inResponse = !inResponse;
-                currentResponse = new ArrayList<>();
-            }
-
-            if (inResponse) {
-                currentResponse.add(line);
+            } else {
+                // are we in the middle of a response?
+                if (!currentResponses.isEmpty()) {
+                    currentResponses.get(0).add(line);
+                }
             }
         }
 

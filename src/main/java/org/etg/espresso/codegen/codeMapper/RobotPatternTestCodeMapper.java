@@ -82,7 +82,6 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         if (nextRobotName == null || ScreenRobotTemplate.supportsAction(action)) {
             // this action do not belongs to any particular screen, send it to the Screen Robot
             methodName = screenRobotTemplate.addMethod(action, espressoLinesForAction);
-            // FIX: this breaks if a method from screen robot is called while outside a robot call chain
         } else {
             RobotTemplate robotTemplate = addRobotTemplate(nextRobotName);
             methodName = robotTemplate.addMethod(action, espressoLinesForAction);

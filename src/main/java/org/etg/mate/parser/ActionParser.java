@@ -11,6 +11,7 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 
 //todo: Se pueden remover todos los parsers y usar gson o jackson para deserializar el json
 public class ActionParser {
@@ -25,21 +26,41 @@ public class ActionParser {
     }
 
     public static Action parse(ObjectMapper mapper, JsonNode node) {
-        Widget widget = WidgetParser.parse(mapper, node.get("widget"));
-        ActionType actionType = mapper.convertValue(node.get("actionType"), ActionType.class);
-        Action action = new Action(widget, actionType);
+        JsonNode rootWidgetNode = node.get("rootWidget");
+        if (rootWidgetNode == null) {
+            // this is an old JSON, use the widget field as root widget
+            rootWidgetNode = node.get("widget");
+        }
 
+        Widget rootWidget = WidgetParser.parse(mapper, rootWidgetNode);
+        ActionType actionType = mapper.convertValue(node.get("actionType"), ActionType.class);
+
+        // target widget path
+        final JsonNode targetWidgetPathArray = node.get("targetWidgetPath");
+        Vector<Integer> targetWidgetPath = new Vector<>();
+        if (targetWidgetPathArray != null){
+            for (Iterator<JsonNode> it = targetWidgetPathArray.elements(); it.hasNext(); ) {
+                JsonNode element = it.next();
+                targetWidgetPath.add(element.asInt());
+            }
+        }
+
+        Action action = new Action(rootWidget, targetWidgetPath, actionType);
+
+        // swipe?
         if (!node.get("swipe").isNull()){
             Point initial = new Point(node.get("swipe").get("initialPosition").get("x").asInt(), node.get("swipe").get("initialPosition").get("y").asInt());
             Point finalP = new Point(node.get("swipe").get("finalPosition").get("x").asInt(), node.get("swipe").get("finalPosition").get("y").asInt());
             action.setSwipe(new Swipe(initial, finalP, 15));
         }
 
+        // extra info?
         final JsonNode extraInfo = node.get("extraInfo");
         if (extraInfo != null){
             action.setExtraInfo(extraInfo.asText());
         }
 
+        // networking info?
         final JsonNode networkingInfoArray = node.get("networkingInfo");
         List<String> networkingInfo = new ArrayList<>();
         if (networkingInfoArray != null){

@@ -6,7 +6,8 @@ import java.util.Vector;
 
 public class Action {
 
-    private Widget widget;
+    private Widget rootWidget;
+    private Vector<Integer> targetWidgetPath = new Vector<>();
     private ActionType actionType;
     private String extraInfo;
     private boolean executed;
@@ -27,12 +28,15 @@ public class Action {
     public Action(ActionType actionType) {
         this.actionType = actionType;
         fitness = 0;
-        widget = new Widget("", "", "");
+        rootWidget = new Widget("", "", "");
     }
 
-    public Action(Widget widget, ActionType actionType) {
-        setWidget(widget);
+    public Action(Widget rootWidget, Vector<Integer> widgetPath, ActionType actionType) {
         setActionType(actionType);
+
+        setRootWidget(rootWidget);
+        targetWidgetPath.addAll(widgetPath);
+
         setExtraInfo("");
         adjActions = new Vector<Action>();
         setExecuted(false);
@@ -51,11 +55,23 @@ public class Action {
     }
 
     public Widget getWidget() {
-        return widget;
+        Widget targetWidget = rootWidget;
+        for (Integer index : targetWidgetPath) {
+            targetWidget = targetWidget.getChildren().get(index);
+        }
+        return targetWidget;
     }
 
-    public void setWidget(Widget widget) {
-        this.widget = widget;
+    public void setRootWidget(Widget widget) {
+        this.rootWidget = widget;
+    }
+
+    public Widget getRootWidget() {
+        return rootWidget;
+    }
+
+    public Vector<Integer> getTargetWidgetPath() {
+        return targetWidgetPath;
     }
 
     public ActionType getActionType() {
@@ -112,12 +128,12 @@ public class Action {
         if (o == null || getClass() != o.getClass()) return false;
         Action action = (Action) o;
         return actionType == action.actionType &&
-                Objects.equals(widget.getIdByActivity(), action.widget.getIdByActivity());
+                Objects.equals(getWidget().getIdByActivity(), action.getWidget().getIdByActivity());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(widget.getIdByActivity(), actionType);
+        return Objects.hash(getWidget().getIdByActivity(), actionType);
     }
 
     public List<String> getNetworkingInfo() {
