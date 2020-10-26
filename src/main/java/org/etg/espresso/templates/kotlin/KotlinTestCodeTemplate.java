@@ -129,42 +129,6 @@ public class KotlinTestCodeTemplate implements VelocityTemplate {
                 "\n" +
                 "${SetupCodeFunction}" +
                 "\n" +
-                "    #if (${AddClassOrSuperClassesNameMethod})\n" +
-                "private Matcher<View> classOrSuperClassesName(final Matcher<String> classNameMatcher) {\n" +
-                "\n" +
-                "        return new TypeSafeMatcher<View>() {\n" +
-                "            @Override\n" +
-                "            fun describeTo(Description description) {\n" +
-                "                description.appendText(\"Class name or any super class name \")\n" +
-                "                classNameMatcher.describeTo(description)\n" +
-                "            }\n" +
-                "\n" +
-                "            @Override\n" +
-                "            public boolean matchesSafely(View view) {\n" +
-                "                Class<?> clazz = view.getClass()\n" +
-                "                String canonicalName\n" +
-                "\n" +
-                "                do {\n" +
-                "                    canonicalName = clazz.getCanonicalName()\n" +
-                "                    if (canonicalName == null) {\n" +
-                "                        return false\n" +
-                "                    }\n" +
-                "\n" +
-                "                    if (classNameMatcher.matches(canonicalName)) {\n" +
-                "                        return true\n" +
-                "                    }\n" +
-                "\n" +
-                "                    clazz = clazz.getSuperclass()\n" +
-                "                    if (clazz == null) {\n" +
-                "                        return false\n" +
-                "                    }\n" +
-                "                } while (!\"java.lang.Object\".equals(canonicalName))\n" +
-                "\n" +
-                "                return false\n" +
-                "            }\n" +
-                "        }\n" +
-                "    }\n" +
-                "    #end\n" +
                 "    #if (${AddTryCatchImport})\n" +
                 "private String buildPerformExceptionMessage(Exception e, int performNumber) {\n" +
                 "        errorCount++\n" +

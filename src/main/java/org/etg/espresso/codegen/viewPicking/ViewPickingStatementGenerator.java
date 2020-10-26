@@ -47,41 +47,44 @@ public class ViewPickingStatementGenerator extends ActionCodeMapper {
 
     @Override
     public String addTestCodeLines(List<String> testCodeLines, StandardTestCodeMapper testCodeMapper, int actionIndex, int actionsCount) {
-        if (isSwipeAction(action)) {
-            return getRootPickingStatement(action, testCodeLines, testCodeMapper);
-        }
+        ViewPickingStatementGenerator2 pickingStatementGenerator2 = new ViewPickingStatementGenerator2(etgProperties, action);
+        return pickingStatementGenerator2.addTestCodeLines(testCodeLines, testCodeMapper, actionIndex, actionsCount);
 
-        //1- Create a basic view picking statement using info from target widget.
-        String variableName = createViewPickingStatement(testCodeLines, testCodeMapper);
-        String statement = testCodeLines.get(testCodeLines.size() - 1);
-
-        //parse statement as AST, find first allOf expression or add it if missing
-        Statement parsedStatement = StaticJavaParser.parseStatement(statement);
-
-        //2- check children to be more specific
-        (new ImproverWithChildrenInfo(etgProperties)).improveStatementWithChildrensOf(action.getWidget(), parsedStatement);
-
-        //3- check parent to be more specific
-        (new ImproverWithParentInfo(etgProperties)).improveStatementWithParentsOf(action.getWidget(), parsedStatement);
-
-        //update last statement with improved statement
-        testCodeLines.remove(testCodeLines.size() - 1);
-        String improvedStatementString = parsedStatement.toString();
-
-        if(etgProperties.useKotlinFormat()) {
-            // convert Java statement into Kotlin format
-            List<String> words = new ArrayList<>(Arrays.asList(improvedStatementString.split(" ")));
-            // remove type
-            words.remove(0);
-            // add "val" declaration
-            words.add(0, "val");
-            // join all together again
-            improvedStatementString = String.join(" ", words);
-        }
-
-        testCodeLines.add(improvedStatementString);
-
-        return variableName;
+        // if (isSwipeAction(action)) {
+        //     return getRootPickingStatement(action, testCodeLines, testCodeMapper);
+        // }
+        //
+        // //1- Create a basic view picking statement using info from target widget.
+        // String variableName = createViewPickingStatement(testCodeLines, testCodeMapper);
+        // String statement = testCodeLines.get(testCodeLines.size() - 1);
+        //
+        // //parse statement as AST, find first allOf expression or add it if missing
+        // Statement parsedStatement = StaticJavaParser.parseStatement(statement);
+        //
+        // //2- check children to be more specific
+        // (new ImproverWithChildrenInfo(etgProperties)).improveStatementWithChildrensOf(action.getWidget(), parsedStatement);
+        //
+        // //3- check parent to be more specific
+        // (new ImproverWithParentInfo(etgProperties)).improveStatementWithParentsOf(action.getWidget(), parsedStatement);
+        //
+        // //update last statement with improved statement
+        // testCodeLines.remove(testCodeLines.size() - 1);
+        // String improvedStatementString = parsedStatement.toString();
+        //
+        // if(etgProperties.useKotlinFormat()) {
+        //     // convert Java statement into Kotlin format
+        //     List<String> words = new ArrayList<>(Arrays.asList(improvedStatementString.split(" ")));
+        //     // remove type
+        //     words.remove(0);
+        //     // add "val" declaration
+        //     words.add(0, "val");
+        //     // join all together again
+        //     improvedStatementString = String.join(" ", words);
+        // }
+        //
+        // testCodeLines.add(improvedStatementString);
+        //
+        // return variableName;
     }
 
     private boolean isSwipeAction(Action action) {

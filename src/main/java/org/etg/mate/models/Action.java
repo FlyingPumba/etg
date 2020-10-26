@@ -1,5 +1,6 @@
 package org.etg.mate.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
@@ -142,5 +143,46 @@ public class Action {
 
     public void setNetworkingInfo(List<String> networkingInfo) {
         this.networkingInfo = networkingInfo;
+    }
+
+    /**
+     * Return all widgets in screen
+     */
+    public List<Widget> getAllWidgetsInScreen() {
+        return getWidgetsNotInPath(rootWidget, null);
+    }
+
+    /**
+     * Return all remaining widgets in screen that are not the target widget
+     */
+    public List<Widget> getOtherWidgetsInScreen() {
+        return getWidgetsNotInPath(rootWidget, targetWidgetPath);
+    }
+
+    private List<Widget> getWidgetsNotInPath(Widget currentWidget, List<Integer> currentWidgetPath) {
+        List<Widget> widgets = new ArrayList<>();
+
+        if (currentWidgetPath == null || !currentWidgetPath.isEmpty()) {
+            // we are collecting all widgets or this is not the target widget to which the path leads
+            widgets.add(currentWidget);
+        }
+
+        Vector<Widget> children = currentWidget.getChildren();
+        for (int i = 0, childrenSize = children.size(); i < childrenSize; i++) {
+            Widget child = children.get(i);
+
+            if (currentWidgetPath != null && !currentWidgetPath.isEmpty() && currentWidgetPath.get(0) == i) {
+                // this child is partially in the path of the target widget
+                List<Integer> widgetPath = new ArrayList<>(currentWidgetPath);
+                widgetPath.remove(0);
+
+                widgets.addAll(getWidgetsNotInPath(child, widgetPath));
+            } else {
+                // this child is not in the path of the target widget or we are collecting all the widgets
+                widgets.addAll(getWidgetsNotInPath(child, null));
+            }
+        }
+
+        return widgets;
     }
 }

@@ -5,10 +5,7 @@ import org.etg.espresso.templates.TemplatesFactory;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.espresso.templates.java.IsEqualTrimmingAndIgnoringCaseJavaTemplate;
 import org.etg.espresso.templates.java.VisibleViewMatcherJavaTemplate;
-import org.etg.espresso.templates.kotlin.utils.EspressoUtilsTemplate;
-import org.etg.espresso.templates.kotlin.utils.IsEqualTrimmingAndIgnoringCaseKotlinTemplate;
-import org.etg.espresso.templates.kotlin.utils.MockedServerTest;
-import org.etg.espresso.templates.kotlin.utils.VisibleViewMatcherKotlinTemplate;
+import org.etg.espresso.templates.kotlin.utils.*;
 import org.etg.mate.models.Action;
 
 import java.util.HashSet;
@@ -38,6 +35,8 @@ public abstract class TestCodeMapper {
         etgProperties = properties;
         if (etgProperties.useKotlinFormat()) {
             neededTemplates.add(new VisibleViewMatcherKotlinTemplate());
+            neededTemplates.add(new ClassOrSuperClassNameMatcherKotlinTemplate());
+            neededTemplates.add(new IsImmediateDescendantOfAMatcherKotlinTemplate());
             neededTemplates.add(new IsEqualTrimmingAndIgnoringCaseKotlinTemplate());
             neededTemplates.add(new MockedServerTest(etgProperties));
             neededTemplates.add(new EspressoUtilsTemplate());

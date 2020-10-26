@@ -55,10 +55,13 @@ public class RobotTemplate implements VelocityTemplate {
                 "import ${EspressoPackageName}.espresso.action.ViewActions.*\n" +
                 "import ${EspressoPackageName}.espresso.matcher.ViewMatchers.*\n" +
                 "import ${PackageName}.R\n" +
+                "import ${PackageName}.utils.ClassOrSuperClassNameMatcher.Companion.classOrSuperClassesName\n" +
                 "import ${PackageName}.utils.IsEqualTrimmingAndIgnoringCase.Companion.equalToTrimmingAndIgnoringCase\n" +
+                "import ${PackageName}.utils.IsImmediateDescendantOfAMatcher.Companion.isImmediateDescendantOfA\n" +
                 "import ${PackageName}.utils.VisibleViewMatcher.Companion.isVisible\n" +
                 "import ${PackageName}.utils.EspressoUtils.Companion.getClickAction\n" +
                 "import ${PackageName}.utils.EspressoUtils.Companion.getLongClickAction\n" +
+                "import ${PackageName}.utils.EspressoUtils.Companion.withTextOrHint\n" +
                 "import org.hamcrest.Matchers.*\n" +
                 "\n" +
                 String.format("fun %s(func: %s.() -> Unit) = %s().apply { func() }\n",

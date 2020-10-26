@@ -1,9 +1,7 @@
 package org.etg.mate.models;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class Widget {
 
@@ -596,5 +594,72 @@ public class Widget {
 
     public void setIsAndroidView(boolean androidView) {
         this.androidView = androidView;
+    }
+
+    public Widget getWidgetByRelativePath(String relativePath) {
+        if (relativePath.isEmpty()) {
+            return this;
+        }
+
+        String[] indexes = relativePath.split(",");
+        Widget current = this;
+        for (String strIndex : indexes) {
+            int index = Integer.parseInt(strIndex);
+            if (index < 0) {
+                // we are going up one level
+                if (current.getParent() != null) {
+                    current = current.getParent();
+                } else {
+                    // we reached a dead end using this relative path from this widget
+                    return null;
+                }
+            } else {
+                // we are going down one level
+                if (current.getChildren().size() > index) {
+                    current = current.getChildren().elementAt(index);
+                } else {
+                    // we reached a dead end using this relative path from this widget
+                    return null;
+                }
+            }
+        }
+        return current;
+    }
+
+    /**
+     * This method computes the relative path between this widget and another one.
+     * It does so by looking at the absolute path of both and checking if there are matching prefixes.
+     * @param otherWidget
+     * @return
+     */
+    public String getRelativePathToWidget(Widget otherWidget) {
+        Vector<Integer> ourPath = new Vector<>(this.widgetPath);
+        Vector<Integer> theirPath = new Vector<>(otherWidget.getWidgetPath());
+
+        // find common prefix length
+        int commonPrefixLength = 0;
+        for (int i = 0; i < Math.min(ourPath.size(), theirPath.size()); i++) {
+            Integer ourIndex = ourPath.get(i);
+            Integer theirIndex = theirPath.get(i);
+
+            if (ourIndex.equals(theirIndex)) {
+                commonPrefixLength += 1;
+            } else {
+                break;
+            }
+        }
+
+        // Let's build relative path
+        Vector<String> relativePath = new Vector<>();
+        // first, we go up on our path until we reach the beginning of the common prefix
+        for (int i = ourPath.size() - 1; i >= commonPrefixLength; i--) {
+            relativePath.add("-1");
+        }
+        // then we go down on the path of the other widget
+        for (int i = commonPrefixLength; i < theirPath.size(); i++) {
+            relativePath.add(theirPath.get(i).toString());
+        }
+
+        return String.join(",", relativePath);
     }
 }
