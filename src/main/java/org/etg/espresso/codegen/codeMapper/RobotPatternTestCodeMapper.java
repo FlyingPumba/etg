@@ -57,8 +57,13 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
     }
 
     private List<String> mapActionToRobotCalls(int index, List<Action> actions) {
-        // get standard code mapping (Espresso code) for this action
         Action action = actions.get(index);
+        if (shouldSkipAction(action)) {
+            return new ArrayList<>();
+        }
+
+
+        // get standard code mapping (Espresso code) for this action
         List<String> espressoLinesForAction = standardCodeMapping(action, index, actions.size());
 
         // Figure out which robot are we using for this action and following ones
@@ -101,6 +106,15 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         }
 
         return actionTestCodeLines;
+    }
+
+    private boolean shouldSkipAction(Action action) {
+        if (action.getWidget().getClazz().contains("Spinner")) {
+            // avoid clicking spinners, it only causes problems due to flakiness.
+            return true;
+        }
+
+        return false;
     }
 
     private void dumpMockResponsesForRobotScreen(int index, List<Action> actions, String currentRobotName, List<String> actionTestCodeLines) {
