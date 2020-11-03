@@ -1,8 +1,12 @@
 package org.etg.espresso.templates.kotlin.robot;
 
+import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import org.etg.espresso.codegen.viewPicking.ViewPickingStatementGenerator2;
 import org.etg.espresso.templates.VelocityTemplate;
 import org.etg.mate.models.Action;
 import org.etg.mate.models.ActionType;
+import org.etg.mate.models.Widget;
 
 import java.util.*;
 
@@ -94,17 +98,32 @@ public class RobotTemplate implements VelocityTemplate {
     }
 
     private String getMethodNameForAction(Action action) {
-        String resourceID = action.getWidget().getResourceID();
-        if (resourceID != null && !resourceID.isEmpty()) {
-            String actualWidgetName = resourceID.split("/")[1];
-            return lowerCaseFirstCharacter(upperCaseParts(actualWidgetName, "_"));
+        String methodName = "";
+        Widget targetWidget = action.getWidget();
+
+        // is Matcher combination available?
+        ViewPickingStatementGenerator2.MatcherCombination matcherCombination =
+                ViewPickingStatementGenerator2.reducedMatcherCombinationsForWidget.get(targetWidget);
+        if (matcherCombination != null) {
+            methodName = buildMethodNameFromMatcherCombination(matcherCombination, targetWidget);
+            if (!methodName.isEmpty()) {
+                return methodName;
+            }
         }
 
-        String contentDesc = action.getWidget().getContentDesc();
-        if (contentDesc != null && !contentDesc.isEmpty()) {
-            return lowerCaseFirstCharacter(upperCaseParts(contentDesc, " "));
+        // can we use Resource Id?
+        methodName = parseResourceIdForMethodName(targetWidget);
+        if (!methodName.isEmpty()) {
+            return methodName;
         }
 
+        // can we use the Content Description?
+        methodName = parseContentDescriptionForMethodName(targetWidget);
+        if (!methodName.isEmpty()) {
+            return methodName;
+        }
+
+        // mark this method as an unknown action
         String name = "unkownAction" + unknownActionNumber;
         unknownActionNumber++;
         return name;
@@ -145,5 +164,112 @@ public class RobotTemplate implements VelocityTemplate {
                 .append("\n");
 
         return methodBody.toString();
+    }
+
+    private String buildMethodNameFromMatcherCombination(
+            ViewPickingStatementGenerator2.MatcherCombination matcherCombination,
+            Widget targetWidget
+    ) {
+        StringBuilder methodName = new StringBuilder();
+
+        for (ViewPickingStatementGenerator2.MatcherForRelativeWidget matcher : matcherCombination.getMatchers()) {
+            Widget widgetToMatch = matcher.getRelativePath().isEmpty()?
+                    targetWidget : targetWidget.getWidgetByRelativePath(matcher.getRelativePath());
+
+            String methodNamePart = "";
+            if (matcher.getType().equals(ViewPickingStatementGenerator2.MatcherType.ResourceId)) {
+                methodNamePart = parseResourceIdForMethodName(widgetToMatch);
+            } else if (matcher.getType().equals(ViewPickingStatementGenerator2.MatcherType.Clazz)) {
+                methodNamePart = parseClassNameForMethodName(widgetToMatch);
+            } else if (matcher.getType().equals(ViewPickingStatementGenerator2.MatcherType.ContentDescription)) {
+                methodNamePart = parseContentDescriptionForMethodName(widgetToMatch);
+            } else if (matcher.getType().equals(ViewPickingStatementGenerator2.MatcherType.Text)) {
+                methodNamePart = parseTextOrHintForMethodName(widgetToMatch);
+            }
+
+            if (methodName.length() > 0) {
+                methodName.append(upperCaseFirstCharacter(methodNamePart));
+            } else {
+                methodName.append(methodNamePart);
+            }
+        }
+
+        return methodName.toString();
+    }
+
+    private String parseResourceIdForMethodName(Widget widgetToMatch) {
+        String resourceID = widgetToMatch.getResourceID();
+        if (resourceID != null && !resourceID.isEmpty()) {
+            String actualWidgetName = resourceID.split("/")[1];
+            return lowerCaseFirstCharacter(upperCaseParts(actualWidgetName, "_"));
+        }
+
+        return "";
+    }
+
+    private String parseClassNameForMethodName(Widget widgetToMatch) {
+        String className = widgetToMatch.getClazz();
+        if (className != null && !className.isEmpty()) {
+            return lowerCaseFirstCharacter(upperCaseParts(className, "."));
+        }
+
+        return "";
+    }
+
+    private String parseContentDescriptionForMethodName(Widget widgetToMatch) {
+        String contentDesc = widgetToMatch.getContentDesc();
+        if (contentDesc != null && !contentDesc.isEmpty()) {
+            return lowerCaseFirstCharacter(upperCaseParts(contentDesc, " "));
+        }
+
+        return "";
+    }
+
+    private String parseTextOrHintForMethodName(Widget widgetToMatch) {
+        String methodName = "";
+
+        String text = widgetToMatch.getText();
+        if (text != null && !text.isEmpty()) {
+            String aux = removeSpecialCharacters(text);
+            if (aux.length() > 2) {
+                methodName = lowerCaseFirstCharacter(upperCaseParts(aux, " "));
+            } else {
+                methodName = aux.toLowerCase();
+            }
+        }
+
+        String hint = widgetToMatch.getHint();
+        if (hint != null && !hint.isEmpty()) {
+            String aux = removeSpecialCharacters(hint);
+            if (aux.length() > 2) {
+                methodName += lowerCaseFirstCharacter(upperCaseParts(aux, " "));
+            } else {
+                methodName += aux.toLowerCase();
+            }
+        }
+
+        return methodName;
+    }
+
+    private String removeSpecialCharacters(String value) {
+        // remove special symbols
+        value = value.replace("$", "");
+        value = value.replace("(", "");
+        value = value.replace(")", "");
+        value = value.replace("?", "");
+        value = value.replace("¿", "");
+        value = value.replace("¡", "");
+        value = value.replace("!", "");
+        value = value.replace("-", "");
+        value = value.replace("_", "");
+
+        // remove characters with tilde
+        value = value.replace("á", "a");
+        value = value.replace("é", "e");
+        value = value.replace("í", "i");
+        value = value.replace("ó", "o");
+        value = value.replace("ú", "u");
+
+        return value;
     }
 }

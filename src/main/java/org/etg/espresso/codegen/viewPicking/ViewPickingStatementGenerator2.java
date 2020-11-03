@@ -37,14 +37,16 @@ public class ViewPickingStatementGenerator2 extends ActionCodeMapper {
     protected final String IS_IMMEDIATE_DESCENDANT_OF = "isImmediateDescendantOfA";
     protected final String HAS_DESCENDANT = "hasDescendant";
 
-    private enum MatcherType {
+    public static HashMap<Widget, MatcherCombination> reducedMatcherCombinationsForWidget = new HashMap<>();
+
+    public enum MatcherType {
         ResourceId,
         Clazz,
         ContentDescription,
         Text,
     }
 
-    class MatcherForRelativeWidget {
+    public class MatcherForRelativeWidget {
         private final String relativePath;
         private final MatcherType type;
 
@@ -62,8 +64,27 @@ public class ViewPickingStatementGenerator2 extends ActionCodeMapper {
         }
     }
 
-    class MatcherCombination {
-        private final HashSet<MatcherForRelativeWidget> matchers = new HashSet<>();
+    public class MatcherCombination {
+        private final TreeSet<MatcherForRelativeWidget> matchers = new TreeSet<>((m, n) -> {
+            // 1st, try to order by matcher type
+            int result = m.getType().compareTo(n.getType());
+
+            if (result == 0) {
+                // 2nd, if tie, order by closeness of matcher to target widget
+                int commasInM = m.getRelativePath().length() -
+                        m.getRelativePath().replace(",", "").length();
+                int commasInN = n.getRelativePath().length() -
+                        n.getRelativePath().replace(",", "").length();
+                result = commasInM - commasInN;
+            }
+
+            if (result == 0) {
+                // 3rd, if tie, order alphabetically using relative path
+                result = m.getRelativePath().compareTo(n.getRelativePath());
+            }
+
+            return result;
+        });
         private Boolean unique = null;
 
         public MatcherCombination() {}
@@ -137,6 +158,10 @@ public class ViewPickingStatementGenerator2 extends ActionCodeMapper {
 
             return hash.toString();
         }
+
+        public TreeSet<MatcherForRelativeWidget> getMatchers() {
+            return matchers;
+        }
     }
 
     public ViewPickingStatementGenerator2(ETGProperties etgProperties, Action action) {
@@ -156,6 +181,8 @@ public class ViewPickingStatementGenerator2 extends ActionCodeMapper {
         if (!matcherCombination.isUnique(targetWidget, otherWidgets)) {
             throw new Error("Unable to find unique matcher for target widget");
         }
+
+        reducedMatcherCombinationsForWidget.put(targetWidget, matcherCombination);
 
         String viewPickingStatement = buildPickingStatementFromMatcherCombination(matcherCombination, targetWidget);
         String variableName = "view";
