@@ -250,25 +250,38 @@ public class ETGProperties {
         return activity;
     }
 
+    /**
+     * We will infer the runtime permissions by subtracting the install permissions to all the requested permissions
+     * @return a list of permissions
+     */
     public List<String> getRuntimePermissionsUsingADB() {
         String dumpsysCmd = String.format("adb shell dumpsys package %s", getCompiledPackageName());
         String[] lines = ProcessRunner.runCommand(dumpsysCmd).split("\n");
 
         List<String> runtimePermissions = new ArrayList<>();
-        boolean inRuntimePermissionsSection = false;
+        boolean inRequestedPermissionsSection = false;
+        boolean inInstallPermissionsSection = false;
         for (String line: lines) {
-            if (line.contains("runtime permissions")) {
-                // we are in the runtime permissions section
-                inRuntimePermissionsSection = true;
+            if (line.contains("requested permissions")) {
+                // we are in the requested permissions section
+                inRequestedPermissionsSection = true;
+                inInstallPermissionsSection = false;
                 continue;
+            } else if (line.contains("install permissions")) {
+                // we are in the install permissions section
+                inRequestedPermissionsSection = false;
+                inInstallPermissionsSection = true;
+                continue;
+            } else if (line.contains("User ")) {
+                break;
             }
 
-            if (inRuntimePermissionsSection) {
-                if (line.contains("android.permission")) {
-                    String permission = line.split("android.permission.")[1].split(":")[0];
+            if (line.contains("android.permission")) {
+                String permission = line.split("android.permission.")[1].split(":")[0];
+                if (inRequestedPermissionsSection) {
                     runtimePermissions.add(permission);
-                } else {
-                    break;
+                } else if (inInstallPermissionsSection) {
+                    runtimePermissions.remove(permission);
                 }
             }
         }
