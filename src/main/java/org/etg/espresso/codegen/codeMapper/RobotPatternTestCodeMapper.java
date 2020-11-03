@@ -33,7 +33,6 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
 
     @Override
     public void addTestCodeLinesForAction(int index, List<Action> actions, List<String> testCodeLines) {
-        Action action = actions.get(index);
         List<String> actionTestCodeLines = new ArrayList<>();
 
         if (index == 0 && etgProperties.getSleepAfterLaunch() != -1) {
@@ -61,7 +60,6 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         if (shouldSkipAction(action)) {
             return new ArrayList<>();
         }
-
 
         // get standard code mapping (Espresso code) for this action
         List<String> espressoLinesForAction = standardCodeMapping(action, index, actions.size());
@@ -201,6 +199,12 @@ public class RobotPatternTestCodeMapper extends TestCodeMapper {
         }
 
         String activityFullQualifiedName = idByActivity.split("_")[0].split("/")[1];
+        boolean outsideActivity = !activityFullQualifiedName.startsWith(etgProperties.getPackageName());
+        if (outsideActivity) {
+            // this is an activity provided by another package (e.g., barcode reader)
+            return null;
+        }
+
         String[] parts = activityFullQualifiedName.split("\\.");
         String simpleName = parts[parts.length - 1];
 
